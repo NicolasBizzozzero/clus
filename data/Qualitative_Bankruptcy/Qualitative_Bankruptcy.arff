@@ -1,0 +1,343 @@
+% 1. Title: Qualitative_Bankruptcy database
+% 
+% 2. Source Information
+%    -- Creator:  Martin.A Uthayakumar.j Nadarajan.m (uthayakumar17691@gmail.com)
+%    -- Guided By: Dr.V.Prasanna Venkatesan
+%    -- Date:      February 2014
+%
+% 3. Past Usage:
+%	The attributes or parameters which we used for collecting the dataset is referred from the paper
+%       "The discovery of experts’decision rules from qualitative bankruptcy data using genetic algorithms" 
+%	by Myoung-Jong Kim*, Ingoo Han.
+% 
+% 4. Number of Instances: 250 
+% 
+% 5. Number of Attributes: 6, each corresponding to Qualitative Parameters in Bankruptcy
+% 
+% 6. Attribute Information: (P=Positive,A-Average,N-negative,B-Bankruptcy,NB-Non-Bankruptcy)
+% 
+%     1. Industrial Risk: {P,A,N}
+%     2. Management Risk: {P,A,N}
+%     3. Financial Flexibility: {P,A,N}
+%     4. Credibility: {P,A,N}
+%     5. Competitiveness: {P,A,N}
+%     6. Operating Risk: {P,A,N}
+%     7. Class: {B,NB}
+%
+%     Internal Risks: 	
+%     i.Industry risk (IR) : 
+%		Government policies and International agreements, 
+%		Cyclicality, 
+%		Degree of competition,				
+%		The price and stability of market supply,
+%		The size and growth of market demand,	
+%		The sensitivity to changes in macroeconomic factors,
+%		Domestic and international competitive power, 
+%		Product Life Cycle.
+%     ii.Management risk(MR): 
+%		Ability and competence of management, 
+%		Stability of management,
+%		The relationship between management/ owner, 
+%		Human resources management, 
+%		Growth process/business performance, 
+%		Short and long term business planning, 
+%		achievement and feasibility. 
+%      iii.Financial Flexibility(FF): 
+%		Direct financing, 
+%		Indirect financing, 
+%		Other financing 
+%      iv.Credibility (CR):  
+%		Credit history,  
+%		reliability of information, 
+%		The relationship with financial institutes.
+%      v.Competitiveness (CO):  
+%		Market position, 
+%		The level of core capacities, 
+%		Differentiated strategy, 
+%       vi.Operating Risk (OP):  
+%		The stability and diversity of procurement, 
+%		The stability of transaction, 
+%		The efficiency of production, 
+%		The prospects for demand for product and service, 
+%		Sales diversification,
+%		Sales price and settlement condition, 
+%		Collection of A/R,
+%		Effectiveness of sale network.
+% 
+% 7. Missing Attribute Values: None
+% 
+% 8. Class Distribution: [143 instances For Non-Bankruptcy] [107 instances For Bankruptcy]
+%
+% Information about the dataset
+% CLASSTYPE: nominal
+
+@relation bankrupt_qualitative
+
+
+@attribute IR {P,A,N}
+
+@attribute MR {P,A,N}
+
+@attribute FF {P,A,N}
+
+@attribute CR {P,A,N}
+
+@attribute CO {P,A,N}
+
+@attribute OP {P,A,N}
+
+@attribute Class {B,NB}
+
+
+@data
+
+P,P,A,A,A,P,NB
+N,N,A,A,A,N,NB
+A,A,A,A,A,A,NB
+P,P,P,P,P,P,NB
+N,N,P,P,P,N,NB
+A,A,P,P,P,A,NB
+P,P,A,P,P,P,NB
+P,P,P,A,A,P,NB
+P,P,A,P,A,P,NB
+P,P,A,A,P,P,NB
+P,P,P,P,A,P,NB
+P,P,P,A,P,P,NB
+N,N,A,P,P,N,NB
+N,N,P,A,A,N,NB
+N,N,A,P,A,N,NB
+N,N,A,P,A,N,NB
+N,N,A,A,P,N,NB
+N,N,P,P,A,N,NB
+N,N,P,A,P,N,NB
+A,A,A,P,P,A,NB
+A,A,P,A,A,A,NB
+A,A,A,P,A,A,NB
+A,A,A,A,P,A,NB
+A,A,P,P,A,A,NB
+A,A,P,A,P,A,NB
+P,N,A,A,A,P,NB
+N,P,A,A,A,N,NB
+P,N,A,A,A,N,NB
+P,N,P,P,P,P,NB
+N,P,P,P,P,N,NB
+P,N,P,P,P,N,NB
+N,N,A,P,P,P,NB
+P,N,P,A,A,P,NB
+N,P,A,P,A,P,NB
+N,P,A,A,P,N,NB
+P,N,P,P,A,N,NB
+N,P,P,A,P,A,NB
+A,N,A,P,P,A,NB
+A,P,P,A,A,A,NB
+A,A,A,P,A,P,NB
+A,A,A,A,P,N,NB
+N,A,P,P,P,N,NB
+A,N,P,A,P,N,NB
+A,P,P,A,P,N,NB
+N,N,P,A,P,P,NB
+N,N,P,P,P,P,NB
+P,A,P,P,P,N,NB
+A,P,P,P,P,N,NB
+A,N,N,A,P,P,NB
+A,P,P,A,P,P,NB
+P,A,P,A,P,N,NB
+A,N,A,A,P,P,NB
+A,N,A,A,P,N,NB
+A,N,A,A,P,A,NB
+A,A,N,P,P,A,NB
+A,A,N,P,P,P,NB
+A,P,P,P,P,P,NB
+A,P,A,A,A,P,NB
+N,P,N,P,P,A,NB
+N,N,P,P,P,A,NB
+A,A,A,P,P,A,NB
+A,A,A,P,P,P,NB
+P,A,A,P,P,P,NB
+A,N,N,P,P,A,NB
+P,N,N,P,P,A,NB
+A,A,N,P,P,P,NB
+P,A,P,N,P,N,NB
+P,A,N,A,P,N,NB
+P,P,P,A,P,N,NB
+P,A,P,N,P,N,NB
+P,A,A,P,P,N,NB
+P,P,A,P,P,P,NB
+P,A,P,A,P,P,NB
+P,P,A,A,P,N,NB
+A,A,A,A,A,P,NB
+P,P,A,P,P,N,NB
+A,P,N,P,A,P,NB
+A,P,A,P,A,P,NB
+P,A,N,A,P,A,NB
+A,P,N,P,A,P,NB
+P,A,A,A,P,A,NB
+A,P,A,P,A,P,NB
+A,P,P,P,P,P,NB
+P,A,A,N,P,P,NB
+A,P,A,A,A,P,NB
+A,N,N,N,P,P,NB
+N,P,N,P,P,A,NB
+P,N,A,N,A,P,NB
+N,N,P,P,P,A,NB
+A,A,A,P,P,A,NB
+A,A,A,P,P,P,NB
+P,A,A,P,P,P,NB
+A,N,N,P,P,A,NB
+A,A,N,P,P,P,NB
+P,A,P,N,P,N,NB
+P,P,P,A,P,N,NB
+P,A,P,N,P,N,NB
+P,A,A,P,P,N,NB
+P,P,A,P,P,P,NB
+P,A,P,A,P,P,NB
+P,P,A,A,P,N,NB
+A,A,A,A,A,P,NB
+P,P,A,P,P,N,NB
+A,P,N,P,A,P,NB
+P,A,A,A,P,A,NB
+A,P,A,P,A,P,NB
+A,P,N,P,A,P,NB
+A,P,A,P,A,P,NB
+P,P,A,A,A,P,NB
+N,N,A,A,A,N,NB
+A,A,A,A,A,A,NB
+P,P,P,P,P,P,NB
+N,N,P,P,P,N,NB
+A,A,P,P,P,A,NB
+P,P,A,P,P,P,NB
+P,P,P,A,A,P,NB
+P,P,A,P,A,P,NB
+P,P,A,A,P,P,NB
+P,P,P,P,A,P,NB
+P,P,P,A,P,P,NB
+N,N,A,P,P,N,NB
+N,N,P,A,A,N,NB
+N,N,A,P,A,N,NB
+N,N,A,P,A,N,NB
+N,N,A,A,P,N,NB
+N,N,P,P,A,N,NB
+N,N,P,A,P,N,NB
+A,A,A,P,P,A,NB
+A,A,P,A,A,A,NB
+A,A,A,P,A,A,NB
+A,A,A,A,P,A,NB
+A,A,P,P,A,A,NB
+A,A,P,A,P,A,NB
+P,N,A,A,A,P,NB
+N,P,A,A,A,N,NB
+P,N,A,A,A,N,NB
+P,N,P,P,P,P,NB
+N,P,P,P,P,N,NB
+P,N,P,P,P,N,NB
+N,N,A,P,P,P,NB
+P,N,P,A,A,P,NB
+N,P,A,P,A,P,NB
+N,P,A,A,P,N,NB
+A,N,N,N,N,A,B
+P,N,N,N,N,N,B
+N,P,N,N,N,N,B
+A,P,N,A,N,N,B
+N,N,N,N,N,N,B
+N,N,N,A,N,A,B
+N,N,N,N,N,P,B
+N,N,N,N,N,A,B
+N,N,N,A,N,P,B
+N,N,N,A,N,N,B
+N,N,A,N,N,N,B
+P,N,N,N,N,N,B
+A,N,N,N,N,N,B
+N,N,N,N,N,N,B
+P,N,N,N,A,A,B
+A,N,N,N,N,A,B
+A,N,N,N,N,A,B
+A,A,N,N,N,P,B
+A,N,N,N,N,N,B
+P,A,N,N,N,A,B
+P,N,N,N,N,P,B
+P,A,N,N,N,N,B
+P,N,N,N,N,N,B
+N,A,N,N,N,P,B
+N,N,N,N,N,A,B
+A,A,N,N,N,N,B
+A,A,N,N,N,N,B
+P,P,N,N,N,N,B
+A,P,N,N,N,N,B
+P,A,N,N,N,N,B
+A,N,N,N,N,N,B
+N,N,N,N,N,N,B
+N,A,N,N,N,N,B
+P,N,N,N,N,N,B
+N,P,N,N,N,N,B
+A,P,N,A,N,N,B
+N,N,N,P,N,P,B
+N,N,N,N,N,N,B
+N,N,N,A,N,A,B
+N,N,N,P,N,N,B
+N,N,N,N,N,P,B
+N,N,N,N,N,A,B
+N,N,N,A,N,P,B
+N,N,N,A,N,N,B
+N,N,A,N,N,N,B
+P,N,N,N,N,N,B
+A,N,N,N,N,N,B
+N,N,N,N,N,N,B
+P,N,N,N,A,A,B
+P,N,N,N,A,A,B
+A,N,N,N,N,A,B
+N,N,N,N,N,A,B
+N,P,N,N,N,N,B
+A,P,N,A,N,N,B
+N,N,N,N,N,N,B
+N,N,N,A,N,A,B
+N,N,N,P,N,N,B
+N,N,N,N,N,P,B
+N,N,N,N,N,A,B
+N,N,N,A,N,P,B
+P,N,N,N,N,P,B
+P,A,N,N,N,N,B
+P,N,N,N,N,N,B
+N,A,N,N,N,P,B
+N,N,N,N,N,A,B
+A,A,N,N,N,N,B
+A,A,N,N,N,N,B
+N,N,N,A,N,N,B
+N,N,A,N,N,N,B
+P,N,N,N,N,N,B
+A,N,N,N,N,N,B
+N,N,N,N,N,N,B
+N,A,P,A,N,P,B
+P,N,N,N,N,N,B
+N,A,N,N,N,P,B
+N,N,N,N,N,A,B
+A,A,N,N,N,N,B
+A,A,N,N,N,P,B
+A,N,N,N,N,N,B
+P,A,N,N,N,A,B
+P,N,N,N,N,P,B
+P,A,N,N,N,N,B
+P,N,N,N,N,N,B
+N,A,N,N,N,P,B
+N,N,N,N,N,A,B
+A,A,N,N,N,N,B
+A,A,N,N,N,N,B
+A,P,N,N,N,N,B
+P,A,N,N,N,N,B
+A,N,N,N,N,N,B
+N,N,N,N,N,N,B
+N,A,N,N,N,N,B
+A,N,N,N,N,A,B
+P,N,N,N,N,N,B
+N,P,N,N,N,N,B
+A,P,N,A,N,N,B
+N,N,N,N,N,N,B
+N,N,N,A,N,A,B
+N,N,N,N,N,P,B
+N,N,N,N,N,A,B
+N,N,N,A,N,P,B
+N,N,N,A,N,N,B
+N,N,A,N,N,N,B
+P,N,N,N,N,N,B
+A,N,N,N,N,N,B
+N,N,N,N,N,N,B
+P,N,N,N,A,A,B
