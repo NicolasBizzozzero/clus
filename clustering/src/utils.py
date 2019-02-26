@@ -1,5 +1,6 @@
 import random
 import inspect
+import functools
 
 import numpy as np
 
@@ -12,11 +13,12 @@ def remove_unexpected_arguments(func):
     * BIZZOZZERO Nicolas
     * POUYET Adrien
     """
-    def wrapper(*arg, **kwargs):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
         possible_parameters = inspect.getfullargspec(func).args
         new_kwargs = dict(filter(lambda a: a[0] in possible_parameters, kwargs.items()))
 
-        return func(*arg, **new_kwargs)
+        return func(*args, **new_kwargs)
     return wrapper
 
 

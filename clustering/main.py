@@ -60,7 +60,10 @@ def main(dataset, clustering_algorithm, delimiter, components, eps, max_iter, fu
     # Perform the clustering method
     affectations, centroids, losses = clustering_algorithm(data, components=components, eps=eps, max_iter=max_iter,
                                                            fuzzifier=fuzzifier)
-    print(losses)
+
+    # print("Affectations :\n", affectations)
+    # print("Centroids    :\n", centroids)
+    print("Losses       :\n", losses)
 
 
 if __name__ == '__main__':
