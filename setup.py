@@ -69,9 +69,10 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
+        "click >= 7.0",
         "numpy >= 1.16.1",
         "pandas >= 0.24.1",
-        "click >= 7.0"
+        "scikit-learn >= 0.20.2"
     ],
 
     # List additional groups of dependencies here (e.g. development

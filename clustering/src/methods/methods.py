@@ -2,7 +2,7 @@ import enum
 from typing import Callable
 
 from clustering.src.methods import kmeans, fuzzy_c_means
-
+from clustering.src.methods.fuzzy_c_medoids import fuzzy_c_medoids
 
 ALIAS_CM_KMEANS = ("kmeans",)
 ALIAS_CM_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
@@ -76,7 +76,7 @@ def clusteringmethod_to_function(clustering_method):
     elif clustering_method is ClusteringMethod.POSSIBILISTIC_C_MEANS:
         raise NotImplementedError()
     elif clustering_method is ClusteringMethod.FUZZY_C_MEDOIDS:
-        raise NotImplementedError()
+        return fuzzy_c_medoids
     elif clustering_method is ClusteringMethod.HARD_C_MEDOIDS:
         raise NotImplementedError()
     elif clustering_method is ClusteringMethod.LINEARIZED_FUZZY_C_MEDOIDS:

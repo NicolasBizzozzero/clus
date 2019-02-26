@@ -29,7 +29,7 @@ from clustering.src.utils import set_manual_seed
               help="Minimal threshold caracterizing an algorithm's convergence")
 @click.option("--max-iter", type=int, default=1000,
               help="Maximal number of iteration to make before stopping an algorithm")
-@click.option("-m", "--fuzzifier", type=int, default=2,
+@click.option("-m", "--fuzzifier", type=float, default=2,
               help="Fuzzification exponent applied to the membership degrees")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None,
