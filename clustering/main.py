@@ -1,7 +1,20 @@
+# TODO: Comment gérer les 0 (petit epsilon partout ou juste sur les 0) ou même supprimer les doublons
+# MJ a dit de tester voir si j'obtiens les memes resultats (a epsilon pres) en ajoutant epsilon ou alors en mettant
+# à 0 les valeurs De u_ij pour des exemples qui sont égaux
+# Ne surtout pas supprimer les doublons. Un cluster avec plein d'exemples au même endroit aura plus de force qu'un
+# cluster avec un seul exemple.
+# TODO: Est-ce que je normalise mes données ?
+# Ne pas faire de normalisation centrée-réduite sur un même attribut à cause des outliers
+# On peut cependant faire une normalisation entre les attributs de manière à ce qu'ils soient dans le même
+# intervalle de valeurs, et qu'un attribut ne soit pas plus fort qu'un autre.
+# TODO: La matrice de dissimilarité, on la fournie ou je dois la calculer ? La dissimilarité est symétrique ?
+# La dissimilarité n'est pas forcement symétrique, mais on peut suppose qu'elle l'est pour pouvoir simplifier des
+# calculs.
+
 import click
 import pandas as pd
+from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clustering.src.methods import kmeans, fuzzy_c_means
 from clustering.src.methods.methods import get_clustering_function
 from clustering.src.utils import set_manual_seed
 
@@ -22,6 +35,7 @@ from clustering.src.utils import set_manual_seed
 ]))
 # CSV parsing options
 @click.option("--delimiter", "--sep", type=str, default=",", help="")
+@click.option("--header", is_flag=True, help="Set this flag if your dataset contains a header")
 # Clustering options
 @click.option("-c", "-k", "--components", type=int, default=100,
               help="Number of clustering components")
@@ -34,7 +48,7 @@ from clustering.src.utils import set_manual_seed
 # Miscellaneous options
 @click.option("--seed", type=int, default=None,
               help="Random seed to set")
-def main(dataset, clustering_algorithm, delimiter, components, eps, max_iter, fuzzifier, seed):
+def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_iter, fuzzifier, seed):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -55,7 +69,8 @@ def main(dataset, clustering_algorithm, delimiter, components, eps, max_iter, fu
     clustering_algorithm = get_clustering_function(clustering_algorithm)
 
     # Load data
-    data = pd.read_csv(dataset, delimiter=delimiter).values
+    data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
+    data = DistanceMetric.get_metric('euclidean').pairwise(data)  # TODO: Retirer cette ligne après les tests
 
     # Perform the clustering method
     affectations, centroids, losses = clustering_algorithm(data, components=components, eps=eps, max_iter=max_iter,
@@ -63,7 +78,7 @@ def main(dataset, clustering_algorithm, delimiter, components, eps, max_iter, fu
 
     # print("Affectations :\n", affectations)
     # print("Centroids    :\n", centroids)
-    print("Losses       :\n", losses)
+    print("\nLosses       :\n", losses)
 
 
 if __name__ == '__main__':
