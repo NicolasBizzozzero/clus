@@ -6,7 +6,7 @@ from clustering.src.utils import remove_unexpected_arguments
 
 
 @remove_unexpected_arguments
-def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
+def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_size, eps, max_iter):
     assert (len(data.shape) == 2) and data.shape[0] == data.shape[1]  # The data matrix must be a square matrix
 
     # Initialisation
@@ -20,9 +20,13 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
     while (current_iter <= max_iter) and \
             ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
             ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
+
         medoids_idx_old = medoids_idx
         memberships = _compute_memberships(data, medoids_idx, fuzzifier)
-        medoids_idx = _compute_medoids(data, memberships, fuzzifier)
+        top_membership_subset = _compute_top_membership_subset(memberships, membership_subset_size)
+        medoids_idx = _compute_medoids(data, memberships, fuzzifier, top_membership_subset)
+        print(medoids_idx)
+        exit(0)
 
         loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
@@ -68,13 +72,38 @@ def _compute_memberships(data, medoids_idx, fuzzifier):
     return memberships
 
 
-def _compute_medoids(data, memberships, fuzzifier):
-    print(data[..., np.newaxis].shape)
-    print((memberships ** fuzzifier).shape)
-    print((data[..., np.newaxis] * (memberships ** fuzzifier)).shape)
-    print((data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).shape)
-    print((data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0).shape)
-    return (data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
+def _compute_medoids(data, memberships, fuzzifier, top_membership_subset):
+    # TODO: Comprendre les dimensions en entrée et en retour
+    # TODO: COmprendre ce que je fais à chaque calcul et ce que je veux
+    # TODO:
+    C = 5
+    N = 5000
+
+    for i in range(C):
+        for i_xk in top_membership_subset[:, i]:
+            print((memberships[:, i] ** fuzzifier) * data[i_xk, :].sum())
+        exit(0)
+
+
+
+    r = data[..., np.newaxis]
+
+    print(r)
+    print(r.shape)
+    exit(0)
+    u = (memberships.take(top_membership_subset) ** fuzzifier)
+    print(r.shape)
+    print(u.shape)
+    print((r * u).shape)
+    print((r * u).sum(axis=1))
+
+    exit(0)
+    return (r * u).sum(axis=1).argmin(axis=0)
+
+
+def _compute_top_membership_subset(memberships, membership_subset_size):
+    # TODO: can be speed-up with np.argpartition
+    return memberships.argsort(axis=0)[-membership_subset_size:][::-1]
 
 
 if __name__ == '__main__':

@@ -45,10 +45,13 @@ from clustering.src.utils import set_manual_seed
               help="Maximal number of iteration to make before stopping an algorithm")
 @click.option("-m", "--fuzzifier", type=float, default=2,
               help="Fuzzification exponent applied to the membership degrees")
+@click.option("-p", "--membership-subset-size", type=int, default=10,
+              help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None,
               help="Random seed to set")
-def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_iter, fuzzifier, seed):
+def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_iter, fuzzifier, membership_subset_size,
+         seed):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -73,13 +76,17 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_
     data = DistanceMetric.get_metric('euclidean').pairwise(data)  # TODO: Retirer cette ligne après les tests
 
     # Perform the clustering method
-    affectations, centroids, losses = clustering_algorithm(data, components=components, eps=eps, max_iter=max_iter,
-                                                           fuzzifier=fuzzifier)
+    affectations, centroids, losses = clustering_algorithm(data,
+                                                           components=components,
+                                                           eps=eps,
+                                                           max_iter=max_iter,
+                                                           fuzzifier=fuzzifier,
+                                                           membership_subset_size=membership_subset_size)
 
     # print("Affectations :\n", affectations)
     # print("Centroids    :\n", centroids)
-    print("\nLosses       :\n", losses)
+    # print("\nLosses       :\n", losses)
 
 
 if __name__ == '__main__':
-    main(dataset="qualbank", eps=0, max_iter=1000, seed=0)
+    pass
