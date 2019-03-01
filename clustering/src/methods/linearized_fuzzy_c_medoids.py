@@ -24,6 +24,7 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_si
         medoids_idx_old = medoids_idx
         memberships = _compute_memberships(data, medoids_idx, fuzzifier)
         top_membership_subset = _compute_top_membership_subset(memberships, membership_subset_size)
+        exit(0)
         medoids_idx = _compute_medoids(data, memberships, fuzzifier, top_membership_subset)
         print(medoids_idx)
         exit(0)
@@ -102,8 +103,15 @@ def _compute_medoids(data, memberships, fuzzifier, top_membership_subset):
 
 
 def _compute_top_membership_subset(memberships, membership_subset_size):
-    # TODO: can be speed-up with np.argpartition
-    return memberships.argsort(axis=0)[-membership_subset_size:][::-1]
+    topk_idx = np.argpartition(memberships, -membership_subset_size, axis=0)[-membership_subset_size:]
+    top_memberships_subset = memberships[topk_idx, np.arange(memberships.shape[1])]  # Adrien
+    from scipy import sparse
+    mask = sparse.coo_matrix((np.ones(len(topk_idx[0])), topk_idx), shape=top_memberships_subset.shape, dtype=bool)
+    print(mask.shape)
+    print(mask)
+    return top_memberships_subset
+
+    # return memberships.argsort(axis=0)[-membership_subset_size:][::-1]
 
 
 if __name__ == '__main__':
