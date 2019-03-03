@@ -7,12 +7,14 @@ from clustering.src.utils import remove_unexpected_arguments
 
 @remove_unexpected_arguments
 def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
-    assert (len(data.shape) == 2) and data.shape[0] == data.shape[1]  # The data matrix must be a square matrix
+    # The data matrix must be a square matrix
+    assert (len(data.shape) == 2) and data.shape[0] == data.shape[1]
 
     # Initialisation
     nb_examples, dim = data.shape
     memberships = np.zeros(shape=(nb_examples, components), dtype=np.float64)
-    medoids_idx = _init_medoids(data, nb_examples, components, selection_method="random")
+    medoids_idx = _init_medoids(
+        data, nb_examples, components, selection_method="random")
 
     current_iter = 0
     losses = []
@@ -69,11 +71,6 @@ def _compute_memberships(data, medoids_idx, fuzzifier):
 
 
 def _compute_medoids(data, memberships, fuzzifier):
-    print(data[..., np.newaxis].shape)
-    print((memberships ** fuzzifier).shape)
-    print((data[..., np.newaxis] * (memberships ** fuzzifier)).shape)
-    print((data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).shape)
-    print((data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0).shape)
     return (data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
 
 
