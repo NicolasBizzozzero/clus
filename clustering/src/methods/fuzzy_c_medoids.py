@@ -1,4 +1,5 @@
 import sys
+import time
 
 import numpy as np
 
@@ -19,6 +20,7 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
     current_iter = 0
     losses = []
     medoids_idx_old = None
+    start_time = time.time()
     while (current_iter <= max_iter) and \
             ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
             ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
@@ -28,8 +30,9 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
 
         loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
+
         current_iter += 1
-        print_progression(iteration=current_iter, loss=loss)
+        print_progression(iteration=current_iter, loss=loss, start_time=start_time)
     return memberships, data[medoids_idx, :], np.array(losses)
 
 

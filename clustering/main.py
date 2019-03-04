@@ -34,8 +34,12 @@ from clustering.src.utils import set_manual_seed
     "datastream_linearized_fuzzy_c_medoids_select", "ds_lfcmed_select",
 ]))
 # CSV parsing options
-@click.option("--delimiter", "--sep", type=str, default=",", help="")
-@click.option("--header", is_flag=True, help="Set this flag if your dataset contains a header")
+@click.option("--delimiter", "--sep", type=str, default=",",
+              help="Character or REGEX used for separating data in the CSV data file")
+@click.option("--header", is_flag=True,
+              help=("Set this flag if your dataset contains a header, it will then be ignored by the clustering algorit"
+                    "hm. If you set this flag while not having a header, the first example of the dataset will be ignor"
+                    "ed"))
 # Clustering options
 @click.option("-c", "-k", "--components", type=int, default=100,
               help="Number of clustering components")
@@ -45,7 +49,7 @@ from clustering.src.utils import set_manual_seed
               help="Maximal number of iteration to make before stopping an algorithm")
 @click.option("-m", "--fuzzifier", type=float, default=2,
               help="Fuzzification exponent applied to the membership degrees")
-@click.option("-p", "--membership-subset-size", type=int, default=10,
+@click.option("-p", "--membership-subset-size", type=int, default=None,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None,

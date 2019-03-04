@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 from clustering.src.utils import remove_unexpected_arguments, print_progression
@@ -12,14 +14,17 @@ def kmeans(data, components, eps, max_iter):
 
     current_iter = 0
     losses = []
+    start_time = time.time()
     while (current_iter <= max_iter) and \
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
         affectations = _optim_affectations(data, centroids)
         centroids = _optim_centroids(data, affectations)
+
         loss = _compute_loss(data, affectations, centroids)
         losses.append(loss)
+
         current_iter += 1
-        print_progression(iteration=current_iter, loss=loss)
+        print_progression(iteration=current_iter, loss=loss, start_time=start_time)
     return affectations, centroids, np.array(losses)
 
 

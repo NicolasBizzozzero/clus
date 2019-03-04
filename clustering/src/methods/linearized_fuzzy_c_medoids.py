@@ -1,4 +1,5 @@
 import sys
+import time
 
 import numpy as np
 from scipy.sparse import csr_matrix
@@ -25,25 +26,22 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier,
     current_iter = 0
     losses = []
     medoids_idx_old = None
+    start_time = time.time()
     while (current_iter <= max_iter) and \
           ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and\
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
 
         medoids_idx_old = medoids_idx
         memberships = _compute_memberships(data, medoids_idx, fuzzifier)
-        top_memberships_mask = _compute_top_membership_subset(
-            memberships, membership_subset_size)
-        medoids_idx = _compute_medoids(
-            data, memberships, fuzzifier, top_memberships_mask)
+        top_memberships_mask = _compute_top_membership_subset(memberships, membership_subset_size)
+        medoids_idx = _compute_medoids(data, memberships, fuzzifier, top_memberships_mask)
 
         loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
+
         current_iter += 1
-        print_progression(iteration=current_iter, loss=loss)
+        print_progression(iteration=current_iter, loss=loss, start_time=start_time)
     return memberships, data[medoids_idx, :], np.array(losses)
-
-
-
 
 
 def _init_medoids(data, nb_examples, components, selection_method="random"):
@@ -57,16 +55,12 @@ def _init_medoids(data, nb_examples, components, selection_method="random"):
         return None
 
 
-def _compute_loss(data, medoids_idx, memberships, fuzzifier):
-    return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
-
-
 def _compute_memberships(data, medoids_idx, fuzzifier):
     r = data[:, medoids_idx]
 
     # If two examples are of equals distance, the computation will make divisions by zero. We add this
     # small coefficient to not divide by zero while keeping our distances as correct as possible
-    r += 1e-7
+    r += np.finfo(data.dtype).eps
 
     tmp = (1 / r) ** (1 / (fuzzifier - 1))
     memberships = tmp / tmp.sum(axis=1, keepdims=True)
@@ -78,15 +72,13 @@ def _compute_memberships(data, medoids_idx, fuzzifier):
     return memberships
 
 
-def _compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
-    return (data[..., np.newaxis] * top_memberships_mask * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
-
-
 def _compute_top_membership_subset(memberships, membership_subset_size):
-    # TODO: citer Adrien et Olivier qui ont taffé dessus.
-    topk_idx = np.argpartition(
-        memberships, -membership_subset_size, axis=0)[-membership_subset_size:]
-    # top_memberships_subset = memberships[topk_idx, np.arange(memberships.shape[1])]  # Adrien
+    """ Compute a mask of the `memberships` matrix. The mask is True `membership_subset_size` times in each column for
+    all indexes where the membership has one of the `membership_subset_size` highest value for this column.
+
+    Many thanks to RISSER-MAROIX Olivier and POUYET Adrien for their help.
+    """
+    topk_idx = np.argpartition(memberships, -membership_subset_size, axis=0)[-membership_subset_size:]
 
     # TODO: tester la rapidité sans le toarray
     top_memberships_mask = \
@@ -94,9 +86,20 @@ def _compute_top_membership_subset(memberships, membership_subset_size):
                     (topk_idx.flatten(), np.nonzero(abs(topk_idx) + 1)[1])),
                    shape=memberships.shape,
                    dtype=bool).toarray()
+
+    # Return the subset of the top memberships (the result of the application of the mask).
+    # Not used here but might be useful. Many thanks to POUYET Adrien for its help.
+    # top_memberships_subset = memberships[topk_idx, np.arange(memberships.shape[1])]
+
     return top_memberships_mask
 
-    # return memberships.argsort(axis=0)[-membership_subset_size:][::-1]
+
+def _compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
+    return (data[..., np.newaxis] * top_memberships_mask * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
+
+
+def _compute_loss(data, medoids_idx, memberships, fuzzifier):
+    return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
 
 
 if __name__ == '__main__':

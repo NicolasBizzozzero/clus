@@ -4,8 +4,7 @@
 
 
 ## TODO
-* Mettre à jour les méthodes d'initialisation pour TOUS les algorithmes, surement faire ça dans un module à parti.
-
+* Mettre à jour les méthodes d'initialisation pour TOUS les algorithmes, surement faire ça dans un module à part. Idées : init_random, init_random_medoids, central_dissimilar_medoids, central_dissimilar_random_medoids
 
 
 ## References
