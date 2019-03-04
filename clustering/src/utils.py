@@ -1,6 +1,7 @@
 import random
 import inspect
 import functools
+import sys
 
 import numpy as np
 
@@ -33,6 +34,14 @@ def set_manual_seed(seed):
     """
     random.seed(seed)
     np.random.seed(seed)
+
+
+def print_progression(iteration, loss):
+    sys.stdout.write('\r')
+    sys.stdout.write("Iteration {}, Loss : {}".format(
+        iteration, loss
+    ))
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import numpy as np
 
-from clustering.src.utils import remove_unexpected_arguments
+from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
@@ -19,6 +19,7 @@ def kmeans(data, components, eps, max_iter):
         loss = _compute_loss(data, affectations, centroids)
         losses.append(loss)
         current_iter += 1
+        print_progression(iteration=current_iter, loss=loss)
     return affectations, centroids, np.array(losses)
 
 

@@ -3,7 +3,7 @@ import sys
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from clustering.src.utils import remove_unexpected_arguments
+from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
@@ -12,11 +12,15 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier,
     # The data matrix must be a square matrix
     assert (len(data.shape) == 2) and data.shape[0] == data.shape[1]
 
+    # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
+    # in a cluster
+    if membership_subset_size is None:
+        membership_subset_size = data.shape[0] // components
+
     # Initialisation
     nb_examples, dim = data.shape
     memberships = np.zeros(shape=(nb_examples, components), dtype=np.float64)
-    medoids_idx = _init_medoids(
-        data, nb_examples, components, selection_method="random")
+    medoids_idx = _init_medoids(data, nb_examples, components, selection_method="random")
 
     current_iter = 0
     losses = []
@@ -35,13 +39,11 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier,
         loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
         current_iter += 1
-
-        sys.stdout.write('\r')
-        sys.stdout.write("Iteration {}, Loss : {}".format(
-            current_iter, loss
-        ))
-        sys.stdout.flush()
+        print_progression(iteration=current_iter, loss=loss)
     return memberships, data[medoids_idx, :], np.array(losses)
+
+
+
 
 
 def _init_medoids(data, nb_examples, components, selection_method="random"):

@@ -2,7 +2,7 @@ import sys
 
 import numpy as np
 
-from clustering.src.utils import remove_unexpected_arguments
+from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
@@ -29,12 +29,7 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
         loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
         current_iter += 1
-
-        sys.stdout.write('\r')
-        sys.stdout.write("Iteration {}, Loss : {}".format(
-            current_iter, loss
-        ))
-        sys.stdout.flush()
+        print_progression(iteration=current_iter, loss=loss)
     return memberships, data[medoids_idx, :], np.array(losses)
 
 
