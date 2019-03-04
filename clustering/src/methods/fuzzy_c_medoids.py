@@ -47,18 +47,14 @@ def _init_medoids(data, nb_examples, components, selection_method="random"):
         return None
 
 
-def _compute_loss(data, medoids_idx, memberships, fuzzifier):
-    return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
-
-
 def _compute_memberships(data, medoids_idx, fuzzifier):
-    r = data[:, medoids_idx]
+    dist_data_medoids = data[:, medoids_idx]
 
     # If two examples are of equals distance, the computation will make divisions by zero. We add this
     # small coefficient to not divide by zero while keeping our distances as correct as possible
-    r += 1e-7
+    dist_data_medoids += np.fmax(dist_data_medoids, np.finfo(data.dtype).eps)
 
-    tmp = (1 / r) ** (1 / (fuzzifier - 1))
+    tmp = (1 / dist_data_medoids) ** (1 / (fuzzifier - 1))
     memberships = tmp / tmp.sum(axis=1, keepdims=True)
 
     for index_medoid, medoid in enumerate(medoids_idx):
@@ -70,6 +66,10 @@ def _compute_memberships(data, medoids_idx, fuzzifier):
 
 def _compute_medoids(data, memberships, fuzzifier):
     return (data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
+
+
+def _compute_loss(data, medoids_idx, memberships, fuzzifier):
+    return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
 
 
 if __name__ == '__main__':

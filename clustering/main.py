@@ -16,7 +16,7 @@ import pandas as pd
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clustering.src.methods.methods import get_clustering_function
-from clustering.src.utils import set_manual_seed
+from clustering.src.utils import set_manual_seed, normalization_mean_std
 
 
 # TODO: Lister tous les algos disponibles et leurs acronymes
@@ -54,8 +54,10 @@ from clustering.src.utils import set_manual_seed
 # Miscellaneous options
 @click.option("--seed", type=int, default=None,
               help="Random seed to set")
+@click.option("--normalize", is_flag=True,
+              help="Set this flag if you want to normalize your data to zero mean and unit variance")
 def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_iter, fuzzifier, membership_subset_size,
-         seed):
+         seed, normalize):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -78,6 +80,9 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_
     # Load data
     data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
     data = DistanceMetric.get_metric('euclidean').pairwise(data)  # TODO: Retirer cette ligne après les tests
+
+    if normalize:
+        data = normalization_mean_std(data)
 
     # Perform the clustering method
     affectations, centroids, losses = clustering_algorithm(data,

@@ -104,5 +104,14 @@ def print_progression(iteration, loss, start_time):
     sys.stdout.flush()
 
 
+def normalization_mean_std(array):
+    """ Normalize `array` to zero mean and unit variance.
+
+    Source :
+    * https://stackoverflow.com/a/31153050
+    """
+    return (array - array.mean(axis=0)) / array.std(axis=0)
+
+
 if __name__ == '__main__':
     pass
