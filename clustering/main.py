@@ -13,7 +13,10 @@
 
 import click
 import pandas as pd
+import matplotlib.pyplot as plt
+
 from sklearn.neighbors.dist_metrics import DistanceMetric
+from sklearn.decomposition import PCA
 
 from clustering.src.methods.methods import get_clustering_function
 from clustering.src.utils import set_manual_seed, normalization_mean_std
@@ -56,8 +59,13 @@ from clustering.src.utils import set_manual_seed, normalization_mean_std
               help="Random seed to set")
 @click.option("--normalize", is_flag=True,
               help="Set this flag if you want to normalize your data to zero mean and unit variance")
-def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_iter, fuzzifier, membership_subset_size,
-         seed, normalize):
+@click.option("--vizualise", is_flag=True,
+              help=("Set this flag if you want to vizualise the clustering re"
+                    "sult. If your data's dimension is more than 2, a 2-compo"
+                    "nents PCA is applied to the data before vizualising."))
+def main(dataset, clustering_algorithm, delimiter, header, components, eps,
+         max_iter, fuzzifier, membership_subset_size, seed, normalize,
+         vizualise):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -78,23 +86,50 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps, max_
     clustering_algorithm = get_clustering_function(clustering_algorithm)
 
     # Load data
-    data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
-    data = DistanceMetric.get_metric('euclidean').pairwise(data)  # TODO: Retirer cette ligne après les tests
+    data = pd.read_csv(dataset, delimiter=delimiter,
+                       header=0 if header else None).values
+    data = DistanceMetric.get_metric('euclidean').pairwise(
+        data)  # TODO: Retirer cette ligne après les tests
 
     if normalize:
         data = normalization_mean_std(data)
 
     # Perform the clustering method
-    affectations, centroids, losses = clustering_algorithm(data,
-                                                           components=components,
-                                                           eps=eps,
-                                                           max_iter=max_iter,
-                                                           fuzzifier=fuzzifier,
-                                                           membership_subset_size=membership_subset_size)
+    memberships, clusters_center, losses = clustering_algorithm(
+        data,
+        components=components,
+        eps=eps,
+        max_iter=max_iter,
+        fuzzifier=fuzzifier,
+        membership_subset_size=membership_subset_size
+    )
 
-    # print("Affectations :\n", affectations)
-    # print("Centroids    :\n", centroids)
-    # print("\nLosses       :\n", losses)
+    if vizualise:
+        if data.shape[-1] > 2:
+            pca = PCA(n_components=2).fit(data)
+            data = pca.transform(data)
+            clusters_center = pca.transform(clusters_center)
+
+
+def plot_clustering(data, memberships, clusters_center,
+                    title="Application of the {method} algorithm with ")
+    for i in range(0, pca_2d.shape[0]):
+        if iris.target[i] == 0:
+            c1 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='r',
+                             marker='+')
+        elif iris.target[i] == 1:
+            c2 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='g',
+                             marker='o')
+        elif iris.target[i] == 2:
+            c3 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='b',
+                             marker='*')
+        plt.legend([c1, c2, c3], ['Setosa', 'Versicolor',
+                                  'Virginica'])
+        plt.title('Iris dataset with 3 clusters and known outcomes')
+        plt.show()
+
+    plt.scatter(pca_2d[:, 0], pca_2d[:, 1], c='black')
+    plt.show()
 
 
 if __name__ == '__main__':
