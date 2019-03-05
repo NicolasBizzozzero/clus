@@ -11,7 +11,13 @@ def kmeans(data, components, eps, max_iter):
     nb_examples, dim = data.shape
     centroids = np.random.uniform(low=data.min(axis=0), high=data.max(axis=0),
                                   size=(components, dim)).astype(np.float64)
-    affectations = np.zeros(shape=(nb_examples, components), dtype=np.float64)
+    print(centroids)
+    centroids = np.random.rand(components, dim).astype(np.float64)
+    print(centroids)
+    centroids = np.random.normal(loc=data.mean(axis=0), scale=data.std(axis=0),
+                                 size=(components, dim)).astype(np.float64)
+    print(centroids)
+    affectations = None
 
     current_iter = 0
     losses = []
@@ -19,6 +25,12 @@ def kmeans(data, components, eps, max_iter):
     while (current_iter <= max_iter) and \
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
         affectations = _optim_affectations(data, centroids)
+
+        # TODO: Corriger ce bug
+        if 0 in np.sum(affectations, axis=0):
+            print(np.sum(affectations, axis=0))
+            return affectations, centroids, np.array(losses)
+
         centroids = _optim_centroids(data, affectations)
 
         loss = _compute_loss(data, affectations, centroids)
@@ -58,10 +70,17 @@ def _optim_affectations(data, centroids):
 def _optim_centroids(data, affectations):
     # TODO: np.sum(affectations, axis=0) sometimes contains 0, bug appearing when there is too many clusters and one do
     #  not contains any example
-    if 0 in np.sum(affectations, axis=0):
-        print(np.sum(affectations, axis=0))
-        exit(0)
+    print(np.sum(affectations, axis=0))
     return (np.dot(data.T, affectations) / np.sum(affectations, axis=0)).T
+
+
+def _handle_empty_clusters(data, affectations, centroids, strategy):
+    if strategy == "nothing":
+        pass
+    elif strategy == "random_example":
+        pass
+    elif strategy == "furthest_example_from_its_centroid":
+        pass
 
 
 if __name__ == '__main__':

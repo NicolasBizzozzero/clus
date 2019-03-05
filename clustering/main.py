@@ -91,6 +91,8 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps,
     * linearized_fuzzy_c_medoids_select (or l_fcmed_select)
     * datastream_linearized_fuzzy_c_medoids_select (or ds_lfcmed_select)
     """
+    print("Starting clustering with the following parameters :", locals())
+
     if seed is not None:
         set_manual_seed(seed)
 
@@ -124,6 +126,7 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps,
         fuzzifier=fuzzifier,
         membership_subset_size=membership_subset_size
     )
+    print("")
 
     if vizualise:
         vizualise_clustering_2d(data=data, clusters_center=clusters_center,

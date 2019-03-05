@@ -96,6 +96,9 @@ def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):
 
 
 def _apply_tsne_if_too_many_dimensions(data, clusters_center, n_components):
+    # TODO: Impossible selon l'auteur de t-SNE : https://lvdmaaten.github.io/tsne/
+    # Solution potentielle : Je me dis faire une regression linéaire qui apprends le mapping et l'appliquer sur les
+    # position des clusters comme il le suggère peut être pas mal
     applied_pca = False
     if data.shape[-1] > n_components:
         applied_pca = True
