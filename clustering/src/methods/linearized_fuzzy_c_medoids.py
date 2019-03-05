@@ -3,6 +3,7 @@ import time
 
 import numpy as np
 from scipy.sparse import csr_matrix
+from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
@@ -80,9 +81,12 @@ def _compute_top_membership_subset(memberships, membership_subset_size):
     """
     topk_idx = np.argpartition(memberships, -membership_subset_size, axis=0)[-membership_subset_size:]
 
-    # TODO: tester la rapidité sans le toarray
+    # TODO: Sparse matrix may be faster, but it could not be used for the medoids computation because the other matrix
+    # has 3 dimensions, and it is currently not possible to do matrix multiplication with a sparse matrix and a
+    # more-than-2-dimensions matrix. See : https://github.com/scipy/scipy/blob/master/scipy/sparse/base.py#L527
+    # Thus we convert it to a traditional matrix with the `.toarray()` operation.
     top_memberships_mask = \
-        csr_matrix(([1] * len(topk_idx.flatten()),
+        csr_matrix((np.ones((topk_idx.shape[0] * topk_idx.shape[1],)),
                     (topk_idx.flatten(), np.nonzero(abs(topk_idx) + 1)[1])),
                    shape=memberships.shape,
                    dtype=bool).toarray()

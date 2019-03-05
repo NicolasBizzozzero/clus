@@ -8,6 +8,8 @@ from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 @remove_unexpected_arguments
 def fuzzy_c_means(data, components, fuzzifier, eps, max_iter):
+    assert fuzzifier > 1
+
     # Initialisation
     nb_examples, dim = data.shape
     centroids = np.random.rand(components, dim).astype(np.float64)
@@ -30,11 +32,15 @@ def fuzzy_c_means(data, components, fuzzifier, eps, max_iter):
 
 
 def _compute_memberships(data, centroids, fuzzifier):
-    dist_data_centroids = cdist(data.T, centroids, metric="euclidean").T
+    dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1)
 
     # If two examples are of equals distance, the computation will make divisions by zero. We add this
     # small coefficient to not divide by zero while keeping our distances as correct as possible
-    dist_data_centroids = np.fmax(dist_data_centroids, np.finfo(data.dtype).eps)
+    try:
+        dist_data_centroids = np.fmax(dist_data_centroids, np.finfo(data.dtype).eps)
+    except ValueError:
+        # Data is of type int, adding float64 by default
+        dist_data_centroids = np.fmax(dist_data_centroids, np.finfo(np.float64).eps)
 
     tmp = dist_data_centroids ** (-2. / (fuzzifier - 1))
     return (tmp / tmp.sum(axis=0, keepdims=True)).T
@@ -48,8 +54,7 @@ def _compute_centroids(data, memberships, fuzzifier):
 def _compute_loss(data, affectations, centroids, fuzzifier):
     dist_data_centroids = data - centroids[:, np.newaxis]
     return (np.power(affectations, fuzzifier) *
-            np.power(np.linalg.norm(dist_data_centroids, axis=-1,
-                                    ord=2), 2).T).sum()
+            np.linalg.norm(dist_data_centroids, axis=-1, ord=2).T).sum()
 
 
 if __name__ == '__main__':

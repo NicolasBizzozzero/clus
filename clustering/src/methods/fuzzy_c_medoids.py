@@ -2,6 +2,7 @@ import sys
 import time
 
 import numpy as np
+from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
@@ -14,8 +15,7 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
     # Initialisation
     nb_examples, dim = data.shape
     memberships = np.zeros(shape=(nb_examples, components), dtype=np.float64)
-    medoids_idx = _init_medoids(
-        data, nb_examples, components, selection_method="random")
+    medoids_idx = _init_medoids(data, nb_examples, components, selection_method="random")
 
     current_iter = 0
     losses = []

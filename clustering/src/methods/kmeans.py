@@ -41,14 +41,14 @@ def _optim_affectations(data, centroids):
     affectations = np.linalg.norm(dist_data_centroids, ord=2, axis=-1).T
 
     # Set all affectations
-    mask_closest_centroid = (np.arange(len(affectations)),
-                             affectations.argmin(1))
+    mask_closest_centroid = (np.arange(len(affectations)), affectations.argmin(1))
     affectations[mask_closest_centroid] = 1
     affectations[affectations != 1] = 0
     return affectations
 
 
 def _optim_centroids(data, affectations):
+    # TODO: np.sum(affectations, axis=0) sometimes contains 0
     return (np.dot(data.T, affectations) / np.sum(affectations, axis=0)).T
 
 

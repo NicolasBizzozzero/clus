@@ -11,19 +11,26 @@
 # La dissimilarité n'est pas forcement symétrique, mais on peut suppose qu'elle l'est pour pouvoir simplifier des
 # calculs.
 
+import ntpath
+
 import click
+
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
-from sklearn.decomposition import PCA
 
-from clustering.src.methods.methods import get_clustering_function
+from clustering.src.methods.methods import get_clustering_function, ClusteringMethod, clusteringmethod_to_str, \
+    str_to_clusteringmethod
 from clustering.src.utils import set_manual_seed, normalization_mean_std
 
 
 # TODO: Lister tous les algos disponibles et leurs acronymes
 # TODO: Dans chaque option, lister pour quels acronymes elles sont disponibles (ou s'ils le sont pour tous sauf ...)
+from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clustering_3d
+
+
 @click.command()
 @click.argument("dataset", type=click.Path(exists=True))
 @click.argument("clustering_algorithm", type=click.Choice([
@@ -63,9 +70,14 @@ from clustering.src.utils import set_manual_seed, normalization_mean_std
               help=("Set this flag if you want to vizualise the clustering re"
                     "sult. If your data's dimension is more than 2, a 2-compo"
                     "nents PCA is applied to the data before vizualising."))
+@click.option("--vizualise-3d", is_flag=True,
+              help=("Set this flag if you want to vizualise the clustering re"
+                    "sult in 3D. If your data's dimension is more than 3, a 3"
+                    "-components PCA is applied to the data before vizualisin"
+                    "g."))
 def main(dataset, clustering_algorithm, delimiter, header, components, eps,
          max_iter, fuzzifier, membership_subset_size, seed, normalize,
-         vizualise):
+         vizualise, vizualise_3d):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -83,19 +95,28 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps,
         set_manual_seed(seed)
 
     # Load the clustering algorithm
-    clustering_algorithm = get_clustering_function(clustering_algorithm)
+    clustering_function = get_clustering_function(clustering_algorithm)
 
     # Load data
     data = pd.read_csv(dataset, delimiter=delimiter,
                        header=0 if header else None).values
-    data = DistanceMetric.get_metric('euclidean').pairwise(
-        data)  # TODO: Retirer cette ligne après les tests
 
     if normalize:
+        # TODO: Which normalization ?
         data = normalization_mean_std(data)
 
+    # Some methods need the data to be a pairwise distance matrix
+    # If it is not the case, default to the euclidean distance
+    if str_to_clusteringmethod(clustering_algorithm) in (
+            ClusteringMethod.FUZZY_C_MEDOIDS,
+            ClusteringMethod.LINEARIZED_FUZZY_C_MEDOIDS):
+        if data.shape[0] != data.shape[1]:
+            print("The data need to be a pairwise distance matrix for the {} clustering "
+                  "method.".format(clustering_algorithm), "Applying euclidean distance.")
+            data = DistanceMetric.get_metric('euclidean').pairwise(data)
+
     # Perform the clustering method
-    memberships, clusters_center, losses = clustering_algorithm(
+    memberships, clusters_center, losses = clustering_function(
         data,
         components=components,
         eps=eps,
@@ -105,31 +126,18 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps,
     )
 
     if vizualise:
-        if data.shape[-1] > 2:
-            pca = PCA(n_components=2).fit(data)
-            data = pca.transform(data)
-            clusters_center = pca.transform(clusters_center)
+        vizualise_clustering_2d(data=data, clusters_center=clusters_center,
+                                clustering_method=clustering_algorithm,
+                                dataset_name=ntpath.basename(dataset),
+                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                           header=0).columns.tolist())
 
-
-def plot_clustering(data, memberships, clusters_center,
-                    title="Application of the {method} algorithm with ")
-    for i in range(0, pca_2d.shape[0]):
-        if iris.target[i] == 0:
-            c1 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='r',
-                             marker='+')
-        elif iris.target[i] == 1:
-            c2 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='g',
-                             marker='o')
-        elif iris.target[i] == 2:
-            c3 = plt.scatter(pca_2d[i, 0], pca_2d[i, 1], c='b',
-                             marker='*')
-        plt.legend([c1, c2, c3], ['Setosa', 'Versicolor',
-                                  'Virginica'])
-        plt.title('Iris dataset with 3 clusters and known outcomes')
-        plt.show()
-
-    plt.scatter(pca_2d[:, 0], pca_2d[:, 1], c='black')
-    plt.show()
+    if vizualise_3d:
+        vizualise_clustering_3d(data=data, clusters_center=clusters_center,
+                                clustering_method=clustering_algorithm,
+                                dataset_name=ntpath.basename(dataset),
+                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                           header=0).columns.tolist())
 
 
 if __name__ == '__main__':
