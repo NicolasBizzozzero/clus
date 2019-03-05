@@ -5,6 +5,7 @@ import numpy as np
 
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 
 
 _TITLE_WRAP_SIZE = 60
@@ -91,6 +92,16 @@ def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):
         pca = PCA(n_components=n_components)
         data = pca.fit_transform(data)
         clusters_center = pca.transform(clusters_center)
+    return data, clusters_center, applied_pca
+
+
+def _apply_tsne_if_too_many_dimensions(data, clusters_center, n_components):
+    applied_pca = False
+    if data.shape[-1] > n_components:
+        applied_pca = True
+        tsne = TSNE(n_components=n_components)
+        data = tsne.fit_transform(data)
+        clusters_center = tsne.transform(clusters_center)
     return data, clusters_center, applied_pca
 
 
