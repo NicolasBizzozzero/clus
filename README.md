@@ -7,7 +7,6 @@
 * https://medium.com/@rrfd/standardize-or-normalize-examples-in-python-e3f174b65dfc
 * https://github.com/holtskinner/PossibilisticCMeans
 * Ne pas faire la PCA sur les données utilisant des matrices des distance, revoir le code
-* Détecter pourquoi les fcm fonctionnent pas k=15 s4.csv pas de seed fuzzifier=1.5
 * Detecter probleme du fuzzifier (range ? 2 ou plus ?)
 * Voir pourquoi la fonction des lfcmdd est lente (tps à chaque étape, peut etre améliorer en sauvegardant la matrice là)
 * Etudier silhouette (https://en.wikipedia.org/wiki/Silhouette_(clustering)) et ARI (https://en.wikipedia.org/wiki/Rand_index, https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&ved=2ahUKEwiPyoOkvuvgAhUHuRoKHf_aAggQFjADegQIBxAB&url=https%3A%2F%2Fdavetang.org%2Fmuse%2F2017%2F09%2F21%2Fadjusted-rand-index%2F&usg=AOvVaw2O53qsxo75pv4xn8HfHBin)

@@ -11,7 +11,7 @@ from sklearn.manifold import TSNE
 _TITLE_WRAP_SIZE = 60
 _SIZE_EXAMPLES = 3
 _SIZE_CLUSTERS_CENTER = 20
-_CMAP_EXAMPLES = "jet"  # "Accent"
+_CMAP_EXAMPLES = "hsv"
 _COLOR_CLUSTERS_CENTER = "black"
 _MARKER_EXAMPLES = 'o'
 _MARKER_CLUSTERS_CENTER = 'x'
@@ -37,7 +37,14 @@ def vizualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
 
     # Plot the vizualisation
-    plt.scatter(data[:, 0], data[:, 1], c=closest_cluster, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES,
+    fig, ax = plt.subplots()
+
+    # Set the most diverse colormap possible
+    # TODO: Not working with scatter (keep the code anyway), try this solution : https://stackoverflow.com/questions/36801717/using-matplotlibs-color-cycle-as-a-colormap
+    cm = plt.get_cmap(_CMAP_EXAMPLES)
+    ax.set_prop_cycle(cmap=[cm(i / clusters_center.shape[0]) for i in range(clusters_center.shape[0])])
+
+    plt.scatter(data[:, 0], data[:, 1], c=closest_cluster, s=_SIZE_EXAMPLES,
                 marker=_MARKER_EXAMPLES)
     plt.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
                 marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
