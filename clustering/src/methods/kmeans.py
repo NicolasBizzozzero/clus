@@ -2,47 +2,43 @@ import time
 
 import numpy as np
 
-from clustering.src.initialization import int_to_clusterinitialization_function
+from clustering.src.handle_empty_clusters import handle_empty_clusters
+from clustering.src.initialization import cluster_initialization
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def kmeans(data, components, eps, max_iter, initialization_method):
+def kmeans(data, components, eps, max_iter, initialization_method, empty_clusters_method):
     # Initialisation
-    initialization_method = int_to_clusterinitialization_function(initialization_method)
-    centroids = initialization_method(data, components)
+    centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
 
-    affectations = None
+    memberships = None
     current_iter = 0
     losses = []
     start_time = time.time()
     while (current_iter <= max_iter) and \
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
-        affectations = _optim_affectations(data, centroids)
+        memberships = _optim_memberships(data, centroids)
+        handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
 
-        # TODO: Corriger ce bug
-        if 0 in np.sum(affectations, axis=0):
-            print(np.sum(affectations, axis=0))
-            return affectations, centroids, np.array(losses)
+        centroids = _optim_centroids(data, memberships)
 
-        centroids = _optim_centroids(data, affectations)
-
-        loss = _compute_loss(data, affectations, centroids)
+        loss = _compute_loss(data, memberships, centroids)
         losses.append(loss)
 
         current_iter += 1
         print_progression(iteration=current_iter, loss=loss, start_time=start_time)
-    return affectations, centroids, np.array(losses)
+    return memberships, centroids, np.array(losses)
 
 
-def _compute_loss(data, affectations, centroids):
+def _compute_loss(data, memberships, centroids):
     dist_data_centroids = data - centroids[:, np.newaxis]
-    return (affectations *
+    return (memberships *
             np.power(np.linalg.norm(dist_data_centroids, axis=-1, ord=2),
                      2).T).sum()
 
 
-def _optim_affectations(data, centroids):
+def _optim_memberships(data, centroids):
     """
 
     Source :
@@ -61,19 +57,10 @@ def _optim_affectations(data, centroids):
     return affectations
 
 
-def _optim_centroids(data, affectations):
+def _optim_centroids(data, memberships):
     # TODO: np.sum(affectations, axis=0) sometimes contains 0, bug appearing when there is too many clusters and one do
     #  not contains any example
-    return (np.dot(data.T, affectations) / np.sum(affectations, axis=0)).T
-
-
-def _handle_empty_clusters(data, affectations, centroids, strategy):
-    if strategy == "nothing":
-        pass
-    elif strategy == "random_example":
-        pass
-    elif strategy == "furthest_example_from_its_centroid":
-        pass
+    return (np.dot(data.T, memberships) / np.sum(memberships, axis=0)).T
 
 
 if __name__ == '__main__':

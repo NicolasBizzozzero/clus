@@ -1,15 +1,16 @@
 import time
 
 import numpy as np
+from clustering.src.handle_empty_clusters import handle_empty_clusters
 from scipy.sparse import csr_matrix
 
-from clustering.src.initialization import int_to_clusterinitialization_idx_function
+from clustering.src.initialization import cluster_initialization
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
 def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_size, eps, max_iter,
-                               initialization_method):
+                               initialization_method, empty_clusters_method):
     assert (len(data.shape) == 2) and data.shape[0] == data.shape[1], "The distance matrix is not squared"
     assert initialization_method in (2, 3, 4), "Your initialization method must be based on example selection"
 
@@ -19,8 +20,7 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_si
         membership_subset_size = data.shape[0] // components
 
     # Initialisation
-    initialization_method = int_to_clusterinitialization_idx_function(initialization_method)
-    medoids_idx = initialization_method(data, components)
+    medoids_idx = cluster_initialization(data, components, initialization_method, need_idx=True)
 
     memberships = None
     current_iter = 0
@@ -33,6 +33,8 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_si
 
         medoids_idx_old = medoids_idx
         memberships = _compute_memberships(data, medoids_idx, fuzzifier)
+        handle_empty_clusters(data, medoids_idx, memberships, strategy=empty_clusters_method)
+
         top_memberships_mask = _compute_top_membership_subset(memberships, membership_subset_size)
         medoids_idx = _compute_medoids(data, memberships, fuzzifier, top_memberships_mask)
 

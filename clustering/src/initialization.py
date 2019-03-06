@@ -3,12 +3,6 @@ import enum
 import numpy as np
 
 
-__all__ = [
-    "int_to_clusterinitialization_function", "int_to_clusterinitialization_idx_function",
-    "random_uniform", "random_gaussian", "random_choice"
-]
-
-
 @enum.unique
 class ClusterInitialization(enum.IntEnum):
     UNKNOWN = -1
@@ -24,6 +18,14 @@ class UnknownClusterInitialization(Exception):
         Exception.__init__(self, "The cluster initialization method : \"{method_name}\" doesn't exists".format(
             method_name=method_name
         ))
+
+
+def cluster_initialization(data, components, strategy: int, need_idx: bool):
+    if need_idx:
+        strategy = int_to_clusterinitialization_idx_function(strategy)
+    else:
+        strategy = int_to_clusterinitialization_function(strategy)
+    return strategy(data, components)
 
 
 def random_uniform(data, components):

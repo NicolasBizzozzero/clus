@@ -59,6 +59,11 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
                     "3 - random_choice: Randomly choose clusters from the dataset\n"
                     "4 - central_dissimilar_medoids: TODO\n"
                     "5 - central_dissimilar_random_medoids: TODO"))
+@click.option("--empty-clusters-method", type=int, default=1,
+              help=("Method used to handle empty clusters. The following method are available :\n"
+                    "1 - nothing: Do absolutely nothing\n"
+                    "2 - random_example: Draw a random example and fully assign it to the cluster\n"
+                    "3 - furthest_example_from_its_centroid: TODO"))
 @click.option("-c", "-k", "--components", type=int, default=100,
               help="Number of clustering components")
 @click.option("--eps", type=float, default=0.001,
@@ -84,8 +89,8 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
                     "-components PCA is applied to the data before vizualisin"
                     "g."))
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
-         components, eps, max_iter, fuzzifier, membership_subset_size, seed,
-         normalize, vizualise, vizualise_3d):
+         empty_clusters_method, components, eps, max_iter, fuzzifier,
+         membership_subset_size, seed, normalize, vizualise, vizualise_3d):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -133,7 +138,8 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
         max_iter=max_iter,
         fuzzifier=fuzzifier,
         membership_subset_size=membership_subset_size,
-        initialization_method=initialization_method
+        initialization_method=initialization_method,
+        empty_clusters_method=empty_clusters_method
     )
     print("")
 

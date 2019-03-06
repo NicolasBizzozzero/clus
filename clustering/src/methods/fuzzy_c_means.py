@@ -1,19 +1,19 @@
 import time
 
 import numpy as np
+from clustering.src.handle_empty_clusters import handle_empty_clusters
 from scipy.spatial.distance import cdist
 
-from clustering.src.initialization import int_to_clusterinitialization_function
+from clustering.src.initialization import cluster_initialization
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_method):
+def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_method, empty_clusters_method):
     assert fuzzifier > 1
 
     # Initialisation
-    initialization_method = int_to_clusterinitialization_function(initialization_method)
-    centroids = initialization_method(data, components)
+    centroids = cluster_initialization(data, components, initialization_method, need_idx=False)
 
     memberships = None
     current_iter = 0
@@ -22,6 +22,8 @@ def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_met
     while (current_iter <= max_iter) and \
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
         memberships = _compute_memberships(data, centroids, fuzzifier)
+        handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
+
         centroids = _compute_centroids(data, memberships, fuzzifier)
 
         loss = _compute_loss(data, memberships, centroids, fuzzifier)

@@ -2,20 +2,20 @@ import sys
 import time
 
 import numpy as np
+from clustering.src.handle_empty_clusters import handle_empty_clusters
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clustering.src.initialization import int_to_clusterinitialization_idx_function
+from clustering.src.initialization import cluster_initialization
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter, initialization_method):
+def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter, initialization_method, empty_clusters_method):
     assert (len(data.shape) == 2) and data.shape[0] == data.shape[1], "The distance matrix is not squared"
     assert initialization_method in (2, 3, 4), "Your initialization method must be based on example selection"
 
     # Initialisation
-    initialization_method = int_to_clusterinitialization_idx_function(initialization_method)
-    medoids_idx = initialization_method(data, components)
+    medoids_idx = cluster_initialization(data, components, initialization_method, need_idx=True)
 
     memberships = None
     current_iter = 0
@@ -27,6 +27,8 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter, initialization_m
             ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
         medoids_idx_old = medoids_idx
         memberships = _compute_memberships(data, medoids_idx, fuzzifier)
+        handle_empty_clusters(data, medoids_idx, memberships, strategy=empty_clusters_method)
+
         medoids_idx = _compute_medoids(data, memberships, fuzzifier)
 
         loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)

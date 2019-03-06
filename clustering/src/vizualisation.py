@@ -9,7 +9,7 @@ from sklearn.manifold import TSNE
 
 
 _TITLE_WRAP_SIZE = 60
-_SIZE_EXAMPLES = 5
+_SIZE_EXAMPLES = 3
 _SIZE_CLUSTERS_CENTER = 20
 _CMAP_EXAMPLES = "jet"  # "Accent"
 _COLOR_CLUSTERS_CENTER = "black"
