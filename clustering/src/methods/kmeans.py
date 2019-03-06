@@ -2,23 +2,17 @@ import time
 
 import numpy as np
 
+from clustering.src.initialization import int_to_clusterinitialization_function
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def kmeans(data, components, eps, max_iter):
+def kmeans(data, components, eps, max_iter, initialization_method):
     # Initialisation
-    nb_examples, dim = data.shape
-    centroids = np.random.uniform(low=data.min(axis=0), high=data.max(axis=0),
-                                  size=(components, dim)).astype(np.float64)
-    print(centroids)
-    centroids = np.random.rand(components, dim).astype(np.float64)
-    print(centroids)
-    centroids = np.random.normal(loc=data.mean(axis=0), scale=data.std(axis=0),
-                                 size=(components, dim)).astype(np.float64)
-    print(centroids)
-    affectations = None
+    initialization_method = int_to_clusterinitialization_function(initialization_method)
+    centroids = initialization_method(data, components)
 
+    affectations = None
     current_iter = 0
     losses = []
     start_time = time.time()
@@ -70,7 +64,6 @@ def _optim_affectations(data, centroids):
 def _optim_centroids(data, affectations):
     # TODO: np.sum(affectations, axis=0) sometimes contains 0, bug appearing when there is too many clusters and one do
     #  not contains any example
-    print(np.sum(affectations, axis=0))
     return (np.dot(data.T, affectations) / np.sum(affectations, axis=0)).T
 
 

@@ -3,18 +3,19 @@ import time
 import numpy as np
 from scipy.spatial.distance import cdist
 
+from clustering.src.initialization import int_to_clusterinitialization_function
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def fuzzy_c_means(data, components, fuzzifier, eps, max_iter):
+def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_method):
     assert fuzzifier > 1
 
     # Initialisation
-    nb_examples, dim = data.shape
-    centroids = np.random.rand(components, dim).astype(np.float64)
-    memberships = np.zeros(shape=(nb_examples, components), dtype=np.float64)
+    initialization_method = int_to_clusterinitialization_function(initialization_method)
+    centroids = initialization_method(data, components)
 
+    memberships = None
     current_iter = 0
     losses = []
     start_time = time.time()

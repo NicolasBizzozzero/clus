@@ -51,6 +51,14 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
                     "hm. If you set this flag while not having a header, the first example of the dataset will be ignor"
                     "ed"))
 # Clustering options
+@click.option("--initialization-method", type=int, default=2,
+              help=("Method used to initialize the clusters' center. The following method are available :\n"
+                    "1 - random: Draw clusters from a uniform distribution between the min and the max of each attribu"
+                    "te\n"
+                    "2 - random_gaussian: Draw clusters from a gaussian distribution\n"
+                    "3 - random_choice: Randomly choose clusters from the dataset\n"
+                    "4 - central_dissimilar_medoids: TODO\n"
+                    "5 - central_dissimilar_random_medoids: TODO"))
 @click.option("-c", "-k", "--components", type=int, default=100,
               help="Number of clustering components")
 @click.option("--eps", type=float, default=0.001,
@@ -75,9 +83,9 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
                     "sult in 3D. If your data's dimension is more than 3, a 3"
                     "-components PCA is applied to the data before vizualisin"
                     "g."))
-def main(dataset, clustering_algorithm, delimiter, header, components, eps,
-         max_iter, fuzzifier, membership_subset_size, seed, normalize,
-         vizualise, vizualise_3d):
+def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
+         components, eps, max_iter, fuzzifier, membership_subset_size, seed,
+         normalize, vizualise, vizualise_3d):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -124,7 +132,8 @@ def main(dataset, clustering_algorithm, delimiter, header, components, eps,
         eps=eps,
         max_iter=max_iter,
         fuzzifier=fuzzifier,
-        membership_subset_size=membership_subset_size
+        membership_subset_size=membership_subset_size,
+        initialization_method=initialization_method
     )
     print("")
 

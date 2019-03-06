@@ -4,19 +4,20 @@ import time
 import numpy as np
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
+from clustering.src.initialization import int_to_clusterinitialization_idx_function
 from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
-    # The data matrix must be a square matrix
-    assert (len(data.shape) == 2) and data.shape[0] == data.shape[1]
+def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter, initialization_method):
+    assert (len(data.shape) == 2) and data.shape[0] == data.shape[1], "The distance matrix is not squared"
+    assert initialization_method in (2, 3, 4), "Your initialization method must be based on example selection"
 
     # Initialisation
-    nb_examples, dim = data.shape
-    memberships = np.zeros(shape=(nb_examples, components), dtype=np.float64)
-    medoids_idx = _init_medoids(data, nb_examples, components, selection_method="random")
+    initialization_method = int_to_clusterinitialization_idx_function(initialization_method)
+    medoids_idx = initialization_method(data, components)
 
+    memberships = None
     current_iter = 0
     losses = []
     medoids_idx_old = None
@@ -34,17 +35,6 @@ def fuzzy_c_medoids(data, components, fuzzifier, eps, max_iter):
         current_iter += 1
         print_progression(iteration=current_iter, loss=loss, start_time=start_time)
     return memberships, data[medoids_idx, :], np.array(losses)
-
-
-def _init_medoids(data, nb_examples, components, selection_method="random"):
-    if selection_method == "random":
-        return np.random.choice(range(nb_examples), size=components)
-    elif selection_method == "most_dissimilar":
-        return None
-    elif selection_method == "most_dissimilar_randomized":
-        return None
-    else:
-        return None
 
 
 def _compute_memberships(data, medoids_idx, fuzzifier):
