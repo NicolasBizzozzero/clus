@@ -10,7 +10,8 @@ from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def fuzzy_c_medoids(distance_matrix, components, fuzzifier, eps, max_iter, initialization_method, empty_clusters_method):
+def fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, eps, max_iter, initialization_method,
+                    empty_clusters_method):
     assert (len(distance_matrix.shape) == 2) and distance_matrix.shape[0] == distance_matrix.shape[1], "The distance matrix is not squared"
     assert initialization_method in (2, 3, 4), "Your initialization method must be based on example selection"
 
@@ -36,7 +37,7 @@ def fuzzy_c_medoids(distance_matrix, components, fuzzifier, eps, max_iter, initi
 
         current_iter += 1
         print_progression(iteration=current_iter, loss=loss, start_time=start_time)
-    return memberships, distance_matrix[medoids_idx, :], np.array(losses)
+    return memberships, data[medoids_idx, :], np.array(losses)
 
 
 def _compute_memberships(data, medoids_idx, fuzzifier):

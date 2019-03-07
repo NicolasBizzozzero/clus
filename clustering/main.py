@@ -1,34 +1,33 @@
 # TODO: Comment gérer les 0 (petit epsilon partout ou juste sur les 0) ou même supprimer les doublons
-# MJ a dit de tester voir si j'obtiens les memes resultats (a epsilon pres) en ajoutant epsilon ou alors en mettant
-# à 0 les valeurs De u_ij pour des exemples qui sont égaux
-# Ne surtout pas supprimer les doublons. Un cluster avec plein d'exemples au même endroit aura plus de force qu'un
-# cluster avec un seul exemple.
+ # MJ a dit de tester voir si j'obtiens les memes resultats (a epsilon pres) en ajoutant epsilon ou alors en mettant
+ # à 0 les valeurs De u_ij pour des exemples qui sont égaux
+ # Ne surtout pas supprimer les doublons. Un cluster avec plein d'exemples au même endroit aura plus de force qu'un
+ # cluster avec un seul exemple.
 # TODO: Est-ce que je normalise mes données ?
-# Ne pas faire de normalisation centrée-réduite sur un même attribut à cause des outliers
-# On peut cependant faire une normalisation entre les attributs de manière à ce qu'ils soient dans le même
-# intervalle de valeurs, et qu'un attribut ne soit pas plus fort qu'un autre.
+ # Ne pas faire de normalisation centrée-réduite sur un même attribut à cause des outliers
+ # On peut cependant faire une normalisation entre les attributs de manière à ce qu'ils soient dans le même
+ # intervalle de valeurs, et qu'un attribut ne soit pas plus fort qu'un autre.
 # TODO: La matrice de dissimilarité, on la fournie ou je dois la calculer ? La dissimilarité est symétrique ?
-# La dissimilarité n'est pas forcement symétrique, mais on peut suppose qu'elle l'est pour pouvoir simplifier des
-# calculs.
+ # La dissimilarité n'est pas forcement symétrique, mais on peut suppose qu'elle l'est pour pouvoir simplifier des
+ # calculs.
 
 import ntpath
+import os
+import sys
 
 import click
 
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clustering.src.methods.methods import get_clustering_function, ClusteringMethod, clusteringmethod_to_str, \
-    str_to_clusteringmethod
+from clustering.src.methods.methods import get_clustering_function, use_distance_matrix
 from clustering.src.utils import set_manual_seed, normalization_mean_std
 
 
 # TODO: Lister tous les algos disponibles et leurs acronymes
 # TODO: Dans chaque option, lister pour quels acronymes elles sont disponibles (ou s'ils le sont pour tous sauf ...)
-from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clustering_3d
+from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
 
 @click.command()
@@ -74,33 +73,36 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
               help="Fuzzification exponent applied to the membership degrees")
 @click.option("-p", "--membership-subset-size", type=int, default=None,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
-# Vizualisation options
-@click.option("--vizualise", is_flag=True,
-              help=("Set this flag if you want to vizualise the clustering re"
+# Visualisation options
+@click.option("--visualise", is_flag=True,
+              help=("Set this flag if you want to visualise the clustering re"
                     "sult. If your data's dimension is more than 2, a 2-compo"
-                    "nents PCA is applied to the data before vizualising."))
-@click.option("--vizualise-3d", is_flag=True,
-              help=("Set this flag if you want to vizualise the clustering re"
+                    "nents PCA is applied to the data before visualising."))
+@click.option("--visualise-3d", is_flag=True,
+              help=("Set this flag if you want to visualise the clustering re"
                     "sult in 3D. If your data's dimension is more than 3, a 3"
-                    "-components PCA is applied to the data before vizualisin"
+                    "-components PCA is applied to the data before visualisin"
                     "g."))
 @click.option("--save", is_flag=True,
-              help=("Set this flag if you want to save the vizualisation of the clustering re"
+              help=("Set this flag if you want to save the visualisation of the clustering re"
                     "sult. If your data's dimension is more than 2, a 2-compo"
-                    "nents PCA is applied to the data before vizualising."))
+                    "nents PCA is applied to the data before visualising."))
 @click.option("--save-3d", is_flag=True,
-              help=("Set this flag if you want to save the vizualisation of the clustering re"
+              help=("Set this flag if you want to save the visualisation of the clustering re"
                     "sult in 3D. If your data's dimension is more than 3, a 3"
-                    "-components PCA is applied to the data before vizualisin"
+                    "-components PCA is applied to the data before visualisin"
                     "g."))
 # Miscellaneous options
 @click.option("--seed", type=int, default=None,
               help="Random seed to set")
 @click.option("--normalize", is_flag=True,
               help="Set this flag if you want to normalize your data to zero mean and unit variance")
+@click.option("--quiet", is_flag=True,
+              help="Set this flag if you want to have absolutely no output during the execution")
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier,
-         membership_subset_size, vizualise, vizualise_3d, save, save_3d, delattrseed, normalize):
+         membership_subset_size, visualise, visualise_3d, save, save_3d, seed, normalize,
+         quiet):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -114,10 +116,15 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     * linearized_fuzzy_c_medoids_select (or l_fcmed_select)
     * datastream_linearized_fuzzy_c_medoids_select (or ds_lfcmed_select)
     """
-    print("Starting clustering with the following parameters :", locals())
+    parameters = locals()
+
+    if quiet:
+        sys.stdout = open(os.devnull, 'w')
 
     if seed is not None:
         set_manual_seed(seed)
+
+    print("Starting clustering with the following parameters :", parameters)
 
     # Load the clustering algorithm
     clustering_function = get_clustering_function(clustering_algorithm)
@@ -156,52 +163,62 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     )
     print("")
 
-    if vizualise:
-        vizualise_clustering_2d(data=data, clusters_center=clusters_center,
+    if visualise:
+        visualise_clustering_2d(data=data,
+                                distance_matrix=distance_matrix,
+                                clusters_center=clusters_center,
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist())
 
-    if vizualise_3d:
-        vizualise_clustering_3d(data=data, clusters_center=clusters_center,
+    if visualise_3d:
+        visualise_clustering_3d(data=data,
+                                distance_matrix=distance_matrix,
+                                clusters_center=clusters_center,
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist())
     if save:
-        vizualise_clustering_2d(data=data, clusters_center=clusters_center,
+        visualise_clustering_2d(data=data,
+                                clusters_center=clusters_center,
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
-                                                                           header=0).columns.tolist(),
+                                                                           header=0).columns.tolist(    ),
                                 show=False,
-                                saving_path=_compute_saving_path(dataset_name,
+                                saving_path=_compute_saving_path(dataset,
                                                                  clustering_algorithm,
                                                                  components,
-                                                                 seed))
+                                                                 seed,
+                                                                 dir_dest="results"))
 
     if save_3d:
-        vizualise_clustering_3d(data=data, clusters_center=clusters_center,
+        visualise_clustering_3d(data=data,
+                                clusters_center=clusters_center,
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
                                 show=True,
-                                saving_path=_compute_saving_path(dataset_name,
+                                saving_path=_compute_saving_path(dataset,
                                                                  clustering_algorithm,
                                                                  components,
-                                                                 seed))
+                                                                 seed,
+                                                                 dir_dest="results"))
 
 
-def _compute_saving_path(dataset_name, clustering_algorithm, components,
-                         seed) -> str:
-    return "{}_{}_{}_{}.png".format(
-        dataset_name,
+def _compute_saving_path(dataset, clustering_algorithm, components,
+                         seed, dir_dest) -> str:
+    os.makedirs(dir_dest, exist_ok=True)
+
+    return os.path.join(dir_dest, "{}_{}_{}_{}.png".format(
+        os.path.splitext(ntpath.basename(dataset))[0],
         clustering_algorithm,
         components,
         seed
-    )
+    ))
 
 
 if __name__ == '__main__':

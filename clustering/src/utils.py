@@ -8,6 +8,8 @@ import numpy as np
 
 
 # Used for stocking time delta between each iterations
+from sklearn.preprocessing import MinMaxScaler
+
 _TIME_LAST_ITERATION = None
 _TIME_DELTAS = []
 
@@ -111,6 +113,17 @@ def normalization_mean_std(array):
     * https://stackoverflow.com/a/31153050
     """
     return (array - array.mean(axis=0)) / array.std(axis=0)
+
+
+def normalize_range(array, floor=0, ceil=1):
+    """ Normalise an array between a given range.
+    :param array: The array to normalize. Also works for pandas.DataFrame with
+    numeric values.
+    :param floor: The minimal value of the normalized range.
+    :param ceil: The maximal value of the normalized range.
+    """
+    scaler = MinMaxScaler(feature_range=(floor, ceil), copy=True)
+    return scaler.fit_transform(array)
 
 
 if __name__ == '__main__':
