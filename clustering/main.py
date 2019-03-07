@@ -74,11 +74,7 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
               help="Fuzzification exponent applied to the membership degrees")
 @click.option("-p", "--membership-subset-size", type=int, default=None,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
-# Miscellaneous options
-@click.option("--seed", type=int, default=None,
-              help="Random seed to set")
-@click.option("--normalize", is_flag=True,
-              help="Set this flag if you want to normalize your data to zero mean and unit variance")
+# Vizualisation options
 @click.option("--vizualise", is_flag=True,
               help=("Set this flag if you want to vizualise the clustering re"
                     "sult. If your data's dimension is more than 2, a 2-compo"
@@ -88,9 +84,23 @@ from clustering.src.vizualisation import vizualise_clustering_2d, vizualise_clus
                     "sult in 3D. If your data's dimension is more than 3, a 3"
                     "-components PCA is applied to the data before vizualisin"
                     "g."))
+@click.option("--save", is_flag=True,
+              help=("Set this flag if you want to save the vizualisation of the clustering re"
+                    "sult. If your data's dimension is more than 2, a 2-compo"
+                    "nents PCA is applied to the data before vizualising."))
+@click.option("--save-3d", is_flag=True,
+              help=("Set this flag if you want to save the vizualisation of the clustering re"
+                    "sult in 3D. If your data's dimension is more than 3, a 3"
+                    "-components PCA is applied to the data before vizualisin"
+                    "g."))
+# Miscellaneous options
+@click.option("--seed", type=int, default=None,
+              help="Random seed to set")
+@click.option("--normalize", is_flag=True,
+              help="Set this flag if you want to normalize your data to zero mean and unit variance")
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier,
-         membership_subset_size, seed, normalize, vizualise, vizualise_3d):
+         membership_subset_size, vizualise, vizualise_3d, save, save_3d, delattrseed, normalize):
     """ Apply a clustering algorithm to a CSV dataset.
 
     \b
@@ -122,17 +132,20 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
-    if str_to_clusteringmethod(clustering_algorithm) in (
-            ClusteringMethod.FUZZY_C_MEDOIDS,
-            ClusteringMethod.LINEARIZED_FUZZY_C_MEDOIDS):
+    distance_matrix = None
+    if use_distance_matrix(clustering_algorithm):
         if data.shape[0] != data.shape[1]:
             print("The data need to be a pairwise distance matrix for the {} clustering "
                   "method.".format(clustering_algorithm), "Applying euclidean distance.")
-            data = DistanceMetric.get_metric('euclidean').pairwise(data)
+            distance_matrix = DistanceMetric.get_metric(
+                'euclidean').pairwise(data)
+        else:
+            distance_matrix = data
 
     # Perform the clustering method
     memberships, clusters_center, losses = clustering_function(
-        data,
+        data=data,
+        distance_matrix=distance_matrix,
         components=components,
         eps=eps,
         max_iter=max_iter,
@@ -156,6 +169,39 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist())
+    if save:
+        vizualise_clustering_2d(data=data, clusters_center=clusters_center,
+                                clustering_method=clustering_algorithm,
+                                dataset_name=ntpath.basename(dataset),
+                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                           header=0).columns.tolist(),
+                                show=False,
+                                saving_path=_compute_saving_path(dataset_name,
+                                                                 clustering_algorithm,
+                                                                 components,
+                                                                 seed))
+
+    if save_3d:
+        vizualise_clustering_3d(data=data, clusters_center=clusters_center,
+                                clustering_method=clustering_algorithm,
+                                dataset_name=ntpath.basename(dataset),
+                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                           header=0).columns.tolist(),
+                                show=True,
+                                saving_path=_compute_saving_path(dataset_name,
+                                                                 clustering_algorithm,
+                                                                 components,
+                                                                 seed))
+
+
+def _compute_saving_path(dataset_name, clustering_algorithm, components,
+                         seed) -> str:
+    return "{}_{}_{}_{}.png".format(
+        dataset_name,
+        clustering_algorithm,
+        components,
+        seed
+    )
 
 
 if __name__ == '__main__':

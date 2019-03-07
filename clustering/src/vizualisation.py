@@ -21,12 +21,12 @@ _AZIMUTH = 134
 _DISTANCE_3D = 12
 
 
-def vizualise_clustering_2d(data, clusters_center, clustering_method, dataset_name, header=None,
-                            title_wrap_size=_TITLE_WRAP_SIZE):
+def vizualise_clustering_2d(data, clusters_center, clustering_method, dataset_name, header=None, show=True, saving_path=None):
     assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-vizualisation"
 
     # Apply a 2-components PCA if the data has more than 2 dimensions
-    data, clusters_center, applied_pca = _apply_pca_if_too_many_dimensions(data, clusters_center, n_components=2)
+    data, clusters_center, applied_pca = _apply_pca_if_too_many_dimensions(
+        data, clusters_center, n_components=2)
 
     # Transform the header if it exists or if a PCA has been applied
     if applied_pca:
@@ -34,7 +34,8 @@ def vizualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     elif header is None:
         header = ["dimension_1", "dimension_2"]
 
-    closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    closest_cluster = np.linalg.norm(
+        data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
 
     # Plot the vizualisation
     fig, ax = plt.subplots()
@@ -42,7 +43,8 @@ def vizualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     # Set the most diverse colormap possible
     # TODO: Not working with scatter (keep the code anyway), try this solution : https://stackoverflow.com/questions/36801717/using-matplotlibs-color-cycle-as-a-colormap
     cm = plt.get_cmap(_CMAP_EXAMPLES)
-    ax.set_prop_cycle(cmap=[cm(i / clusters_center.shape[0]) for i in range(clusters_center.shape[0])])
+    ax.set_prop_cycle(cmap=[cm(i / clusters_center.shape[0])
+                            for i in range(clusters_center.shape[0])])
 
     plt.scatter(data[:, 0], data[:, 1], c=closest_cluster, s=_SIZE_EXAMPLES,
                 marker=_MARKER_EXAMPLES)
@@ -51,17 +53,22 @@ def vizualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
 
     plt.xlabel(header[0])
     plt.ylabel(header[1])
-    title = _compute_title(clusters_center, clustering_method, dataset_name, applied_pca, n_components_pca=2)
-    plt.title("\n".join(wrap(title, title_wrap_size)))
-    plt.show()
+    title = _compute_title(clusters_center, clustering_method,
+                           dataset_name, applied_pca, n_components_pca=2)
+    plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
+
+    if saving_path is not None:
+        plt.savefig(saving_path)
+    if show:
+        plt.show()
 
 
-def vizualise_clustering_3d(data, clusters_center, clustering_method, dataset_name, header=None,
-                            title_wrap_size=_TITLE_WRAP_SIZE):
+def vizualise_clustering_3d(data, clusters_center, clustering_method, dataset_name, header=None, show=True, saving_path=None):
     assert data.shape[-1] >= 3, "Data must have at least 3 dimensions for a 3D-vizualisation"
 
     # Apply a 3-components PCA if the data has more than 3 dimensions
-    data, clusters_center, applied_pca = _apply_pca_if_too_many_dimensions(data, clusters_center, n_components=3)
+    data, clusters_center, applied_pca = _apply_pca_if_too_many_dimensions(
+        data, clusters_center, n_components=3)
 
     # Transform the header if it exists or if a PCA has been applied
     if applied_pca:
@@ -69,13 +76,15 @@ def vizualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
     elif header is None:
         header = ["dimension_1", "dimension_2", "dimension_3"]
 
-    closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    closest_cluster = np.linalg.norm(
+        data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
 
     # Plot the vizualisation
     fig = plt.figure()
     ax = Axes3D(fig, rect=[0, 0, 1, 1], elev=_ELEVATION, azim=_AZIMUTH)
 
-    ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=closest_cluster, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES)
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2],
+               c=closest_cluster, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES)
     ax.scatter(clusters_center[:, 0], clusters_center[:, 1], clusters_center[:, 2], c=_COLOR_CLUSTERS_CENTER,
                s=_SIZE_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER, marker=_MARKER_CLUSTERS_CENTER)
 
@@ -87,9 +96,14 @@ def vizualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
     ax.set_zlabel(header[2])
     ax.dist = _DISTANCE_3D
 
-    title = _compute_title(clusters_center, clustering_method, dataset_name, applied_pca, n_components_pca=3)
-    ax.set_title("\n".join(wrap(title, title_wrap_size)))
-    plt.show()
+    title = _compute_title(clusters_center, clustering_method,
+                           dataset_name, applied_pca, n_components_pca=3)
+    ax.set_title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
+
+    if saving_path is not None:
+        plt.savefig(saving_path)
+    if show:
+        plt.show()
 
 
 def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):

@@ -9,18 +9,18 @@ from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_size, eps, max_iter,
+def linearized_fuzzy_c_medoids(distance_matrix, components, fuzzifier, membership_subset_size, eps, max_iter,
                                initialization_method, empty_clusters_method):
-    assert (len(data.shape) == 2) and data.shape[0] == data.shape[1], "The distance matrix is not squared"
+    assert (len(distance_matrix.shape) == 2) and distance_matrix.shape[0] == distance_matrix.shape[1], "The distance matrix is not squared"
     assert initialization_method in (2, 3, 4), "Your initialization method must be based on example selection"
 
     # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
     # in a cluster
     if membership_subset_size is None:
-        membership_subset_size = data.shape[0] // components
+        membership_subset_size = distance_matrix.shape[0] // components
 
     # Initialisation
-    medoids_idx = cluster_initialization(data, components, initialization_method, need_idx=True)
+    medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
     memberships = None
     current_iter = 0
@@ -32,18 +32,18 @@ def linearized_fuzzy_c_medoids(data, components, fuzzifier, membership_subset_si
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
 
         medoids_idx_old = medoids_idx
-        memberships = _compute_memberships(data, medoids_idx, fuzzifier)
-        handle_empty_clusters(data, medoids_idx, memberships, strategy=empty_clusters_method)
+        memberships = _compute_memberships(distance_matrix, medoids_idx, fuzzifier)
+        handle_empty_clusters(distance_matrix, medoids_idx, memberships, strategy=empty_clusters_method)
 
         top_memberships_mask = _compute_top_membership_subset(memberships, membership_subset_size)
-        medoids_idx = _compute_medoids(data, memberships, fuzzifier, top_memberships_mask)
+        medoids_idx = _compute_medoids(distance_matrix, memberships, fuzzifier, top_memberships_mask)
 
-        loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
+        loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
 
         current_iter += 1
         print_progression(iteration=current_iter, loss=loss, start_time=start_time)
-    return memberships, data[medoids_idx, :], np.array(losses)
+    return memberships, distance_matrix[medoids_idx, :], np.array(losses)
 
 
 def _compute_memberships(data, medoids_idx, fuzzifier):

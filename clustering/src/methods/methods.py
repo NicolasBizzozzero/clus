@@ -10,8 +10,10 @@ ALIAS_CM_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
 ALIAS_CM_POSSIBILISTIC_C_MEANS = ("possibilistic_c_means", "pcm")
 ALIAS_CM_FUZZY_C_MEDOIDS = ("fuzzy_c_medoids", "fcmdd")
 ALIAS_CM_HARD_C_MEDOIDS = ("hard_c_medoids", "hcmdd")
-ALIAS_CM_LINEARIZED_FUZZY_C_MEDOIDS = ("linearized_fuzzy_c_medoids", "lfcmdd", "l_fc_med")
-ALIAS_CM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = ("linearized_fuzzy_c_medoids_select", "l_fcmed_select")
+ALIAS_CM_LINEARIZED_FUZZY_C_MEDOIDS = (
+    "linearized_fuzzy_c_medoids", "lfcmdd", "l_fc_med")
+ALIAS_CM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = (
+    "linearized_fuzzy_c_medoids_select", "l_fcmed_select")
 ALIAS_CM_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = ("datastream_linearized_fuzzy_c_medoids_select",
                                                          "ds_lfcmed_select")
 
@@ -34,6 +36,18 @@ class UnknownClusteringMethods(Exception):
         Exception.__init__(self, "The clustering method : \"{method_name}\" doesn't exists".format(
             method_name=method_name
         ))
+
+
+def use_distance_matrix(clustering_method) -> bool:
+    if isinstance(clustering_method, str):
+        clustering_method = str_to_clusteringmethod(clustering_method)
+    return clustering_method in (
+        ClusteringMethod.FUZZY_C_MEDOIDS,
+        ClusteringMethod.HARD_C_MEDOIDS,
+        ClusteringMethod.LINEARIZED_FUZZY_C_MEDOIDS,
+        ClusteringMethod.LINEARIZED_FUZZY_C_MEDOIDS_SELECT,
+        ClusteringMethod.DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT
+    )
 
 
 def get_clustering_function(string: str) -> Callable:
