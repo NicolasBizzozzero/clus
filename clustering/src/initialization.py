@@ -6,11 +6,11 @@ import numpy as np
 @enum.unique
 class ClusterInitialization(enum.IntEnum):
     UNKNOWN = -1
-    RANDOM_UNIFORM = 0
-    RANDOM_GAUSSIAN = 1
-    RANDOM_CHOICE = 2
-    CENTRAL_DISSIMILAR_MEDOIDS = 3
-    CENTRAL_DISSIMILAR_RANDOM_MEDOIDS = 4
+    RANDOM_UNIFORM = 1
+    RANDOM_GAUSSIAN = 2
+    RANDOM_CHOICE = 3
+    CENTRAL_DISSIMILAR_MEDOIDS = 4
+    CENTRAL_DISSIMILAR_RANDOM_MEDOIDS = 5
 
 
 class UnknownClusterInitialization(Exception):
@@ -42,7 +42,8 @@ def random_choice(data, components):
     assert data.shape[0] >= components, ("Cannot take a number of components larger than the number of samples with thi"
                                          "s initialization method")
 
-    idx = np.random.choice(np.arange(data.shape[0]), size=components, replace=False)
+    idx = np.random.choice(
+        np.arange(data.shape[0]), size=components, replace=False)
     return data[idx, :]
 
 

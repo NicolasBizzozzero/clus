@@ -6,9 +6,9 @@ import numpy as np
 @enum.unique
 class EmptyClustersMethod(enum.IntEnum):
     UNKNOWN = -1
-    NOTHING = 0
-    RANDOM_EXAMPLE = 1
-    FURTHEST_EXAMPLE_FROM_ITS_CENTROID = 2
+    NOTHING = 1
+    RANDOM_EXAMPLE = 2
+    FURTHEST_EXAMPLE_FROM_ITS_CENTROID = 3
 
 
 class UnknownEmptyClustersMethod(Exception):
@@ -30,7 +30,8 @@ def nothing(data, clusters_center, memberships, empty_clusters_idx):
 
 
 def random_example(data, clusters_center, memberships, empty_clusters_idx):
-    new_examples_idx = np.random.choice(np.arange(data.shape[0]), size=empty_clusters_idx.size, replace=False)
+    new_examples_idx = np.random.choice(
+        np.arange(data.shape[0]), size=empty_clusters_idx.size, replace=False)
     memberships[new_examples_idx, :] = 0
     memberships[new_examples_idx, empty_clusters_idx] = 1
 
