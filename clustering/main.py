@@ -165,7 +165,6 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
   if visualise:
     visualise_clustering_2d(data=data,
-                            distance_matrix=distance_matrix,
                             clusters_center=clusters_center,
                             clustering_method=clustering_algorithm,
                             dataset_name=ntpath.basename(dataset),
@@ -174,7 +173,6 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
   if visualise_3d:
     visualise_clustering_3d(data=data,
-                            distance_matrix=distance_matrix,
                             clusters_center=clusters_center,
                             clustering_method=clustering_algorithm,
                             dataset_name=ntpath.basename(dataset),
@@ -211,15 +209,15 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
 def _compute_saving_path(dataset, clustering_algorithm, components,
                          seed, dir_dest) -> str:
-  os.makedirs(dir_dest, exist_ok=True)
+    os.makedirs(dir_dest, exist_ok=True)
 
-  return os.path.join(dir_dest, "{}_{}_{}_{}.png".format(
+    return os.path.join(dir_dest, "{}_{}_{}_{}.png".format(
       os.path.splitext(ntpath.basename(dataset))[0],
       clustering_algorithm,
       components,
       seed
-  ))
+    ))
 
 
 if __name__ == '__main__':
-  pass
+    pass
