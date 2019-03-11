@@ -14,7 +14,7 @@ def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_met
     assert (centroids is None) or (centroids.shape == (components, data.shape[1]))
 
     # Initialisation
-    if centroids is not None:
+    if centroids is None:
         centroids = cluster_initialization(data, components, initialization_method, need_idx=False)
 
     memberships = None
@@ -39,34 +39,28 @@ def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_met
 
 
 def _compute_memberships(data, centroids, fuzzifier):
-    dist_data_centroids = np.linalg.norm(
-        data - centroids[:, np.newaxis], ord=2, axis=-1)
+    dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1)
 
     # If two examples are of equals distance, the computation will make divisions by zero. We add this
     # small coefficient to not divide by zero while keeping our distances as correct as possible
     try:
-        dist_data_centroids = np.fmax(
-            dist_data_centroids, np.finfo(data.dtype).eps)
+        dist_data_centroids = np.fmax(dist_data_centroids,
+                                      np.finfo(data.dtype).eps)
     except ValueError:
         # Data is of type int, adding float64 by default
-        dist_data_centroids = np.fmax(
-            dist_data_centroids, np.finfo(np.float64).eps)
+        dist_data_centroids = np.fmax(dist_data_centroids,
+                                      np.finfo(np.float64).eps)
 
     tmp = dist_data_centroids ** (-2. / (fuzzifier - 1))
     return (tmp / tmp.sum(axis=0, keepdims=True)).T
 
 
 def _compute_centroids(data, memberships, fuzzifier):
-    # TODO : Compare with old formula.
-    # TODO: Apply to other algorithms
     fuzzified_memberships = memberships ** fuzzifier
     sum_memberships_by_centroid = np.sum(fuzzified_memberships, axis=0)
     return np.divide(np.dot(data.T, fuzzified_memberships),
                      sum_memberships_by_centroid,
                      where=sum_memberships_by_centroid != 0).T
-
-    # return (np.dot(data.T, np.power(memberships, fuzzifier)) /
-    #         np.sum(np.power(memberships, fuzzifier), axis=0)).T
 
 
 def _compute_loss(data, affectations, centroids, fuzzifier):

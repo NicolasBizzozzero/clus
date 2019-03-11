@@ -15,7 +15,7 @@ def fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, eps, max_iter,
            ((medoids_idx.shape == (components, data.shape[1])) and (all(medoids_idx < data.shape[0])))
 
     # Initialisation
-    if medoids_idx is not None:
+    if medoids_idx is None:
         medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
     memberships = None

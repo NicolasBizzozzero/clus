@@ -22,7 +22,7 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, mem
         membership_subset_size = distance_matrix.shape[0] // components
 
     # Initialisation
-    if medoids_idx is not None:
+    if medoids_idx is None:
         medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
     memberships = None

@@ -12,7 +12,7 @@ def kmeans(data, components, eps, max_iter, initialization_method, empty_cluster
     assert (centroids is None) or (centroids.shape == (components, data.shape[1]))
 
     # Initialisation
-    if centroids is not None:
+    if centroids is None:
         centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
 
     memberships = None

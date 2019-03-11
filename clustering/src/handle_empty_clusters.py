@@ -19,6 +19,9 @@ class UnknownEmptyClustersMethod(Exception):
 
 
 def handle_empty_clusters(data, clusters_center, memberships, strategy):
+    if strategy == EmptyClustersMethod.NOTHING:
+        return
+
     empty_clusters_idx = np.where(np.sum(memberships, axis=0) == 0)[0]
     if empty_clusters_idx.size != 0:
         strategy = int_to_emptyclustermethod_function(strategy)
