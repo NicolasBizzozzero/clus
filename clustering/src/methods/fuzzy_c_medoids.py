@@ -50,6 +50,7 @@ def _compute_memberships(data, medoids_idx, fuzzifier):
     tmp = (1 / dist_data_medoids) ** (1 / (fuzzifier - 1))
     memberships = tmp / tmp.sum(axis=1, keepdims=True)
 
+    # TODO: Optimisable
     for index_medoid, medoid in enumerate(medoids_idx):
         memberships[medoid, :] = 0.
         memberships[medoid, index_medoid] = 1.

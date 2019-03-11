@@ -60,7 +60,6 @@ def _optim_memberships(data, centroids):
 def _optim_centroids(data, memberships):
     # We compute the division only to with non-empty. Indeed, a cluster may be
     # empty in some rare cases. See [2]
-    # TODO: Mettre reference [2]
     sum_memberships_by_centroid = np.sum(memberships, axis=0)
     return np.divide(np.dot(data.T, memberships),
                      sum_memberships_by_centroid,
