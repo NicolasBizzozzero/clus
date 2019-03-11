@@ -8,10 +8,12 @@ from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 @remove_unexpected_arguments
-def kmeans(data, components, eps, max_iter, initialization_method, empty_clusters_method):
+def kmeans(data, components, eps, max_iter, initialization_method, empty_clusters_method, centroids=None):
+    assert (centroids is None) or (centroids.shape == (components, data.shape[1]))
+
     # Initialisation
-    centroids = cluster_initialization(
-        data, components, strategy=initialization_method, need_idx=False)
+    if centroids is not None:
+        centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
 
     memberships = None
     current_iter = 0

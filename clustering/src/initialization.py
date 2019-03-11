@@ -42,8 +42,7 @@ def random_choice(data, components):
     assert data.shape[0] >= components, ("Cannot take a number of components larger than the number of samples with thi"
                                          "s initialization method")
 
-    idx = np.random.choice(
-        np.arange(data.shape[0]), size=components, replace=False)
+    idx = np.random.choice(np.arange(data.shape[0]), size=components, replace=False)
     return data[idx, :]
 
 
