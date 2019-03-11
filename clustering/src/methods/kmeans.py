@@ -58,9 +58,6 @@ def _optim_memberships(data, centroids):
 
 
 def _optim_centroids(data, memberships):
-    # TODO: np.sum(affectations, axis=0) sometimes contains 0, bug appearing when there is too many clusters and one do
-     #  not contains any example
-    # TODO: May be fixed, to test
     # We compute the division only to with non-empty. Indeed, a cluster may be
     # empty in some rare cases. See [2]
     # TODO: Mettre reference [2]
