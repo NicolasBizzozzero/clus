@@ -19,6 +19,7 @@ def kmeans(data, components, eps, max_iter, initialization_method, empty_cluster
     current_iter = 0
     losses = []
     start_time = time.time()
+    # TODO: Stopping criterion with abs or not ?
     while (current_iter <= max_iter) and \
           ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
         memberships = _optim_memberships(data, centroids)
@@ -31,8 +32,9 @@ def kmeans(data, components, eps, max_iter, initialization_method, empty_cluster
         losses.append(loss)
 
         current_iter += 1
-        print_progression(iteration=current_iter,
-                          loss=loss, start_time=start_time)
+        print("Iter :", current_iter, "Loss :", loss)
+        # print_progression(iteration=current_iter,
+        #                  loss=loss, start_time=start_time)
     return memberships, centroids, np.array(losses)
 
 
@@ -49,8 +51,7 @@ def _optim_memberships(data, centroids):
         data, 2) - np.expand_dims(centroids.T, 0), axis=1)
 
     # Set all binary affectations
-    mask_closest_centroid = (
-        np.arange(data.shape[0]), dist_data_centroids.argmin(axis=1))
+    mask_closest_centroid = (np.arange(data.shape[0]), dist_data_centroids.argmin(axis=1))
     affectations = np.zeros(shape=dist_data_centroids.shape, dtype=np.int32)
     affectations[mask_closest_centroid] = 1
 

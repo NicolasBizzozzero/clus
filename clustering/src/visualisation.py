@@ -37,8 +37,7 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     elif header is None:
         header = ["dimension_1", "dimension_2"]
 
-    closest_cluster = np.linalg.norm(
-        data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
 
     # Plot the visualisation
     fig, ax = plt.subplots()
