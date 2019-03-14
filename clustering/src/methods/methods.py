@@ -1,7 +1,8 @@
 import enum
 from typing import Callable
 
-from clustering.src.methods import kmeans, fuzzy_c_means
+from clustering.src.methods.kmeans import kmeans
+from clustering.src.methods.fuzzy_c_means import fuzzy_c_means
 from clustering.src.methods.fuzzy_c_medoids import fuzzy_c_medoids
 from clustering.src.methods.linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
 

@@ -23,7 +23,7 @@ _AZIMUTH = 134
 _DISTANCE_3D = 12
 
 
-def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_name, header=None,
+def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_name=None, header=None,
                             show=True, saving_path=None):
     assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
 
@@ -60,6 +60,7 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
 
     if saving_path is not None:
         plt.savefig(saving_path)
+        plt.close()
     if show:
         plt.show()
 
@@ -112,6 +113,13 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
         plt.show()
 
 
+def visualise_clustering_loss(losses, show=True):
+    plt.plot(losses)
+
+    if show:
+        plt.show()
+
+
 def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):
     applied_pca = False
     if data.shape[-1] > n_components:
@@ -136,13 +144,18 @@ def _apply_tsne_if_too_many_dimensions(data, clusters_center, n_components):
 
 
 def _compute_title(clusters_center, clustering_method, dataset_name, applied_pca, n_components_pca):
+    if dataset_name is None:
+        dataset_name = "."
+    else:
+        dataset_name = " applied to the \"{}\" dataset.".format(dataset_name)
+
     n_components = clusters_center.shape[0]
     if applied_pca:
-        return ("{}-components PCA applied to the results of the \"{}\" clustering algorithm with {} clusters into the "
-                "\"{}\" dataset").format(n_components_pca, clustering_method, n_components, dataset_name)
+        return ("{}-components PCA applied to the results of the \"{}\" clustering algorithm "
+                "with {} clusters{}").format(n_components_pca, clustering_method, n_components, dataset_name)
     else:
-        return ("Results of the \"{}\" clustering algorithm with {} clusters applied to the "
-                "\"{}\" dataset").format(clustering_method, n_components, dataset_name)
+        return ("Results of the \"{}\" clustering algorithm "
+                "with {} clusters{}").format(clustering_method, n_components, dataset_name)
 
 
 def _get_rainbow_color_cycle(clusters_center, borned_range=2000000):
