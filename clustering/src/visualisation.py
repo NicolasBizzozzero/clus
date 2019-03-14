@@ -43,8 +43,6 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     fig, ax = plt.subplots()
 
     # Set the most diverse colormap possible
-    # cm = plt.get_cmap(_CMAP_EXAMPLES)
-    # ax.set_prop_cycle(color=[cm(i / clusters_center.shape[0]) for i in range(clusters_center.shape[0])])
     c = _get_rainbow_color_cycle(closest_cluster)
 
     plt.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES,

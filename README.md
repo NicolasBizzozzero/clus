@@ -19,6 +19,8 @@
 * Lister tous les algos disponibles et leurs acronymes. Dans chaque option, lister pour quels acronymes elles sont disponibles (ou s'ils le sont pour tous sauf ...)
 * Arthur : les algos sont chiants à utiliser, trop de paramètres.
 * Peut etre passer le lien "cool dataset" en reference ?
+* S'appuyer sur ce post pour le tsne : https://stats.stackexchange.com/a/352138 (et voir cette reference : https://arxiv.org/abs/1712.09005)
+* Transformer les 4 appels à visualise en seulement 2, s'inspirer de cette réponse : https://stackoverflow.com/a/21884187
 
 
 ## References

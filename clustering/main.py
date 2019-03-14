@@ -1,5 +1,9 @@
 """ Apply a clustering algorithm to a CSV dataset.
 
+Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
+matrix (eg: with not the same number of examples and dimensions), the software will calculate it itself with a pairwise
+euclidean distance.
+
 \b
 The following clustering algorithms are supported :
 * kmeans
@@ -24,10 +28,13 @@ from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clustering.src.methods.methods import get_clustering_function, use_distance_matrix
 from clustering.src.utils import set_manual_seed, normalization_mean_std
-from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d, visualise_clustering_loss
+from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
 
-@click.command(help=__doc__)
+_MAX_TEXT_WIDTH = 120
+
+
+@click.command(help=__doc__, context_settings=dict(max_content_width=_MAX_TEXT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
@@ -41,11 +48,11 @@ from clustering.src.visualisation import visualise_clustering_2d, visualise_clus
 ]))
 # CSV parsing options
 @click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
-              help="Character or REGEX used for separating data in the CSV data file")
+              help="Character or REGEX used for separating data in the CSV data file.")
 @click.option("--header", is_flag=True,
               help=("Set this flag if your dataset contains a header, it will then be ignored by the clustering algorit"
                     "hm. If you set this flag while not having a header, the first example of the dataset will be ignor"
-                    "ed"))
+                    "ed."))
 # Clustering options
 @click.option("--initialization-method", type=int, default=3, show_default=True,
               help=("Method used to initialize the clusters' center. The following method are available :\n"
@@ -61,13 +68,17 @@ from clustering.src.visualisation import visualise_clustering_2d, visualise_clus
                     "2 - random_example: Draw a random example and fully assign it to the cluster\n"
                     "3 - furthest_example_from_its_centroid: TODO\n"))
 @click.option("-c", "-k", "--components", type=int, default=5, show_default=True,
-              help="Number of clustering components")
+              help="Number of clustering components.")
 @click.option("--eps", type=float, default=1e-4, show_default=True,
-              help="Minimal threshold caracterizing an algorithm's convergence")
+              help="Minimal threshold caracterizing an algorithm's convergence.")
 @click.option("--max-iter", type=int, default=1000, show_default=True,
-              help="Maximal number of iteration to make before stopping an algorithm")
+              help="Maximal number of iteration to make before stopping an algorithm.")
 @click.option("-m", "--fuzzifier", type=float, default=2, show_default=True,
-              help="Fuzzification exponent applied to the membership degrees")
+              help="Fuzzification exponent applied to the membership degrees.")
+@click.option("--pairwise-distance", type=str, default="euclidean", show_default=True,
+              help="Default metric used to compute the distance matrix when the clustering algorithm need it and when i"
+                   "t is not provided by the user. All possible metrics are described at the following link :"
+                   "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 # Visualisation options
@@ -85,15 +96,18 @@ from clustering.src.visualisation import visualise_clustering_2d, visualise_clus
                     " dimension is more than 3, a 3-components PCA is applied to the data before visualising."))
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
-              help="Random seed to set")
+              help="Random seed to set.")
 @click.option("--normalize", is_flag=True,
-              help="Set this flag if you want to normalize your data to zero mean and unit variance")
+              help="Set this flag if you want to normalize your data to zero mean and unit variance.")
 @click.option("--quiet", is_flag=True,
-              help="Set this flag if you want to have absolutely no output during the execution")
+              help="Set this flag if you want to have absolutely no output during the execution.")
+@click.option("--path-dir-dest", type=str, default="results", show_default=True,
+              help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does n"
+                   "ot already exists.")
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
-         empty_clusters_method, components, eps, max_iter, fuzzifier,
+         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
          membership_subset_size, visualise, visualise_3d, save, save_3d, seed, normalize,
-         quiet):
+         quiet, path_dir_dest):
     parameters = locals()
 
     if quiet:
@@ -109,13 +123,9 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
     # Load data
     data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
-    #TODO: TODELETE
-    data = data / 100000
-    print(data.min(), data.max())
 
     if normalize:
-        # TODO: Which normalization ?
-        data = normalization_mean_std(data)
+        raise NotImplementedError()
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
@@ -123,9 +133,8 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     if use_distance_matrix(clustering_algorithm):
         if data.shape[0] != data.shape[1]:
             print("The data need to be a pairwise distance matrix for the {} clustering "
-                  "method.".format(clustering_algorithm), "Applying euclidean distance.")
-            distance_matrix = DistanceMetric.get_metric(
-                'euclidean').pairwise(data)
+                  "method.".format(clustering_algorithm), "Applying \"{}\" distance.".format(pairwise_distance))
+            distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
         else:
             distance_matrix = data
 
@@ -141,7 +150,7 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
         initialization_method=initialization_method,
         empty_clusters_method=empty_clusters_method,
     )
-    print("")
+    print("")  # Print a newline after the line showing the progression at each iteration
 
     if visualise:
         visualise_clustering_2d(data=data,
@@ -170,7 +179,7 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                                                  clustering_algorithm,
                                                                  components,
                                                                  seed,
-                                                                 dir_dest="results"))
+                                                                 dir_dest=path_dir_dest))
 
     if save_3d:
         visualise_clustering_3d(data=data,
@@ -184,9 +193,10 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                                                  clustering_algorithm,
                                                                  components,
                                                                  seed,
-                                                                 dir_dest="results"))
+                                                                 dir_dest=path_dir_dest))
 
 
+# TODO: Move this somewhere else
 def _compute_saving_path(dataset, clustering_algorithm, components,
                          seed, dir_dest) -> str:
     os.makedirs(dir_dest, exist_ok=True)
