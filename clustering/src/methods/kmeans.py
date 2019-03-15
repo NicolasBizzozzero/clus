@@ -1,3 +1,5 @@
+""" Performs the k-means clustering algorithm """
+
 import time
 
 import numpy as np
@@ -19,9 +21,8 @@ def kmeans(data, components, eps, max_iter, initialization_method, empty_cluster
     current_iter = 0
     losses = []
     start_time = time.time()
-    # TODO: Stopping criterion with abs or not ?
     while (current_iter <= max_iter) and \
-          ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
+          ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
         memberships = _optim_memberships(data, centroids)
         handle_empty_clusters(data, centroids, memberships,
                               strategy=empty_clusters_method)
@@ -32,9 +33,8 @@ def kmeans(data, components, eps, max_iter, initialization_method, empty_cluster
         losses.append(loss)
 
         current_iter += 1
-        print("Iter :", current_iter, "Loss :", loss)
-        # print_progression(iteration=current_iter,
-        #                  loss=loss, start_time=start_time)
+        print_progression(iteration=current_iter,
+                          loss=loss, start_time=start_time)
     return memberships, centroids, np.array(losses)
 
 

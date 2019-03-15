@@ -19,6 +19,7 @@ The following clustering algorithms are supported :
 import ntpath
 import os
 import sys
+import warnings
 
 import click
 
@@ -27,7 +28,7 @@ import pandas as pd
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clustering.src.methods.methods import get_clustering_function, use_distance_matrix
-from clustering.src.utils import set_manual_seed, normalization_mean_std
+from clustering.src.utils import set_manual_seed, normalization_mean_std, whiten
 from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
 
@@ -77,7 +78,7 @@ _MAX_TEXT_WIDTH = 120
               help="Fuzzification exponent applied to the membership degrees.")
 @click.option("--pairwise-distance", type=str, default="euclidean", show_default=True,
               help="Default metric used to compute the distance matrix when the clustering algorithm need it and when i"
-                   "t is not provided by the user. All possible metrics are described at the following link :"
+                   "t is not provided by the user. All possible metrics are described at the following link :\nclu"
                    "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
@@ -125,15 +126,22 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
 
     if normalize:
-        raise NotImplementedError()
+        print(data.mean())
+        std_dev = data.std(axis=0)
+        print(std_dev)
+        print(std_dev.shape)
+        data = whiten(data)
+        print(data.mean())
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
     distance_matrix = None
     if use_distance_matrix(clustering_algorithm):
         if data.shape[0] != data.shape[1]:
-            print("The data need to be a pairwise distance matrix for the {} clustering "
-                  "method.".format(clustering_algorithm), "Applying \"{}\" distance.".format(pairwise_distance))
+            warnings.warn("The data need to be a pairwise distance matrix for the {} clustering "
+                          "method.".format(clustering_algorithm),
+                          "Applying \"{}\" distance.".format(pairwise_distance),
+                          RuntimeWarning)
             distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
         else:
             distance_matrix = data

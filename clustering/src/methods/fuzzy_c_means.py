@@ -4,13 +4,12 @@ import numpy as np
 
 from clustering.src.handle_empty_clusters import handle_empty_clusters
 from clustering.src.initialization import cluster_initialization
-from clustering.src.utils import remove_unexpected_arguments
+from clustering.src.utils import remove_unexpected_arguments, print_progression
+
 
 # TODO: If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership to
  # 1, and the memberships of others to 0.
  # See [3]
-
-# TODO: Why is sometime the loss increasing ? Is it normal ? Try FCM s4.csv, seed=1, m=1.5 and see iter 27-28
 
 
 @remove_unexpected_arguments
@@ -28,8 +27,8 @@ def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_met
     current_iter = 0
     losses = []
     start_time = time.time()
-    while (current_iter <= max_iter):# and \
-          #((current_iter < 2) or (abs(losses[-2] - losses[-1] > eps))):
+    while (current_iter <= max_iter) and \
+          ((current_iter < 2) or (abs(losses[-2] - losses[-1] > eps))):
         memberships = _compute_memberships(data, centroids, fuzzifier)
         handle_empty_clusters(data, centroids, memberships,
                               strategy=empty_clusters_method)
@@ -39,12 +38,9 @@ def fuzzy_c_means(data, components, fuzzifier, eps, max_iter, initialization_met
         loss = _compute_loss(data, memberships, centroids, fuzzifier)
         losses.append(loss)
 
-        grow = False if (current_iter < 2) else (losses[-2] - losses[-1]) < 0
-
         current_iter += 1
-        print("Iter :", current_iter, "Loss :", loss, "\tgrow? :", grow)
-        # print_progression(iteration=current_iter,
-        #                  loss=loss, start_time=start_time)
+        print_progression(iteration=current_iter,
+                          loss=loss, start_time=start_time)
 
     return memberships, centroids, np.array(losses)
 
