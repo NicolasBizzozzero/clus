@@ -5,7 +5,7 @@
 # Do not provide the --seed nor the --save and --quiet commands, as they are already
 # provided.
 
-NUMBER_OF_SEEDS=3
+NUMBER_OF_SEEDS=50
 
 for i in $(seq 1 $NUMBER_OF_SEEDS); do
     clus $@ --seed $i --save --quiet &
