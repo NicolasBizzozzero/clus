@@ -53,8 +53,8 @@ def use_distance_matrix(clustering_method) -> bool:
 
 def get_clustering_function(string: str) -> Callable:
     clustering_method = str_to_clusteringmethod(string)
-    function = clusteringmethod_to_function(clustering_method)
-    return function
+    func = clusteringmethod_to_function(clustering_method)
+    return func
 
 
 def str_to_clusteringmethod(string):

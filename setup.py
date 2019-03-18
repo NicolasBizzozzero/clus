@@ -70,6 +70,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "click >= 7.0",
+        "matplotlib >= 3.0.3"
         "numpy >= 1.16.1",
         "pandas >= 0.24.1",
         "scikit-learn >= 0.20.2",

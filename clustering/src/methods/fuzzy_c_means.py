@@ -1,15 +1,15 @@
 import time
 
 import numpy as np
+from clustering.src.utils import print_progression
 
 from clustering.src.handle_empty_clusters import handle_empty_clusters
 from clustering.src.initialization import cluster_initialization
-from clustering.src.utils import remove_unexpected_arguments, print_progression
 
 
 # TODO: If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership to
- # 1, and the memberships of others to 0.
- # See [3]
+#  1, and the memberships of others to 0. See [3]
+from clustering.src.utils.decorator import remove_unexpected_arguments
 
 
 @remove_unexpected_arguments

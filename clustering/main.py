@@ -28,7 +28,8 @@ import pandas as pd
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clustering.src.methods.methods import get_clustering_function, use_distance_matrix
-from clustering.src.utils import set_manual_seed, normalization_mean_std, whiten
+from clustering.src.utils.normalization import _str_to_normalization
+from clustering.src.utils.random import set_manual_seed
 from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
 
@@ -98,8 +99,13 @@ _MAX_TEXT_WIDTH = 120
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
               help="Random seed to set.")
-@click.option("--normalize", is_flag=True,
-              help="Set this flag if you want to normalize your data to zero mean and unit variance.")
+@click.option("--normalization", type=str, default=None, show_default=True,
+              help=("Normalize your data with any of the proposed methods below :\n"
+                    "1 - rescaling: TODO\n"
+                    "2 - mean: TODO\n"
+                    "3 - standardization: TODO\n"
+                    "4 - unit_length: TODO\n"
+                    "5 - whitening: TODO\n"))
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to have absolutely no output during the execution.")
 @click.option("--path-dir-dest", type=str, default="results", show_default=True,
@@ -107,7 +113,7 @@ _MAX_TEXT_WIDTH = 120
                    "ot already exists.")
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
-         membership_subset_size, visualise, visualise_3d, save, save_3d, seed, normalize,
+         membership_subset_size, visualise, visualise_3d, save, save_3d, seed, normalization,
          quiet, path_dir_dest):
     parameters = locals()
 
@@ -125,13 +131,9 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     # Load data
     data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
 
-    if normalize:
-        print(data.mean())
-        std_dev = data.std(axis=0)
-        print(std_dev)
-        print(std_dev.shape)
-        data = whiten(data)
-        print(data.mean())
+    if normalization is not None:
+        normalization_method = _str_to_normalization(normalization)
+        normalization_method(data)
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
