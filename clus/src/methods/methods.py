@@ -1,10 +1,10 @@
 import enum
 from typing import Callable
 
-from clustering.src.methods.kmeans import kmeans
-from clustering.src.methods.fuzzy_c_means import fuzzy_c_means
-from clustering.src.methods.fuzzy_c_medoids import fuzzy_c_medoids
-from clustering.src.methods.linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
+from clus.src.methods.kmeans import kmeans
+from clus.src.methods.fuzzy_c_means import fuzzy_c_means
+from clus.src.methods.fuzzy_c_medoids import fuzzy_c_medoids
+from clus.src.methods.linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
 
 ALIAS_CM_KMEANS = ("kmeans",)
 ALIAS_CM_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
@@ -34,7 +34,7 @@ class ClusteringMethod(enum.IntEnum):
 
 class UnknownClusteringMethods(Exception):
     def __init__(self, method_name: str):
-        Exception.__init__(self, "The clustering method : \"{method_name}\" doesn't exists".format(
+        Exception.__init__(self, "The clus method : \"{method_name}\" doesn't exists".format(
             method_name=method_name
         ))
 

@@ -1,12 +1,12 @@
 import time
 
 import numpy as np
-from clustering.src.handle_empty_clusters import handle_empty_clusters
+from clus.src.handle_empty_clusters import handle_empty_clusters
 from scipy.sparse import csr_matrix
 
-from clustering.src.initialization import cluster_initialization
-from clustering.src.utils.decorator import remove_unexpected_arguments
-from clustering.src.visualisation import print_progression
+from clus.src.initialization import cluster_initialization
+from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.visualisation import print_progression
 
 
 @remove_unexpected_arguments

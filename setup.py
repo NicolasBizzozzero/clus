@@ -20,7 +20,7 @@ with open(path.join(_HERE, _README_FILE_NAME),
     long_description = file.read()
 
 setup(
-    name="clustering",
+    name="clus",
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -30,12 +30,12 @@ setup(
     author="BIZZOZZÉRO Nicolas",
     author_email="nicolasbizzozzero@gmail.com",
 
-    description="A complete fuzzy clustering framework",
+    description="A complete fuzzy clus framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
     license="gpl-v3",
-    url="https://github.com/NicolasBizzozzero/clustering",
+    url="https://github.com/NicolasBizzozzero/clus",
     download_url="",
 
     # See https://pypi.org/classifiers
@@ -53,7 +53,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords=["cli", "clustering", "fuzzy", "fuzzy_clustering", "research",
+    keywords=["cli", "clus", "fuzzy", "fuzzy_clustering", "research",
               "upmc", "sorbonne", "sorbonne_universite"],
 
     # You can just specify the packages manually here if your project is
@@ -70,7 +70,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "click >= 7.0",
-        "matplotlib >= 3.0.3"
+        "matplotlib >= 3.0.3",
         "numpy >= 1.16.1",
         "pandas >= 0.24.1",
         "scikit-learn >= 0.20.2",
@@ -93,7 +93,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            "clus = clustering.main:main"
+            "clus = clus.main:main"
         ],
     },
 )

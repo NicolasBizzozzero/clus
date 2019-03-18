@@ -1,11 +1,11 @@
-""" Apply a clustering algorithm to a CSV dataset.
+""" Apply a clus algorithm to a CSV dataset.
 
 Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
 matrix (eg: with not the same number of examples and dimensions), the software will calculate it itself with a pairwise
 euclidean distance.
 
 \b
-The following clustering algorithms are supported :
+The following clus algorithms are supported :
 * kmeans
 * fuzzy_c_means (or fcm)
 * possibilistic_c_means (or pcm)
@@ -19,18 +19,18 @@ The following clustering algorithms are supported :
 import ntpath
 import os
 import sys
-import warnings
 
 import click
 
 import pandas as pd
+import numpy as np
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clustering.src.methods.methods import get_clustering_function, use_distance_matrix
-from clustering.src.utils.normalization import _str_to_normalization
-from clustering.src.utils.random import set_manual_seed
-from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
+from clus.src.methods.methods import get_clustering_function, use_distance_matrix
+from clus.src.utils.normalization import _str_to_normalization
+from clus.src.utils.random import set_manual_seed
+from clus.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
@@ -52,7 +52,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
               help="Character or REGEX used for separating data in the CSV data file.")
 @click.option("--header", is_flag=True,
-              help=("Set this flag if your dataset contains a header, it will then be ignored by the clustering algorit"
+              help=("Set this flag if your dataset contains a header, it will then be ignored by the clus algorit"
                     "hm. If you set this flag while not having a header, the first example of the dataset will be ignor"
                     "ed."))
 # Clustering options
@@ -70,31 +70,31 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                     "2 - random_example: Draw a random example and fully assign it to the cluster\n"
                     "3 - furthest_example_from_its_centroid: TODO\n"))
 @click.option("-c", "-k", "--components", type=int, default=5, show_default=True,
-              help="Number of clustering components.")
-@click.option("--eps", type=float, default=1e-4, show_default=True,
+              help="Number of clus components.")
+@click.option("--eps", type=float, default=1e-6, show_default=True,
               help="Minimal threshold caracterizing an algorithm's convergence.")
 @click.option("--max-iter", type=int, default=1000, show_default=True,
               help="Maximal number of iteration to make before stopping an algorithm.")
 @click.option("-m", "--fuzzifier", type=float, default=2, show_default=True,
               help="Fuzzification exponent applied to the membership degrees.")
 @click.option("--pairwise-distance", type=str, default="euclidean", show_default=True,
-              help="Default metric used to compute the distance matrix when the clustering algorithm need it and when i"
-                   "t is not provided by the user. All possible metrics are described at the following link :\nclu"
-                   "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
+              help="Metric used to compute the distance matrix when the clus algorithm need it. Set to \"precompu"
+                   "ted\" if your data is already a distance matrix. All possible metrics are described at the followin"
+                   "g link :\nhttps://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 # Visualisation options
 @click.option("--visualise", is_flag=True,
-              help=("Set this flag if you want to visualise the clustering result. If your data's dimension is more tha"
+              help=("Set this flag if you want to visualise the clus result. If your data's dimension is more tha"
                     "n 2, a 2-components PCA is applied to the data before visualising."))
 @click.option("--visualise-3d", is_flag=True,
-              help=("Set this flag if you want to visualise the clustering result in 3D. If your data's dimension is mo"
+              help=("Set this flag if you want to visualise the clus result in 3D. If your data's dimension is mo"
                     "re than 3, a 3-components PCA is applied to the data before visualising."))
 @click.option("--save", is_flag=True,
-              help=("Set this flag if you want to save the visualisation of the clustering result. If your data's dimen"
+              help=("Set this flag if you want to save the visualisation of the clus result. If your data's dimen"
                     "sion is more than 2, a 2-components PCA is applied to the data before visualising."))
 @click.option("--save-3d", is_flag=True,
-              help=("Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's"
+              help=("Set this flag if you want to save the visualisation of the clus result in 3D. If your data's"
                     " dimension is more than 3, a 3-components PCA is applied to the data before visualising."))
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
@@ -123,9 +123,9 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     if seed is not None:
         set_manual_seed(seed)
 
-    print("Starting clustering with the following parameters :", parameters)
+    print("Starting clus with the following parameters :", parameters)
 
-    # Load the clustering algorithm
+    # Load the clus algorithm
     clustering_function = get_clustering_function(clustering_algorithm)
 
     # Load data
@@ -133,22 +133,21 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
     if normalization is not None:
         normalization_method = _str_to_normalization(normalization)
+        data = data.astype(np.float64)
         normalization_method(data)
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
     distance_matrix = None
     if use_distance_matrix(clustering_algorithm):
-        if data.shape[0] != data.shape[1]:
-            warnings.warn("The data need to be a pairwise distance matrix for the {} clustering "
-                          "method.".format(clustering_algorithm),
-                          "Applying \"{}\" distance.".format(pairwise_distance),
-                          RuntimeWarning)
-            distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
-        else:
+        if pairwise_distance == "precomputed":
+            assert data.shape[0] != data.shape[1], ("Your precomputed distance matrix is not square (shape: {})."
+                                                    "").format(data.shape)
             distance_matrix = data
+        else:
+            distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
 
-    # Perform the clustering method
+    # Perform the clus method
     memberships, clusters_center, losses = clustering_function(
         data=data,
         distance_matrix=distance_matrix,

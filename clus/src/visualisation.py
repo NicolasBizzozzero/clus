@@ -6,8 +6,8 @@ from textwrap import wrap
 import matplotlib.pyplot as plt
 import numpy as np
 
-from clustering.src.utils.normalization import rescaling
-from clustering.src.utils.time import pretty_time_delta
+from clus.src.utils.normalization import rescaling
+from clus.src.utils.time import pretty_time_delta
 
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
@@ -145,7 +145,7 @@ def print_progression(iteration, loss, start_time):
                       "Extended_time {extended_time}\t"
                       "Mean_iter_time {mean_iter_time} (std {std_iter_time})").format(
         iteration=iteration,
-        loss=round(loss, 4),
+        loss=round(loss, 7),
         extended_time=pretty_time_delta(extended_time),
         mean_iter_time=pretty_time_delta(np.mean(_TIME_DELTAS)),
         std_iter_time=pretty_time_delta(np.std(_TIME_DELTAS))
@@ -184,10 +184,10 @@ def _compute_title(clusters_center, clustering_method, dataset_name, applied_pca
 
     n_components = clusters_center.shape[0]
     if applied_pca:
-        return ("{}-components PCA applied to the results of the \"{}\" clustering algorithm "
+        return ("{}-components PCA applied to the results of the \"{}\" clus algorithm "
                 "with {} clusters{}").format(n_components_pca, clustering_method, n_components, dataset_name)
     else:
-        return ("Results of the \"{}\" clustering algorithm "
+        return ("Results of the \"{}\" clus algorithm "
                 "with {} clusters{}").format(clustering_method, n_components, dataset_name)
 
 

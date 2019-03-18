@@ -11,6 +11,8 @@ http://joelouismarino.github.io/blog_posts/blog_whitening.html
 https://en.wikipedia.org/wiki/Whitening_transformation
 """
 
+from typing import Callable
+
 import numpy as np
 
 
@@ -28,13 +30,13 @@ def rescaling(array: np.ndarray, floor: float = 0, ceil: float = 1) -> np.ndarra
     return array * (ceil - floor) + floor
 
 
-def rescaling_(array: np.ndarray, floor: float = -1, ceil: float = 1) -> None:
+def rescaling_(array: np.ndarray, floor: float = 0, ceil: float = 1) -> None:
     """ Rescale the range of features to a given range inplace. """
     arr_min = array.min(axis=0)
     arr_max = array.max(axis=0)
     array -= arr_min
     array *= ceil - floor
-    array /= arr_max - arr_min
+    np.divide(array, arr_max - arr_min, out=array)
     array += floor
 
 
@@ -49,7 +51,7 @@ def mean_normalization_(array: np.ndarray) -> None:
     arr_min = array.min(axis=0)
     arr_max = array.max(axis=0)
     array -= arr_mean
-    array /= arr_max - arr_min
+    np.divide(array.astype(np.float64), arr_max - arr_min, out=array)
 
 
 def standardization(array: np.ndarray) -> np.ndarray:
@@ -62,7 +64,7 @@ def standardization_(array: np.ndarray) -> None:
     arr_mean = array.mean(axis=0)
     arr_std = array.std(axis=0)
     array -= arr_mean
-    array /= arr_std
+    np.divide(array.astype(np.float64), arr_std, out=array)
 
 
 def scaling_to_unit_length(array: np.ndarray, norm_p: int = 2) -> np.ndarray:
@@ -72,7 +74,7 @@ def scaling_to_unit_length(array: np.ndarray, norm_p: int = 2) -> np.ndarray:
 
 def scaling_to_unit_length_(array: np.ndarray, norm_p: int = 2) -> None:
     """ Scale the components inplace by dividing each features by their p-norm. """
-    array /= np.sum(np.abs(array) ** norm_p, axis=0) ** 1 / norm_p
+    np.divide(array.astype(np.float64), np.sum(np.abs(array) ** norm_p, axis=0) ** 1 / norm_p, out=array)
 
 
 def whitening(array: np.ndarray) -> np.ndarray:
@@ -81,10 +83,10 @@ def whitening(array: np.ndarray) -> np.ndarray:
 
 def whitening_(array: np.ndarray) -> None:
     arr_std = array.std(axis=0)
-    array /= arr_std
+    np.divide(array.astype(np.float64), arr_std, out=array)
 
 
-def _str_to_normalization(string: str, inplace=True) -> function:
+def _str_to_normalization(string: str, inplace=True) -> Callable:
     string = string.lower()
     if string in ("rescaling",):
         return rescaling_ if inplace else rescaling
