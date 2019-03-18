@@ -33,10 +33,10 @@ from clustering.src.utils.random import set_manual_seed
 from clustering.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
 
-_MAX_TEXT_WIDTH = 120
+_MAX_TEXT_OUTPUT_WIDTH = 120
 
 
-@click.command(help=__doc__, context_settings=dict(max_content_width=_MAX_TEXT_WIDTH))
+@click.command(help=__doc__, context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
