@@ -4,6 +4,7 @@
 
 
 ## TODO
+* Rendre les opérations de clustering inplace (ne pas dupliquer les données)
 * Arriver à exporter les methodes de clustering
 * Stocker les meilleurs clusters à chaque itération
 * Transformer les 4 appels à visualise en seulement 2, s'inspirer de cette réponse : https://stackoverflow.com/a/21884187

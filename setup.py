@@ -53,7 +53,7 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords=["cli", "clus", "fuzzy", "fuzzy_clustering", "research",
+    keywords=["cli", "clus", "clustering", "fuzzy", "fuzzy_clustering", "research",
               "upmc", "sorbonne", "sorbonne_universite"],
 
     # You can just specify the packages manually here if your project is

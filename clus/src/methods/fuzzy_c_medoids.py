@@ -3,8 +3,14 @@ import time
 import numpy as np
 from clus.src.handle_empty_clusters import handle_empty_clusters
 from clus.src.initialization import cluster_initialization
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.utils.decorator import remove_unexpected_arguments, time_this
 from clus.src.visualisation import print_progression
+
+
+# TODO: Improve _compute_medoids
+#  Tested with :
+#  clus data/S-sets/s2.csv fcmdd -k 10 --visualise --normalization rescaling --fuzzifier 2 --seed 1
+#  res in : results/fcmdd
 
 
 @remove_unexpected_arguments
@@ -31,7 +37,13 @@ def fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, eps, max_iter,
         memberships = _compute_memberships(distance_matrix, medoids_idx, fuzzifier)
         handle_empty_clusters(distance_matrix, medoids_idx, memberships, strategy=empty_clusters_method)
 
-        medoids_idx = _compute_medoids(distance_matrix, memberships, fuzzifier)
+        medoids_idx_test = _compute_medoids_TEST(distance_matrix, memberships, fuzzifier)
+        medoids_idx = _compute_medoids_BACKUP(distance_matrix, memberships, fuzzifier)
+
+        print(medoids_idx_test)
+        print(medoids_idx)
+
+        exit(0)
 
         loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
         losses.append(loss)
@@ -41,12 +53,12 @@ def fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, eps, max_iter,
     return memberships, data[medoids_idx, :], np.array(losses)
 
 
-def _compute_memberships(data, medoids_idx, fuzzifier):
-    dist_data_medoids = data[:, medoids_idx]
+def _compute_memberships(distance_matrix, medoids_idx, fuzzifier):
+    dist_data_medoids = distance_matrix[:, medoids_idx]
 
     # If two examples are of equals distance, the computation will make divisions by zero. We add this
     # small coefficient to not divide by zero while keeping our distances as correct as possible
-    dist_data_medoids += np.fmax(dist_data_medoids, np.finfo(data.dtype).eps)
+    dist_data_medoids += np.fmax(dist_data_medoids, np.finfo(distance_matrix.dtype).eps)
 
     tmp = (1 / dist_data_medoids) ** (1 / (fuzzifier - 1))
     memberships = tmp / tmp.sum(axis=1, keepdims=True)
@@ -59,12 +71,22 @@ def _compute_memberships(data, medoids_idx, fuzzifier):
     return memberships
 
 
-def _compute_medoids(data, memberships, fuzzifier):
-    return (data[..., np.newaxis] * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
+@time_this
+def _compute_medoids_TEST(distance_matrix, memberships, fuzzifier):
+    fuzzified_memberships = memberships ** fuzzifier
+    print((distance_matrix[..., np.newaxis] * fuzzified_memberships).sum(axis=1))
+    return (distance_matrix[..., np.newaxis] * fuzzified_memberships).sum(axis=1).argmin(axis=0)
 
 
-def _compute_loss(data, medoids_idx, memberships, fuzzifier):
-    return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
+@time_this
+def _compute_medoids_BACKUP(distance_matrix, memberships, fuzzifier):
+    # TODO: Too long
+    fuzzified_memberships = memberships ** fuzzifier
+    return (distance_matrix[..., np.newaxis] * fuzzified_memberships).sum(axis=1).argmin(axis=0)
+
+
+def _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier):
+    return ((memberships ** fuzzifier) * distance_matrix[:, medoids_idx]).sum(axis=(1, 0))
 
 
 if __name__ == '__main__':
