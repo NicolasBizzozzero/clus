@@ -5,7 +5,7 @@ from clus.src.handle_empty_clusters import handle_empty_clusters
 from scipy.sparse import csr_matrix
 
 from clus.src.initialization import cluster_initialization
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.utils.decorator import remove_unexpected_arguments, time_this
 from clus.src.visualisation import print_progression
 
 
@@ -76,14 +76,14 @@ def _compute_top_membership_subset(memberships, membership_subset_size):
     topk_idx = np.argpartition(memberships, -membership_subset_size, axis=0)[-membership_subset_size:]
 
     # TODO: Sparse matrix may be faster, but it could not be used for the medoids computation because the other matrix
-    # has 3 dimensions, and it is currently not possible to do matrix multiplication with a sparse matrix and a
-    # more-than-2-dimensions matrix. See : https://github.com/scipy/scipy/blob/master/scipy/sparse/base.py#L527
-    # Thus we convert it to a traditional matrix with the `.toarray()` operation.
+    #  has 3 dimensions, and it is currently not possible to do matrix multiplication with a sparse matrix and a
+    #  more-than-2-dimensions matrix. See : https://github.com/scipy/scipy/blob/master/scipy/sparse/base.py#L527
+    #  Thus we convert it to a traditional matrix with the `.toarray()` operation.
     top_memberships_mask = \
         csr_matrix((np.ones((topk_idx.shape[0] * topk_idx.shape[1],)),
                     (topk_idx.flatten(), np.nonzero(abs(topk_idx) + 1)[1])),
                    shape=memberships.shape,
-                   dtype=bool).toarray()
+                   dtype=bool)
 
     # Return the subset of the top memberships (the result of the application of the mask).
     # Not used here but might be useful. Many thanks to POUYET Adrien for its help.
@@ -93,11 +93,21 @@ def _compute_top_membership_subset(memberships, membership_subset_size):
 
 
 def _compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
-    return (data[..., np.newaxis] * top_memberships_mask * (memberships ** fuzzifier)).sum(axis=1).argmin(axis=0)
+    fuzzified_memberships = memberships ** fuzzifier
+    iterable = ((data * top_memberships_mask[:, i] * fuzzified_memberships[:, i]).sum(axis=1).argmin(axis=0) for i in range(memberships.shape[1]))
+    return np.fromiter(iterable, count=memberships.shape[1], dtype=np.int64)
 
 
 def _compute_loss(data, medoids_idx, memberships, fuzzifier):
     return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
+
+
+def __compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
+    """ DEPRECATED: old method used to compute the medoids.
+    Very memory-heavy and slower than the existing method.
+    """
+    fuzzified_memberships = memberships ** fuzzifier
+    return (data[..., np.newaxis] * top_memberships_mask * fuzzified_memberships).sum(axis=1).argmin(axis=0)
 
 
 if __name__ == '__main__':
