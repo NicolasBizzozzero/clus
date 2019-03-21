@@ -4,7 +4,7 @@ import numpy as np
 from clus.src.handle_empty_clusters import handle_empty_clusters
 from scipy.sparse import csr_matrix
 
-from clus.src.initialization import cluster_initialization
+from clus.src.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments, time_this
 from clus.src.visualisation import print_progression
 

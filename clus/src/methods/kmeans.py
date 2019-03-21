@@ -1,18 +1,38 @@
-""" Performs the k-means clus algorithm """
-
 import time
+
+from typing import Optional
 
 import numpy as np
 
 from clus.src.handle_empty_clusters import handle_empty_clusters
-from clus.src.initialization import cluster_initialization
+from clus.src.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
 from clus.src.visualisation import print_progression
 
 
 @remove_unexpected_arguments
-def kmeans(data, components, eps, max_iter, initialization_method, empty_clusters_method, centroids=None):
-    assert (centroids is None) or (centroids.shape == (components, data.shape[1]))
+def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: int = 1000,
+           initialization_method: str = "random_choice", empty_clusters_method: str = "nothing",
+           centroids: Optional[np.ndarray] = None):
+    """ Performs the k-means clustering algorithm on a dataset.
+
+    :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
+    examples and columns as features.
+    :param components: The number of components (clusters) wanted.
+    :param eps: Criterion used to define convergence. If the absolute differences between two consecutive losses is
+    lower than `eps`, the clustering stop.
+    :param max_iter: Criterion used to stop the clustering if the number of iterations exceeds `max_iter`.
+    :param initialization_method: Method used to initialise the centroids. TODO list
+    :param empty_clusters_method: Method used at each iteration to handle empty clusters. TODO list
+    :param centroids: Initials centroids to use instead of randomly initialize them. The centroids need to hav
+    """
+    assert len(data.shape) == 2, "The data must be a 2D array"
+    assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
+    assert 0 <= max_iter, "The number of max iterations must be positive"
+    assert (centroids is None) or (centroids.shape == (components, data.shape[1])),\
+        "The given centroids do not have a correct shape. Expected shape : {}, given shape : {}".format(
+            (components, data.shape[1]), centroids.shape
+        )
 
     # Initialisation
     if centroids is None:
