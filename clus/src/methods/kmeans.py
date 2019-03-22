@@ -41,6 +41,10 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
     * "random_example", assign a random example to all empty clusters.
     * "furthest_example_from_its_centroid", assign the furthest example from its centroid to each empty cluster.
     :param centroids: Initials centroids to use instead of randomly initialize them.
+    :return: A tuple containing :
+    * The memberships matrix.
+    * The centroids matrix.
+    * An array with all losses at each iteration.
     """
     assert len(data.shape) == 2, "The data must be a 2D array"
     assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
