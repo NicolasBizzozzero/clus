@@ -5,7 +5,6 @@
 
 ## TODO
 * Rendre les opérations de clustering inplace (ne pas dupliquer les données)
-* Arriver à exporter les methodes de clustering
 * Stocker les meilleurs clusters à chaque itération
 * Transformer les 4 appels à visualise en seulement 2, s'inspirer de cette réponse : https://stackoverflow.com/a/21884187
 * Supprimer la PCA, la remplacer par un t-SNE
@@ -26,3 +25,4 @@
 * [1] R. Krishnapuram ; A. Joshi ; O. Nasraoui ; L. Yi, Low-complexity fuzzy relational clustering algorithms for Web mining,  IEEE Transactions on Fuzzy Systems (Volume: 9, Issue: 4, Aug 2001), p595-607, DOI: 10.1109/91.940971
 * [2] Tolga Can, K-Means Empty Cluster Example, http://user.ceng.metu.edu.tr/~tcan/ceng465_f1314/Schedule/KMeansEmpty.html (archive: https://web.archive.org/web/20180626092955/http://user.ceng.metu.edu.tr/~tcan/ceng465_f1314/Schedule/KMeansEmpty.html)
 * [3] Ross, Timothy J., Fuzzy Logic With Engineering Applications, 3rd ed. Wiley. 2010. ISBN 978-0-470-74376-8 pp 352-353
+* [4] Joe Marino, statistical whitening, http://joelouismarino.github.io/blog_posts/blog_whitening.html (archive: https://web.archive.org/web/20180813034201/http://joelouismarino.github.io/blog_posts/blog_whitening.html)
