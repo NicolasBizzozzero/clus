@@ -27,7 +27,7 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
     * "random_gaussian" or "gaussian", samples values from a gaussian with the same mean and std as each data's
     dimension.
     * "random_choice" or "choice", samples random examples from the data without replacement.
-    * "central_dissimilar_medoids", sample the first medoid as the most central point of the dataset, then sample all
+    * "central_dissimilar_medoids", samples the first medoid as the most central point of the dataset, then sample all
     successive medoids as the most dissimilar to all medoids that have already been picked.
     * "central_dissimilar_random_medoids", same as "central_dissimilar_medoids", but the first medoid is sampled
     randomly.

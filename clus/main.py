@@ -56,19 +56,23 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                     "hm. If you set this flag while not having a header, the first example of the dataset will be ignor"
                     "ed."))
 # Clustering options
-@click.option("--initialization-method", type=int, default=3, show_default=True,
-              help=("Method used to initialize the clusters' center. The following method are available :\n"
-                    "1 - random: Draw clusters from a uniform distribution between the min and the max of each attribu"
-                    "te\n"
-                    "2 - random_gaussian: Draw clusters from a gaussian distribution\n"
-                    "3 - random_choice: Randomly choose clusters from the dataset\n"
-                    "4 - central_dissimilar_medoids: TODO\n"
-                    "5 - central_dissimilar_random_medoids: TODO\n"))
-@click.option("--empty-clusters-method", type=int, default=1, show_default=True,
-              help=("Method used to handle empty clusters. The following method are available :\n"
-                    "1 - nothing: Do absolutely nothing\n"
-                    "2 - random_example: Draw a random example and fully assign it to the cluster\n"
-                    "3 - furthest_example_from_its_centroid: TODO\n"))
+@click.option("--initialization-method", type=str, default="random_choice", show_default=True,
+              help=("Method used to initialize the clusters' center. The following methods are available :\n"
+                    "'random_uniform' or 'uniform', samples values between the min and max across each dimension.\n"
+                    "'random_gaussian' or 'gaussian', samples values from a gaussian with the same mean and std as each"
+                    " data's dimension.\n"
+                    "'random_choice' or 'choice', samples random examples from the data without replacement.\n"
+                    "'central_dissimilar_medoids', samples the first medoid as the most central point of the dataset, "
+                    "then sample all successive medoids as the most dissimilar to all medoids that have already been "
+                    "picked.\n"
+                    "'central_dissimilar_random_medoids', same as 'central_dissimilar_medoids', but the first medoid "
+                    "is sampled randomly."))
+@click.option("--empty-clusters-method", type=str, default="nothing", show_default=True,
+              help=("Method used to handle empty clusters. The following methods are available :\n"
+                    "'nothing', do absolutely nothing and ignore empty clusters.\n"
+                    "'random_example', assign a random example to all empty clusters.\n"
+                    "'furthest_example_from_its_centroid', assign the furthest example from its centroid to each empty "
+                    "cluster.\n"))
 @click.option("-c", "-k", "--components", type=int, default=5, show_default=True,
               help="Number of clustering components.")
 @click.option("--eps", type=float, default=1e-6, show_default=True,
