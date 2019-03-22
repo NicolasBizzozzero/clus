@@ -1,21 +1,68 @@
 import time
+from typing import Optional, Tuple
 
 import numpy as np
 from clus.src.handle_empty_clusters import handle_empty_clusters
 from scipy.sparse import csr_matrix
 
 from clus.src.cluster_initialization import cluster_initialization
-from clus.src.utils.decorator import remove_unexpected_arguments, time_this
+from clus.src.utils.decorator import remove_unexpected_arguments
 from clus.src.visualisation import print_progression
 
 
 @remove_unexpected_arguments
-def linearized_fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, membership_subset_size, eps, max_iter,
-                               initialization_method, empty_clusters_method, medoids_idx=None):
-    assert (len(distance_matrix.shape) == 2) and distance_matrix.shape[0] == distance_matrix.shape[1], "The distance matrix is not squared"
-    assert initialization_method in (2, 3, 4), "Your initialization method must be based on example selection"
-    assert (medoids_idx is None) or \
-           ((medoids_idx.shape == (components, data.shape[1])) and (all(medoids_idx < data.shape[0])))
+def linearized_fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: int = 10, eps: float = 1e-4,
+                               max_iter: int = 1000, fuzzifier: float = 2, membership_subset_size: Optional[int] = None,
+                               initialization_method: str = "random_choice", empty_clusters_method: str = "nothing",
+                               medoids_idx: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """ Performs the linearized fuzzy c-medoids clustering algorithm on a dataset.
+
+    :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
+    examples and columns as features.
+    :param distance_matrix: The pairwise distance matrix applied across all examples from the data matrix. The distance
+    matrix must be a square matrix.
+    :param components: The number of components (clusters) wanted.
+    :param eps: Criterion used to define convergence. If the absolute differences between two consecutive losses is
+    lower than `eps`, the clustering stop.
+    :param max_iter: Criterion used to stop the clustering if the number of iterations exceeds `max_iter`.
+    :param fuzzifier: Membership fuzzification coefficient.
+    :param membership_subset_size: Size of subset to inspect during the memberships matrix computation. Reduce
+    computations length.
+    :param initialization_method: Method used to initialise the centroids. Can take one of the following values :
+    * "random_uniform" or "uniform", samples values between the min and max across each dimension.
+    * "random_gaussian" or "gaussian", samples values from a gaussian with the same mean and std as each data's
+    dimension.
+    * "random_choice" or "choice", samples random examples from the data without replacement.
+    * "central_dissimilar_medoids", sample the first medoid as the most central point of the dataset, then sample all
+    successive medoids as the most dissimilar to all medoids that have already been picked.
+    * "central_dissimilar_random_medoids", same as "central_dissimilar_medoids", but the first medoid is sampled
+    randomly.
+    :param empty_clusters_method: Method used at each iteration to handle empty clusters. Can take one of the following
+    values :
+    * "nothing", do absolutely nothing and ignore empty clusters.
+    * "random_example", assign a random example to all empty clusters.
+    * "furthest_example_from_its_centroid", assign the furthest example from its centroid to each empty cluster.
+    :param medoids_idx: Initials medoids indexes to use instead of randomly initialize them.
+    :return: A tuple containing :
+    * The memberships matrix.
+    * The medoids matrix.
+    * An array with all losses at each iteration.
+    """
+    assert len(data.shape) == 2, "The data must be a 2D array"
+    assert data.shape[0] > 0, "The data must have at least one example"
+    assert data.shape[1] > 0, "The data must have at least one feature"
+    assert (len(distance_matrix.shape) == 2) and (distance_matrix.shape[0] == distance_matrix.shape[1]), \
+        "The distance matrix is not a square matrix"
+    assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
+    assert 0 <= max_iter, "The number of max iterations must be positive"
+    assert fuzzifier > 1, "The fuzzifier must be greater than 1"
+    assert 1 <= membership_subset_size <= data.shape[0],\
+        "The membership subset size wanted must be between 1 and %s" % data.shape[0]
+    assert (medoids_idx is None) or (medoids_idx.shape == components), \
+        "The given medoids indexes do not have a correct shape. Expected shape : {}, given shape : {}".format(
+            (components,), medoids_idx.shape
+        )
+    assert np.all(medoids_idx < data.shape[0]), "The provided medoid indexes array contains unreachable indexes"
 
     # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
     # in a cluster
@@ -47,6 +94,8 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components, fuzzifier, mem
 
         current_iter += 1
         print_progression(iteration=current_iter, loss=loss, start_time=start_time)
+
+    print("")  # Print a newline after the line showing the progression at each iteration
     return memberships, data[medoids_idx, :], np.array(losses)
 
 

@@ -1,6 +1,6 @@
 import time
 
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from clus.src.visualisation import print_progression
 @remove_unexpected_arguments
 def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: int = 1000,
            initialization_method: str = "random_choice", empty_clusters_method: str = "nothing",
-           centroids: Optional[np.ndarray] = None):
+           centroids: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ Performs the k-means clustering algorithm on a dataset.
 
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
@@ -27,7 +27,7 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
     * "random_gaussian" or "gaussian", samples values from a gaussian with the same mean and std as each data's
     dimension.
     * "random_choice" or "choice", samples random examples from the data without replacement.
-    * "central_dissimilar_medoids", samples the first medoid as the most central point of the dataset, then sample all
+    * "central_dissimilar_medoids", sample the first medoid as the most central point of the dataset, then sample all
     successive medoids as the most dissimilar to all medoids that have already been picked.
     * "central_dissimilar_random_medoids", same as "central_dissimilar_medoids", but the first medoid is sampled
     randomly.
@@ -43,6 +43,8 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
     * An array with all losses at each iteration.
     """
     assert len(data.shape) == 2, "The data must be a 2D array"
+    assert data.shape[0] > 0, "The data must have at least one example"
+    assert data.shape[1] > 0, "The data must have at least one feature"
     assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
     assert 0 <= max_iter, "The number of max iterations must be positive"
     assert (centroids is None) or (centroids.shape == (components, data.shape[1])), \
