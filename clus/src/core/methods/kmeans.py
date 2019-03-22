@@ -8,7 +8,7 @@ from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
 
-_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, Elapsed:{elapsed}, ETA:{remaining}{postfix}"
+_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
 @remove_unexpected_arguments
@@ -58,10 +58,14 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
         centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
 
     with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+        best_memberships = None
+        best_centroids = None
+        best_loss = np.inf
+
         memberships = None
         losses = []
         current_iter = 0
-        while (current_iter <= max_iter) and \
+        while (current_iter < max_iter) and \
               ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
             memberships = _optim_memberships(data, centroids)
             handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
@@ -70,15 +74,20 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
 
             loss = _compute_loss(data, memberships, centroids)
             losses.append(loss)
+            if loss < best_loss:
+                best_loss = loss
+                best_memberships = memberships
+                best_centroids = centroids
 
             # Update the progress bar
             current_iter += 1
             progress_bar.update()
             progress_bar.set_postfix({
-                "Loss": "{0:.6f}".format(loss)
+                "Loss": "{0:.6f}".format(loss),
+                "best_loss": "{0:.6f}".format(best_loss)
             })
 
-    return memberships, centroids, np.array(losses)
+    return best_memberships, best_centroids, np.array(losses)
 
 
 def _optim_memberships(data, centroids):

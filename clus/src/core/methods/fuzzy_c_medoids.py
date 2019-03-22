@@ -7,7 +7,7 @@ from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
 
-_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, Elapsed:{elapsed}, ETA:{remaining}{postfix}"
+_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
 @remove_unexpected_arguments
@@ -66,11 +66,15 @@ def fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: i
         medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
     with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+        best_memberships = None
+        best_medoids_idx = None
+        best_loss = np.inf
+
         memberships = None
         medoids_idx_old = None
         losses = []
         current_iter = 0
-        while (current_iter <= max_iter) and \
+        while (current_iter < max_iter) and \
               ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
               ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
             medoids_idx_old = medoids_idx
@@ -81,15 +85,20 @@ def fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: i
 
             loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
             losses.append(loss)
+            if loss < best_loss:
+                best_loss = loss
+                best_memberships = memberships
+                best_medoids_idx = medoids_idx
 
             # Update the progress bar
             current_iter += 1
             progress_bar.update()
             progress_bar.set_postfix({
-                "Loss": "{0:.6f}".format(loss)
+                "Loss": "{0:.6f}".format(loss),
+                "best_loss": "{0:.6f}".format(best_loss)
             })
 
-    return memberships, data[medoids_idx, :], np.array(losses)
+    return best_memberships, data[best_medoids_idx, :], np.array(losses)
 
 
 def _compute_memberships(distance_matrix, medoids_idx, fuzzifier):
@@ -102,7 +111,6 @@ def _compute_memberships(distance_matrix, medoids_idx, fuzzifier):
     tmp = (1 / dist_data_medoids) ** (1 / (fuzzifier - 1))
     memberships = tmp / tmp.sum(axis=1, keepdims=True)
 
-    # TODO: Optimisable
     for index_medoid, medoid in enumerate(medoids_idx):
         memberships[medoid, :] = 0.
         memberships[medoid, index_medoid] = 1.

@@ -8,7 +8,7 @@ from scipy.sparse import csr_matrix
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
 
-_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, Elapsed:{elapsed}, ETA:{remaining}{postfix}"
+_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
 @remove_unexpected_arguments
@@ -76,11 +76,15 @@ def linearized_fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, co
         medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
     with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+        best_memberships = None
+        best_medoids_idx = None
+        best_loss = np.inf
+
         memberships = None
         medoids_idx_old = None
         losses = []
         current_iter = 0
-        while (current_iter <= max_iter) and \
+        while (current_iter < max_iter) and \
               ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and\
               ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
 
@@ -93,15 +97,20 @@ def linearized_fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, co
 
             loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
             losses.append(loss)
+            if loss < best_loss:
+                best_loss = loss
+                best_memberships = memberships
+                best_medoids_idx = medoids_idx
 
             # Update the progress bar
             current_iter += 1
             progress_bar.update()
             progress_bar.set_postfix({
-                "Loss": "{0:.6f}".format(loss)
+                "Loss": "{0:.6f}".format(loss),
+                "best_loss": "{0:.6f}".format(best_loss)
             })
 
-    return memberships, data[medoids_idx, :], np.array(losses)
+    return best_memberships, data[best_medoids_idx, :], np.array(losses)
 
 
 def _compute_memberships(data, medoids_idx, fuzzifier):
@@ -129,15 +138,11 @@ def _compute_top_membership_subset(memberships, membership_subset_size):
     """
     topk_idx = np.argpartition(memberships, -membership_subset_size, axis=0)[-membership_subset_size:]
 
-    # TODO: Sparse matrix may be faster, but it could not be used for the medoids computation because the other matrix
-    #  has 3 dimensions, and it is currently not possible to do matrix multiplication with a sparse matrix and a
-    #  more-than-2-dimensions matrix. See : https://github.com/scipy/scipy/blob/master/scipy/sparse/base.py#L527
-    #  Thus we convert it to a traditional matrix with the `.toarray()` operation.
     top_memberships_mask = \
         csr_matrix((np.ones((topk_idx.shape[0] * topk_idx.shape[1],)),
                     (topk_idx.flatten(), np.nonzero(abs(topk_idx) + 1)[1])),
                    shape=memberships.shape,
-                   dtype=bool)
+                   dtype=bool).toarray()
 
     # Return the subset of the top memberships (the result of the application of the mask).
     # Not used here but might be useful. Many thanks to POUYET Adrien for its help.
