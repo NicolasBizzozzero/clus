@@ -4,8 +4,8 @@ import numpy as np
 
 from tqdm import tqdm
 
-from clus.src.handle_empty_clusters import handle_empty_clusters
-from clus.src.cluster_initialization import cluster_initialization
+from clus.src.core.handle_empty_clusters import handle_empty_clusters
+from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, Elapsed:{elapsed}, ETA:{remaining}{postfix}"

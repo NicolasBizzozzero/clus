@@ -1,7 +1,7 @@
-from clus.src.methods import kmeans
-from clus.src.methods import fuzzy_c_means
-from clus.src.methods import fuzzy_c_medoids
-from clus.src.methods import linearized_fuzzy_c_medoids
+from clus.src.core.methods import kmeans
+from clus.src.core.methods import fuzzy_c_means
+from clus.src.core.methods import fuzzy_c_medoids
+from clus.src.core.methods import linearized_fuzzy_c_medoids
 
 
 __all__ = [

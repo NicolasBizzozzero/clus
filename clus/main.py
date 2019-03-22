@@ -27,11 +27,11 @@ import numpy as np
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clus.src.methods.methods import get_clustering_function, use_distance_matrix
-from clus.src.normalization import normalization as normalize
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix
+from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.random import set_manual_seed
-from clus.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
-
+from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d
+from clus.src.utils.path import compute_visualisation_saving_path
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
@@ -180,11 +180,11 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                saving_path=_compute_saving_path(dataset,
-                                                                 clustering_algorithm,
-                                                                 components,
-                                                                 seed,
-                                                                 dir_dest=path_dir_dest),
+                                saving_path=compute_visualisation_saving_path(dataset,
+                                                                              clustering_algorithm,
+                                                                              components,
+                                                                              seed,
+                                                                              dir_dest=path_dir_dest),
                                 show=True,
                                 save=save)
 
@@ -195,26 +195,13 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                saving_path=_compute_saving_path(dataset,
-                                                                 clustering_algorithm,
-                                                                 components,
-                                                                 seed,
-                                                                 dir_dest=path_dir_dest),
+                                saving_path=compute_visualisation_saving_path(dataset,
+                                                                              clustering_algorithm,
+                                                                              components,
+                                                                              seed,
+                                                                              dir_dest=path_dir_dest),
                                 show=True,
                                 save=save_3d)
-
-
-# TODO: Move this somewhere else
-def _compute_saving_path(dataset, clustering_algorithm, components,
-                         seed, dir_dest) -> str:
-    os.makedirs(dir_dest, exist_ok=True)
-
-    return os.path.join(dir_dest, "{}_{}_{}_{}.png".format(
-        os.path.splitext(ntpath.basename(dataset))[0],
-        clustering_algorithm,
-        components,
-        seed
-    ))
 
 
 if __name__ == '__main__':

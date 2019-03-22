@@ -1,10 +1,10 @@
 import enum
 from typing import Callable
 
-from clus.src.methods.kmeans import kmeans
-from clus.src.methods.fuzzy_c_means import fuzzy_c_means
-from clus.src.methods.fuzzy_c_medoids import fuzzy_c_medoids
-from clus.src.methods.linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
+from clus.src.core.methods import kmeans
+from clus.src.core.methods import fuzzy_c_means
+from clus.src.core.methods import fuzzy_c_medoids
+from clus.src.core.methods import linearized_fuzzy_c_medoids
 
 ALIAS_CM_KMEANS = ("kmeans",)
 ALIAS_CM_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
