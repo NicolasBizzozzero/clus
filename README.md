@@ -6,7 +6,6 @@
 ## TODO
 * Rendre les opérations de clustering inplace (ne pas dupliquer les données)
 * Stocker les meilleurs clusters à chaque itération
-* Transformer les 4 appels à visualise en seulement 2, s'inspirer de cette réponse : https://stackoverflow.com/a/21884187
 * Supprimer la PCA, la remplacer par un t-SNE
   * S'appuyer sur ce post pour le tsne : https://stats.stackexchange.com/a/352138 (et voir cette reference : https://arxiv.org/abs/1712.09005)
 * Optimiser les méthodes déjà existantes :

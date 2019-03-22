@@ -179,7 +179,14 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
-                                                                           header=0).columns.tolist())
+                                                                           header=0).columns.tolist(),
+                                saving_path=_compute_saving_path(dataset,
+                                                                 clustering_algorithm,
+                                                                 components,
+                                                                 seed,
+                                                                 dir_dest=path_dir_dest),
+                                show=True,
+                                save=save)
 
     if visualise_3d:
         visualise_clustering_3d(data=data,
@@ -187,34 +194,14 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
-                                                                           header=0).columns.tolist())
-    if save:
-        visualise_clustering_2d(data=data,
-                                clusters_center=clusters_center,
-                                clustering_method=clustering_algorithm,
-                                dataset_name=ntpath.basename(dataset),
-                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                show=False,
                                 saving_path=_compute_saving_path(dataset,
                                                                  clustering_algorithm,
                                                                  components,
                                                                  seed,
-                                                                 dir_dest=path_dir_dest))
-
-    if save_3d:
-        visualise_clustering_3d(data=data,
-                                clusters_center=clusters_center,
-                                clustering_method=clustering_algorithm,
-                                dataset_name=ntpath.basename(dataset),
-                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
-                                                                           header=0).columns.tolist(),
+                                                                 dir_dest=path_dir_dest),
                                 show=True,
-                                saving_path=_compute_saving_path(dataset,
-                                                                 clustering_algorithm,
-                                                                 components,
-                                                                 seed,
-                                                                 dir_dest=path_dir_dest))
+                                save=save_3d)
 
 
 # TODO: Move this somewhere else

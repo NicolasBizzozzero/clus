@@ -33,7 +33,7 @@ _TIME_DELTAS = []
 
 
 def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_name=None, header=None,
-                            show=True, saving_path=None):
+                            show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
 
     # Apply a 2-components PCA if the data has more than 2 dimensions
@@ -54,10 +54,10 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     # Set the most diverse colormap possible
     c = _get_rainbow_color_cycle(closest_cluster)
 
-    plt.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES,
-                marker=_MARKER_EXAMPLES)
-    plt.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
-                marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
+    ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES,
+               marker=_MARKER_EXAMPLES)
+    ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
+               marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
 
     plt.xlabel(header[0])
     plt.ylabel(header[1])
@@ -65,15 +65,15 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
                            dataset_name, applied_pca, n_components_pca=2)
     plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 
-    if saving_path is not None:
-        plt.savefig(saving_path)
-        plt.close()
+    if save:
+        fig.savefig(saving_path)
     if show:
         plt.show()
+    plt.close()
 
 
 def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_name, header=None,
-                            show=True, saving_path=None):
+                            show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 3, "Data must have at least 3 dimensions for a 3D-visualisation"
 
     # Apply a 3-components PCA if the data has more than 3 dimensions
@@ -114,10 +114,11 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
                            dataset_name, applied_pca, n_components_pca=3)
     ax.set_title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 
-    if saving_path is not None:
+    if save:
         plt.savefig(saving_path)
     if show:
         plt.show()
+    plt.close()
 
 
 def visualise_clustering_loss(losses, show=True):
