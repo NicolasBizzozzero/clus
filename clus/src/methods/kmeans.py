@@ -9,10 +9,6 @@ from clus.src.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
 from clus.src.visualisation import print_progression
 
-ALIASES_NOTHING = ("nothing",)
-ALIASES_RANDOM_EXAMPLE = ("random_example",)
-ALIASES_FURTHEST_EXAMPLE_FROM_ITS_CENTROID = ("furthest_example_from_its_centroid",)
-
 
 @remove_unexpected_arguments
 def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: int = 1000,
