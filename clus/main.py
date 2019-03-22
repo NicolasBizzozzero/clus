@@ -159,7 +159,6 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
         initialization_method=initialization_method,
         empty_clusters_method=empty_clusters_method,
     )
-    print("")  # Print a newline after the line showing the progression at each iteration
 
     if visualise:
         visualise_clustering_2d(data=data,

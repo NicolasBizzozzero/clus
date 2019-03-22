@@ -1,6 +1,21 @@
+""" This module contains multiple methods to initialise clusters.
+
+If you want to add another initialisation method, you need to update the `_str_to_clusterinitialization` function to
+return your new method, along with its aliases.
+All methods must take the data and the number of components wanted as input. All methods also need to return the
+initialised clusters.
+"""
+
 from typing import Callable
 
 import numpy as np
+
+
+ALIASES_RANDOM_UNIFORM = ("random_uniform", "uniform")
+ALIASES_RANDOM_GAUSSIAN = ("random_gaussian", "gaussian")
+ALIASES_RANDOM_CHOICE = ("random_choice", "choice")
+ALIASES_CENTRAL_DISSIMILAR_MEDOIDS = ("central_dissimilar_medoids",)
+ALIASES_CENTRAL_DISSIMILAR_RANDOM_MEDOIDS = ("central_dissimilar_random_medoids",)
 
 
 class UnknownClusterInitialization(Exception):
@@ -48,24 +63,27 @@ def random_choice_idx(data: np.ndarray, components: int) -> np.ndarray:
 
 
 def _str_to_clusterinitialization(string: str, need_idx: bool) -> Callable:
+    global ALIASES_RANDOM_UNIFORM, ALIASES_RANDOM_GAUSSIAN, ALIASES_RANDOM_CHOICE, ALIASES_CENTRAL_DISSIMILAR_MEDOIDS,\
+        ALIASES_CENTRAL_DISSIMILAR_RANDOM_MEDOIDS
+
     string = string.lower()
-    if string in ("random_uniform", "uniform"):
+    if string in ALIASES_RANDOM_UNIFORM:
         if need_idx:
             raise ClusterInitializationCantReturnIndexes(string)
         return random_uniform
-    if string in ("random_gaussian", "gaussian"):
+    if string in ALIASES_RANDOM_GAUSSIAN:
         if need_idx:
             raise ClusterInitializationCantReturnIndexes(string)
         return random_gaussian
-    if string in ("random_choice", "choice"):
+    if string in ALIASES_RANDOM_CHOICE:
         if need_idx:
             return random_choice_idx
         return random_choice
-    if string in ("central_dissimilar_medoids",):
+    if string in ALIASES_CENTRAL_DISSIMILAR_MEDOIDS:
         if need_idx:
             raise NotImplementedError()
         raise NotImplementedError()
-    if string in ("central_dissimilar_random_medoids",):
+    if string in ALIASES_CENTRAL_DISSIMILAR_RANDOM_MEDOIDS:
         if need_idx:
             raise NotImplementedError()
         raise NotImplementedError()
