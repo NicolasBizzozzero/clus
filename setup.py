@@ -74,7 +74,8 @@ setup(
         "numpy >= 1.16.1",
         "pandas >= 0.24.1",
         "scikit-learn >= 0.20.2",
-        "scipy >= 1.2.1"
+        "scipy >= 1.2.1",
+        "tqdm >= 4.31.1"
     ],
 
     # List additional groups of dependencies here (e.g. development
