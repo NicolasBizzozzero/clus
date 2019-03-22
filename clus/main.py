@@ -52,20 +52,20 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
               help="Character or REGEX used for separating data in the CSV data file.")
 @click.option("--header", is_flag=True,
-              help=("Set this flag if your dataset contains a header, it will then be ignored by the clustering algorit"
-                    "hm. If you set this flag while not having a header, the first example of the dataset will be ignor"
-                    "ed."))
+              help=("Set this flag if your dataset contains a header, it will then be ignored by the clustering "
+                    "algorithm. If you set this flag while not having a header, the first example of the dataset will "
+                    "be ignored."))
 # Clustering options
 @click.option("--initialization-method", type=str, default="random_choice", show_default=True,
               help=("Method used to initialize the clusters' center. The following methods are available :\n"
-                    "'random_uniform' or 'uniform', samples values between the min and max across each dimension.\n"
-                    "'random_gaussian' or 'gaussian', samples values from a gaussian with the same mean and std as each"
-                    " data's dimension.\n"
-                    "'random_choice' or 'choice', samples random examples from the data without replacement.\n"
-                    "'central_dissimilar_medoids', samples the first medoid as the most central point of the dataset, "
-                    "then sample all successive medoids as the most dissimilar to all medoids that have already been "
-                    "picked.\n"
-                    "'central_dissimilar_random_medoids', same as 'central_dissimilar_medoids', but the first medoid "
+                    "- 'random_uniform' or 'uniform', samples values between the min and max across each dimension.\n"
+                    "- 'random_gaussian' or 'gaussian', samples values from a gaussian with the same mean and std as "
+                    "each data's dimension.\n"
+                    "- 'random_choice' or 'choice', samples random examples from the data without replacement.\n"
+                    "- 'central_dissimilar_medoids', samples the first medoid as the most central point of the "
+                    "dataset, then sample all successive medoids as the most dissimilar to all medoids that have "
+                    "already been picked.\n"
+                    "- 'central_dissimilar_random_medoids', same as 'central_dissimilar_medoids', but the first medoid "
                     "is sampled randomly."))
 @click.option("--empty-clusters-method", type=str, default="nothing", show_default=True,
               help=("Method used to handle empty clusters. The following methods are available :\n"
@@ -76,45 +76,46 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("-c", "-k", "--components", type=int, default=5, show_default=True,
               help="Number of clustering components.")
 @click.option("--eps", type=float, default=1e-6, show_default=True,
-              help="Minimal threshold caracterizing an algorithm's convergence.")
+              help="Minimal threshold characterizing an algorithm's convergence.")
 @click.option("--max-iter", type=int, default=1000, show_default=True,
               help="Maximal number of iteration to make before stopping an algorithm.")
 @click.option("-m", "--fuzzifier", type=float, default=2, show_default=True,
               help="Fuzzification exponent applied to the membership degrees.")
 @click.option("--pairwise-distance", type=str, default="euclidean", show_default=True,
-              help="Metric used to compute the distance matrix when the clustering algorithm need it. Set to \"precompu"
-                   "ted\" if your data is already a distance matrix. All possible metrics are described at the followin"
-                   "g link :\nhttps://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
+              help="Metric used to compute the distance matrix when the clustering algorithm need it. Set to "
+                   "\"precomputed\" if your data is already a distance matrix. All possible metrics are described at "
+                   "the following link :\n"
+                   "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 # Visualisation options
 @click.option("--visualise", is_flag=True,
-              help=("Set this flag if you want to visualise the clustering result. If your data's dimension is more tha"
-                    "n 2, a 2-components PCA is applied to the data before visualising."))
+              help="Set this flag if you want to visualise the clustering result. If your data's dimension is more "
+                   "than 2, a 2-components PCA is applied to the data before visualising.")
 @click.option("--visualise-3d", is_flag=True,
-              help=("Set this flag if you want to visualise the clustering result in 3D. If your data's dimension is mo"
-                    "re than 3, a 3-components PCA is applied to the data before visualising."))
+              help="Set this flag if you want to visualise the clustering result in 3D. If your data's dimension is "
+                   "more than 3, a 3-components PCA is applied to the data before visualising.")
 @click.option("--save", is_flag=True,
-              help=("Set this flag if you want to save the visualisation of the clustering result. If your data's dimen"
-                    "sion is more than 2, a 2-components PCA is applied to the data before visualising."))
+              help="Set this flag if you want to save the visualisation of the clustering result. If your data's "
+                   "dimension is more than 2, a 2-components PCA is applied to the data before visualising.")
 @click.option("--save-3d", is_flag=True,
-              help=("Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's"
-                    " dimension is more than 3, a 3-components PCA is applied to the data before visualising."))
+              help="Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's "
+                   "dimension is more than 3, a 3-components PCA is applied to the data before visualising.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
               help="Random seed to set.")
 @click.option("--normalization", type=str, default=None, show_default=True,
-              help=("Normalize your data with any of the proposed methods below :\n"
-                    "1 - rescaling: TODO\n"
-                    "2 - mean: TODO\n"
-                    "3 - standardization: TODO\n"
-                    "4 - unit_length: TODO\n"
-                    "5 - whitening: TODO\n"))
+              help="Normalize your data with any of the proposed methods below :\n"
+                   "1 - rescaling: TODO\n"
+                   "2 - mean: TODO\n"
+                   "3 - standardization: TODO\n"
+                   "4 - unit_length: TODO\n"
+                   "5 - whitening: TODO\n")
 @click.option("--quiet", is_flag=True,
-              help="Set this flag if you want to have absolutely no output during the execution.")
+              help="Set this flag if you want to completely silence all outputs to stdout.")
 @click.option("--path-dir-dest", type=str, default="results", show_default=True,
-              help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does n"
-                   "ot already exists.")
+              help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
+                   "not already exists.")
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
          membership_subset_size, visualise, visualise_3d, save, save_3d, seed, normalization,
