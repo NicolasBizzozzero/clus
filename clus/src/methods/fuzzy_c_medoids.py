@@ -56,7 +56,8 @@ def fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: i
         "The given medoids indexes do not have a correct shape. Expected shape : {}, given shape : {}".format(
             (components,), medoids_idx.shape
         )
-    assert np.all(medoids_idx < data.shape[0]), "The provided medoid indexes array contains unreachable indexes"
+    assert (medoids_idx is None) or np.all(medoids_idx < data.shape[0]),\
+        "The provided medoid indexes array contains unreachable indexes"
 
     # Initialisation
     if medoids_idx is None:

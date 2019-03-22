@@ -56,13 +56,14 @@ def linearized_fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, co
     assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
     assert 0 <= max_iter, "The number of max iterations must be positive"
     assert fuzzifier > 1, "The fuzzifier must be greater than 1"
-    assert 1 <= membership_subset_size <= data.shape[0],\
+    assert (membership_subset_size is None) or (1 <= membership_subset_size <= data.shape[0]),\
         "The membership subset size wanted must be between 1 and %s" % data.shape[0]
     assert (medoids_idx is None) or (medoids_idx.shape == components), \
         "The given medoids indexes do not have a correct shape. Expected shape : {}, given shape : {}".format(
             (components,), medoids_idx.shape
         )
-    assert np.all(medoids_idx < data.shape[0]), "The provided medoid indexes array contains unreachable indexes"
+    assert (medoids_idx is None) or np.all(medoids_idx < data.shape[0]),\
+        "The provided medoid indexes array contains unreachable indexes"
 
     # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
     # in a cluster

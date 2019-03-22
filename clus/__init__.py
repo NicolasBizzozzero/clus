@@ -5,10 +5,10 @@ from clus.src.methods import linearized_fuzzy_c_medoids
 
 
 __all__ = [
-    "kmeans",
-    "fuzzy_c_means",
-    "fuzzy_c_medoids",
-    "linearized_fuzzy_c_medoids"
+    kmeans,
+    fuzzy_c_means,
+    fuzzy_c_medoids,
+    linearized_fuzzy_c_medoids
 ]
 
 
