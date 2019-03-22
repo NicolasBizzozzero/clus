@@ -1,13 +1,10 @@
-import sys
 import warnings
-import time
 from textwrap import wrap
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from clus.src.normalization import rescaling
-from clus.src.utils.time import pretty_time_delta
 
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.decomposition import PCA
@@ -25,11 +22,6 @@ _ALPHA_CLUSTERS_CENTER = 0.9
 _ELEVATION = 48
 _AZIMUTH = 134
 _DISTANCE_3D = 12
-
-
-# Used for stocking time delta between each iterations
-_TIME_LAST_ITERATION = None
-_TIME_DELTAS = []
 
 
 def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_name=None, header=None,
@@ -126,32 +118,6 @@ def visualise_clustering_loss(losses, show=True):
 
     if show:
         plt.show()
-
-
-def print_progression(iteration, loss, start_time):
-    global _TIME_DELTAS, _TIME_LAST_ITERATION
-
-    if _TIME_LAST_ITERATION is None:
-        _TIME_DELTAS.append(time.time() - start_time)
-        _TIME_LAST_ITERATION = _TIME_DELTAS[-1] + start_time
-    else:
-        _TIME_DELTAS.append(time.time() - _TIME_LAST_ITERATION)
-        _TIME_LAST_ITERATION += _TIME_DELTAS[-1]
-
-    extended_time = time.time() - start_time
-
-    sys.stdout.write('\r')
-    sys.stdout.write(("Iteration {iteration}\t"
-                      "Loss {loss}\t"
-                      "Extended_time {extended_time}\t"
-                      "Mean_iter_time {mean_iter_time} (std {std_iter_time})").format(
-        iteration=iteration,
-        loss=round(loss, 7),
-        extended_time=pretty_time_delta(extended_time),
-        mean_iter_time=pretty_time_delta(np.mean(_TIME_DELTAS)),
-        std_iter_time=pretty_time_delta(np.std(_TIME_DELTAS))
-    ))
-    sys.stdout.flush()
 
 
 def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):
