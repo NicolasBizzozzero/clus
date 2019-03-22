@@ -146,7 +146,7 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
 
     if normalization is not None:
-        data.astype(np.float64)
+        data = data.astype(np.float64)
         normalize(data, strategy=normalization)
 
     # Some methods need the data to be a pairwise distance matrix

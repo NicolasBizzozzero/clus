@@ -2,10 +2,13 @@ import time
 from typing import Optional, Tuple
 
 import numpy as np
+from tqdm import tqdm
+
 from clus.src.handle_empty_clusters import handle_empty_clusters
 from clus.src.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
-from clus.src.visualisation import print_progression
+
+_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, Elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
 @remove_unexpected_arguments
@@ -63,27 +66,30 @@ def fuzzy_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: i
     if medoids_idx is None:
         medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
-    memberships = None
-    current_iter = 0
-    losses = []
-    medoids_idx_old = None
-    start_time = time.time()
-    while (current_iter <= max_iter) and \
-            ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
-            ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
-        medoids_idx_old = medoids_idx
-        memberships = _compute_memberships(distance_matrix, medoids_idx, fuzzifier)
-        handle_empty_clusters(distance_matrix, medoids_idx, memberships, strategy=empty_clusters_method)
+    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+        memberships = None
+        medoids_idx_old = None
+        losses = []
+        current_iter = 0
+        while (current_iter <= max_iter) and \
+              ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
+              ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
+            medoids_idx_old = medoids_idx
+            memberships = _compute_memberships(distance_matrix, medoids_idx, fuzzifier)
+            handle_empty_clusters(distance_matrix, medoids_idx, memberships, strategy=empty_clusters_method)
 
-        medoids_idx = _compute_medoids(distance_matrix, memberships, fuzzifier)
+            medoids_idx = _compute_medoids(distance_matrix, memberships, fuzzifier)
 
-        loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
-        losses.append(loss)
+            loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
+            losses.append(loss)
 
-        current_iter += 1
-        print_progression(iteration=current_iter, loss=loss, start_time=start_time)
+            # Update the progress bar
+            current_iter += 1
+            progress_bar.update()
+            progress_bar.set_postfix({
+                "Loss": "{0:.6f}".format(loss)
+            })
 
-    print("")  # Print a newline after the line showing the progression at each iteration
     return memberships, data[medoids_idx, :], np.array(losses)
 
 

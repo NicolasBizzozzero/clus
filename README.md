@@ -5,6 +5,7 @@
 
 ## TODO
 * Rendre les opérations de clustering inplace (ne pas dupliquer les données)
+* Changer l'operation d'affichage des résultats à chaque iteration (utiliser TQDM), virer les variables globales dans visualisation.py
 * Stocker les meilleurs clusters à chaque itération
 * Supprimer la PCA, la remplacer par un t-SNE
   * S'appuyer sur ce post pour le tsne : https://stats.stackexchange.com/a/352138 (et voir cette reference : https://arxiv.org/abs/1712.09005)

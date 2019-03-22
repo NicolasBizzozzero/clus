@@ -4,10 +4,13 @@ from typing import Optional, Tuple
 
 import numpy as np
 
+from tqdm import tqdm
+
 from clus.src.handle_empty_clusters import handle_empty_clusters
 from clus.src.cluster_initialization import cluster_initialization
 from clus.src.utils.decorator import remove_unexpected_arguments
-from clus.src.visualisation import print_progression
+
+_FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, Elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
 @remove_unexpected_arguments
@@ -56,24 +59,27 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
     if centroids is None:
         centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
 
-    memberships = None
-    current_iter = 0
-    losses = []
-    start_time = time.time()
-    while (current_iter <= max_iter) and \
-            ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
-        memberships = _optim_memberships(data, centroids)
-        handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
+    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+        memberships = None
+        losses = []
+        current_iter = 0
+        while (current_iter <= max_iter) and \
+              ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
+            memberships = _optim_memberships(data, centroids)
+            handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
 
-        centroids = _optim_centroids(data, memberships)
+            centroids = _optim_centroids(data, memberships)
 
-        loss = _compute_loss(data, memberships, centroids)
-        losses.append(loss)
+            loss = _compute_loss(data, memberships, centroids)
+            losses.append(loss)
 
-        current_iter += 1
-        print_progression(iteration=current_iter, loss=loss, start_time=start_time)
+            # Update the progress bar
+            current_iter += 1
+            progress_bar.update()
+            progress_bar.set_postfix({
+                "Loss": "{0:.6f}".format(loss)
+            })
 
-    print("")  # Print a newline after the line showing the progression at each iteration
     return memberships, centroids, np.array(losses)
 
 
