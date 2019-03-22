@@ -81,7 +81,7 @@ def kmeans(data: np.ndarray, components: int = 10, eps: float = 1e-4, max_iter: 
 
 
 def _optim_memberships(data, centroids):
-    """
+    """ Compute the memberships matrix minimizing the distance across all data and the centroids.
 
     Source :
     * https://codereview.stackexchange.com/questions/61598/k-mean-with-numpy
@@ -102,7 +102,8 @@ def _optim_memberships(data, centroids):
 
 
 def _optim_centroids(data, memberships):
-    # We compute the division only to with non-empty. Indeed, a cluster may be
+    """ Compute the centroids minimizing the distance between all data examples and their respective centroids. """
+    # We compute the division only with non-empty clusters. Indeed, a cluster may be
     # empty in some rare cases. See [2]
     sum_memberships_by_centroid = np.sum(memberships, axis=0)
     return np.divide(np.dot(data.T, memberships),
@@ -110,7 +111,11 @@ def _optim_centroids(data, memberships):
                      where=sum_memberships_by_centroid != 0).T
 
 
+
 def _compute_loss(data, memberships, centroids):
+    """ Compute the loss of the clustering algorithm.
+    This method do not have any purpose in the clustering algorithm. It is only invoked for result analysis.
+    """
     dist_data_centroids = data - centroids[:, np.newaxis]
     return (memberships *
             np.power(np.linalg.norm(dist_data_centroids, axis=-1, ord=2),
