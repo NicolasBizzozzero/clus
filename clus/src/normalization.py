@@ -16,11 +16,27 @@ from typing import Callable
 import numpy as np
 
 
+ALIASES_RESCALING = ("rescaling",)
+ALIASES_MEAN_NORMALIZATION = ("mean", "mean_normalization",)
+ALIASES_STANDARDIZATION = ("standardization",)
+ALIASES_SCALE_TO_UNIT_LENGTH = ("unit_length",)
+ALIASES_WHITENING_ZCA = ("whitening_zca", "zca")
+ALIASES_WHITENING_PCA = ("whitening_pca", "pca")
+ALIASES_WHITENING_CHOLESKY = ("whitening_cholesky", "cholesky")
+ALIASES_WHITENING_ZCA_COR = ("whitening_zca_cor", "zca_cor")
+ALIASES_WHITENING_PCA_COR = ("whitening_pca_cor", "pca_cor")
+
+
 class UnknownNormalization(Exception):
     def __init__(self, name: str):
         Exception.__init__(self, "The normalization : \"{method_name}\" doesn't exists".format(
             method_name=name
         ))
+
+
+def normalization(array: np.ndarray, strategy: str) -> None:
+    strategy = _str_to_normalization(strategy, inplace=True)
+    strategy(array)
 
 
 def rescaling(array: np.ndarray, floor: float = 0, ceil: float = 1) -> np.ndarray:
@@ -77,27 +93,63 @@ def scaling_to_unit_length_(array: np.ndarray, norm_p: int = 2) -> None:
     np.divide(array.astype(np.float64), np.sum(np.abs(array) ** norm_p, axis=0) ** 1 / norm_p, out=array)
 
 
-def whitening(array: np.ndarray) -> np.ndarray:
-    return array / array.std(axis=0)
+def whitening_zca(array: np.ndarray) -> np.ndarray:
+    """ Maximizes the average cross-covariance between each dimension of the whitened and original data, and uniquely
+    produces a symmetric cross-covariance matrix.
+    """
+    pass
 
 
-def whitening_(array: np.ndarray) -> None:
-    arr_std = array.std(axis=0)
-    np.divide(array.astype(np.float64), arr_std, out=array)
+def whitening_zca_cor(array: np.ndarray) -> np.ndarray:
+    """ Maximizes the average cross-correlation between each dimension of the whitened and original data, and uniquely
+    produces a symmetric cross-correlation matrix.
+    """
+    pass
+
+
+def whitening_pca(array: np.ndarray) -> np.ndarray:
+    """ Maximally compresses all dimensions of the original data into each dimension of the whitened data using the
+    cross-covariance matrix as the compression metric.
+    """
+    pass
+
+
+def whitening_pca_cor(array: np.ndarray) -> np.ndarray:
+    """ Maximally compresses all dimensions of the original data into each dimension of the whitened data using the
+    cross-correlation matrix as the compression metric.
+    """
+    pass
+
+
+def whitening_cholesky(array: np.ndarray) -> np.ndarray:
+    """ Uniquely results in lower triangular positive diagonal cross-covariance and cross-correlation matrices. """
+    pass
 
 
 def _str_to_normalization(string: str, inplace=True) -> Callable:
+    global ALIASES_RESCALING, ALIASES_MEAN_NORMALIZATION, ALIASES_STANDARDIZATION, ALIASES_SCALE_TO_UNIT_LENGTH,\
+        ALIASES_WHITENING_ZCA, ALIASES_WHITENING_PCA, ALIASES_WHITENING_CHOLESKY, ALIASES_WHITENING_ZCA_COR,\
+        ALIASES_WHITENING_PCA_COR
+
     string = string.lower()
-    if string in ("rescaling",):
+    if string in ALIASES_RESCALING:
         return rescaling_ if inplace else rescaling
-    elif string in ("mean", "mean_normalization",):
+    elif string in ALIASES_MEAN_NORMALIZATION:
         return mean_normalization_ if inplace else mean_normalization
-    elif string in ("standardization",):
+    elif string in ALIASES_STANDARDIZATION:
         return standardization_ if inplace else standardization
-    elif string in ("unit_length",):
+    elif string in ALIASES_SCALE_TO_UNIT_LENGTH:
         return scaling_to_unit_length_ if inplace else scaling_to_unit_length
-    elif string in ("whitening",):
-        return whitening_ if inplace else whitening
+    elif string in ALIASES_WHITENING_ZCA:
+        raise NotImplementedError()
+    elif string in ALIASES_WHITENING_PCA:
+        raise NotImplementedError()
+    elif string in ALIASES_WHITENING_CHOLESKY:
+        raise NotImplementedError()
+    elif string in ALIASES_WHITENING_ZCA_COR:
+        raise NotImplementedError()
+    elif string in ALIASES_WHITENING_PCA_COR:
+        raise NotImplementedError()
     else:
         raise UnknownNormalization(string)
 

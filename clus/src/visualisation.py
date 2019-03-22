@@ -6,7 +6,7 @@ from textwrap import wrap
 import matplotlib.pyplot as plt
 import numpy as np
 
-from clus.src.utils.normalization import rescaling
+from clus.src.normalization import rescaling
 from clus.src.utils.time import pretty_time_delta
 
 from mpl_toolkits.mplot3d import Axes3D

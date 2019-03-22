@@ -28,7 +28,7 @@ import numpy as np
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.methods.methods import get_clustering_function, use_distance_matrix
-from clus.src.utils.normalization import _str_to_normalization
+from clus.src.normalization import normalization as normalize
 from clus.src.utils.random import set_manual_seed
 from clus.src.visualisation import visualise_clustering_2d, visualise_clustering_3d
 
@@ -69,10 +69,10 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "is sampled randomly.")
 @click.option("--empty-clusters-method", type=str, default="nothing", show_default=True,
               help="Method used to handle empty clusters. The following methods are available :\n"
-                   "'nothing', do absolutely nothing and ignore empty clusters.\n"
-                   "'random_example', assign a random example to all empty clusters.\n"
-                   "'furthest_example_from_its_centroid', assign the furthest example from its centroid to each empty "
-                   "cluster.\n")
+                   "- 'nothing', do absolutely nothing and ignore empty clusters.\n"
+                   "- 'random_example', assign a random example to all empty clusters.\n"
+                   "- 'furthest_example_from_its_centroid', assign the furthest example from its centroid to each "
+                   "empty cluster.")
 @click.option("-c", "-k", "--components", type=int, default=5, show_default=True,
               help="Number of clustering components.")
 @click.option("--eps", type=float, default=1e-6, show_default=True,
@@ -106,11 +106,20 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Random seed to set.")
 @click.option("--normalization", type=str, default=None, show_default=True,
               help="Normalize your data with any of the proposed methods below :\n"
-                   "1 - rescaling: TODO\n"
-                   "2 - mean: TODO\n"
-                   "3 - standardization: TODO\n"
-                   "4 - unit_length: TODO\n"
-                   "5 - whitening: TODO\n")
+                   "- 'rescaling', rescale the range of features into the [0, 1] range.\n"
+                   "- 'mean' or 'mean_normalization', normalize the features to zero mean.\n"
+                   "- 'standardization', normalize the features to zero mean and unit std.\n"
+                   "- 'unit_length', scale the components by dividing each features by their p-norm.\n"
+                   "- 'whitening_zca' or 'zca', maximizes the average cross-covariance between each dimension of the "
+                   "whitened and original data, and uniquely produces a symmetric cross-covariance matrix.\n"
+                   "- 'whitening_pca' or 'pca', maximally compresses all dimensions of the original data into each "
+                   "dimension of the whitened data using the cross-covariance matrix as the compression metric.\n"
+                   "- 'whitening_zca_cor' or 'zca_cor', maximizes the average cross-correlation between each dimension "
+                   "of the whitened and original data, and uniquely produces a symmetric cross-correlation matrix.\n"
+                   "- 'whitening_pca_cor' or 'pca_cor', maximally compresses all dimensions of the original data into "
+                   "each dimension of the whitened data using the cross-correlation matrix as the compression metric.\n"
+                   "- 'whitening_cholesky' or 'cholesky', Uniquely results in lower triangular positive diagonal "
+                   "cross-covariance and cross-correlation matrices.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
 @click.option("--path-dir-dest", type=str, default="results", show_default=True,
@@ -130,16 +139,15 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
 
     print("Starting clustering with the following parameters :", parameters)
 
-    # Load the clus algorithm
+    # Load the clustering algorithm
     clustering_function = get_clustering_function(clustering_algorithm)
 
     # Load data
     data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
 
     if normalization is not None:
-        normalization_method = _str_to_normalization(normalization)
-        data = data.astype(np.float64)
-        normalization_method(data)
+        data.astype(np.float64)
+        normalize(data, strategy=normalization)
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
@@ -152,7 +160,7 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
         else:
             distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
 
-    # Perform the clus method
+    # Perform the clustering method
     memberships, clusters_center, losses = clustering_function(
         data=data,
         distance_matrix=distance_matrix,
