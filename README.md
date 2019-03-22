@@ -8,7 +8,6 @@
 * Supprimer la PCA, la remplacer par un t-SNE
   * S'appuyer sur ce post pour le tsne : https://stats.stackexchange.com/a/352138 (et voir cette reference : https://arxiv.org/abs/1712.09005)
 * Méthodes de Clustering à implémenter :
-  * https://github.com/holtskinner/PossibilisticCMeans
   * https://github.com/scikit-learn/scikit-learn/blob/7b136e9/sklearn/cluster/k_means_.py#L1318
 * La loss n'est pas une mesure efficace pour comparer des clusterings à differentes tailles de composantes. Implémenter des méthodes d'évaluations :
   * silhouette (https://en.wikipedia.org/wiki/Silhouette_(clustering))
