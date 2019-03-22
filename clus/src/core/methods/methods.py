@@ -2,6 +2,7 @@ from typing import Callable
 
 from clus.src.core.methods import kmeans
 from clus.src.core.methods import fuzzy_c_means
+from clus.src.core.methods import hard_c_medoids
 from clus.src.core.methods import fuzzy_c_medoids
 from clus.src.core.methods import linearized_fuzzy_c_medoids
 
@@ -44,7 +45,7 @@ def get_clustering_function(string: str) -> Callable:
     elif string in ALIASES_FUZZY_C_MEDOIDS:
         return fuzzy_c_medoids
     elif string in ALIASES_HARD_C_MEDOIDS:
-        raise NotImplementedError()
+        return hard_c_medoids
     elif string in ALIASES_LINEARIZED_FUZZY_C_MEDOIDS:
         return linearized_fuzzy_c_medoids
     elif string in ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT:
