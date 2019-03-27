@@ -5,6 +5,8 @@ from clus.src.core.methods import fuzzy_c_means
 from clus.src.core.methods import hard_c_medoids
 from clus.src.core.methods import fuzzy_c_medoids
 from clus.src.core.methods import linearized_fuzzy_c_medoids
+from clus.src.core.methods import linearized_fuzzy_c_medoids_select
+
 
 ALIASES_KMEANS = ("kmeans",)
 ALIASES_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
@@ -34,6 +36,16 @@ def use_distance_matrix(clustering_method: str) -> bool:
     )
 
 
+def use_medoids(clustering_method: str) -> bool:
+    return clustering_method in list(
+        ALIASES_FUZZY_C_MEDOIDS +
+        ALIASES_HARD_C_MEDOIDS +
+        ALIASES_LINEARIZED_FUZZY_C_MEDOIDS +
+        ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT +
+        ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT
+    )
+
+
 def get_clustering_function(string: str) -> Callable:
     string = string.lower()
     if string in ALIASES_KMEANS:
@@ -49,7 +61,7 @@ def get_clustering_function(string: str) -> Callable:
     elif string in ALIASES_LINEARIZED_FUZZY_C_MEDOIDS:
         return linearized_fuzzy_c_medoids
     elif string in ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT:
-        raise NotImplementedError()
+        return linearized_fuzzy_c_medoids_select
     elif string in ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT:
         raise NotImplementedError()
     else:

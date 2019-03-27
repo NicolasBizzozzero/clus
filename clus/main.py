@@ -27,7 +27,7 @@ import numpy as np
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.random import set_manual_seed
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d
@@ -172,6 +172,8 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
         initialization_method=initialization_method,
         empty_clusters_method=empty_clusters_method,
     )
+    if use_medoids(clustering_algorithm):
+        clusters_center = data[clusters_center, :]
 
     if visualise:
         visualise_clustering_2d(data=data,

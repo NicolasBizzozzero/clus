@@ -9,6 +9,7 @@
   * S'appuyer sur ce post pour le tsne : https://stats.stackexchange.com/a/352138 (et voir cette reference : https://arxiv.org/abs/1712.09005)
 * Méthodes de Clustering à implémenter :
   * https://github.com/scikit-learn/scikit-learn/blob/7b136e9/sklearn/cluster/k_means_.py#L1318
+  * Vérifier le hard_c_medoids
 * La loss n'est pas une mesure efficace pour comparer des clusterings à differentes tailles de composantes. Implémenter des méthodes d'évaluations :
   * silhouette (https://en.wikipedia.org/wiki/Silhouette_(clustering))
   * ARI (https://en.wikipedia.org/wiki/Rand_index, https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&ved=2ahUKEwiPyoOkvuvgAhUHuRoKHf_aAggQFjADegQIBxAB&url=https%3A%2F%2Fdavetang.org%2Fmuse%2F2017%2F09%2F21%2Fadjusted-rand-index%2F&usg=AOvVaw2O53qsxo75pv4xn8HfHBin)

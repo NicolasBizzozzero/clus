@@ -96,7 +96,7 @@ def hard_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: in
                 "best_loss": "{0:.6f}".format(best_loss)
             })
 
-    return best_memberships, data[best_medoids_idx, :], np.array(losses)
+    return best_memberships, best_medoids_idx, np.array(losses)
 
 
 def _compute_memberships(distance_matrix, medoids_idx):
