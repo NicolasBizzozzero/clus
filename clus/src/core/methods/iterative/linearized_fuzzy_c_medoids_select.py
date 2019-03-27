@@ -5,6 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from scipy.sparse import csr_matrix
+from scipy.cluster.hierarchy import linkage
 
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.array import mini_batches_dist
@@ -20,7 +21,7 @@ def linearized_fuzzy_c_medoids_select(data: np.ndarray, distance_matrix: np.ndar
                                       initialization_method: str = "random_choice",
                                       empty_clusters_method: str = "nothing",
                                       medoids_idx: Optional[np.ndarray] = None) \
-        -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        -> np.ndarray:
     """ Performs the linearized fuzzy c-medoids select clustering algorithm on a dataset.
 
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
@@ -93,7 +94,7 @@ def linearized_fuzzy_c_medoids_select(data: np.ndarray, distance_matrix: np.ndar
         trashcan_distance = []
         for batch_data, batch_distance in mini_batches_dist(data, distance_matrix, batch_size=batch_size,
                                                             allow_dynamic_batch_size=True, shuffle=True):
-            memberships, clusters_center, losses = linearized_fuzzy_c_medoids(
+            memberships, medoids_idx, losses = linearized_fuzzy_c_medoids(
                 data=batch_data, distance_matrix=batch_distance, components=components, eps=eps, max_iter=max_iter,
                 fuzzifier=fuzzifier, membership_subset_size=membership_subset_size,
                 initialization_method=initialization_method, empty_clusters_method=empty_clusters_method,
@@ -120,6 +121,10 @@ def linearized_fuzzy_c_medoids_select(data: np.ndarray, distance_matrix: np.ndar
                     batch_data, batch_distance = _delete_cluster(batch_data, batch_distance, i_cluster, closest_cluster,
                                                                  trashcan_data, trashcan_distance)
 
+    # Perform hierarchical clustering on final medoids
+    linkage_mtx = linkage(data[medoids_idx, :])
+    return linkage_mtx
+
 
 def _delete_cluster(data, distance_mtx, i_cluster, closest_cluster, trashcan_data, trashcan_distance):
     idx_cluster = np.array(closest_cluster == i_cluster, dtype=np.uint8)
@@ -135,7 +140,6 @@ def _delete_cluster(data, distance_mtx, i_cluster, closest_cluster, trashcan_dat
 
 def _compute_cluster_diameter(batch_data, batch_distance, i_cluster) -> float:
     pass
-
 
 
 if __name__ == '__main__':
