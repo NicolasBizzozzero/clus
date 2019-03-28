@@ -31,7 +31,7 @@ from clus.src.core.methods.methods import get_clustering_function, use_distance_
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.random import set_manual_seed
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d
-from clus.src.utils.path import compute_visualisation_saving_path
+from clus.src.utils.path import compute_file_saving_path
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
@@ -88,6 +88,10 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
+@click.option("--save-clus", is_flag=True,
+              help="Set this flag if you want to save the clustering result. A .npz file will be created, containing "
+                   "the memberships matrix 'memberships', the clusters' center matrix 'clusters_center' and the losses "
+                   "across all iterations 'losses'.")
 # Visualisation options
 @click.option("--visualise", is_flag=True,
               help="Set this flag if you want to visualise the clustering result. If your data's dimension is more "
@@ -95,10 +99,10 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--visualise-3d", is_flag=True,
               help="Set this flag if you want to visualise the clustering result in 3D. If your data's dimension is "
                    "more than 3, a 3-components PCA is applied to the data before visualising.")
-@click.option("--save", is_flag=True,
+@click.option("--save-visu", is_flag=True,
               help="Set this flag if you want to save the visualisation of the clustering result. If your data's "
                    "dimension is more than 2, a 2-components PCA is applied to the data before visualising.")
-@click.option("--save-3d", is_flag=True,
+@click.option("--save-visu-3d", is_flag=True,
               help="Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's "
                    "dimension is more than 3, a 3-components PCA is applied to the data before visualising.")
 # Miscellaneous options
@@ -127,7 +131,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "not already exists.")
 def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
-         membership_subset_size, visualise, visualise_3d, save, save_3d, seed, normalization,
+         membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
          quiet, path_dir_dest):
     parameters = locals()
 
@@ -175,6 +179,16 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
     if use_medoids(clustering_algorithm):
         clusters_center = data[clusters_center, :]
 
+    if save_clus:
+        file_path = compute_file_saving_path(dataset=dataset,
+                                             clustering_algorithm=clustering_algorithm,
+                                             components=components,
+                                             seed=seed,
+                                             dir_dest=path_dir_dest,
+                                             extension="npz",
+                                             is_3d_visualisation=False)
+        np.savez(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses)
+
     if visualise:
         visualise_clustering_2d(data=data,
                                 clusters_center=clusters_center,
@@ -182,13 +196,14 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                saving_path=compute_visualisation_saving_path(dataset,
-                                                                              clustering_algorithm,
-                                                                              components,
-                                                                              seed,
-                                                                              dir_dest=path_dir_dest),
+                                saving_path=compute_file_saving_path(dataset=dataset,
+                                                                     clustering_algorithm=clustering_algorithm,
+                                                                     components=components,
+                                                                     seed=seed,
+                                                                     dir_dest=path_dir_dest,
+                                                                     extension="png"),
                                 show=True,
-                                save=save)
+                                save=save_visu)
 
     if visualise_3d:
         visualise_clustering_3d(data=data,
@@ -197,13 +212,15 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                saving_path=compute_visualisation_saving_path(dataset,
-                                                                              clustering_algorithm,
-                                                                              components,
-                                                                              seed,
-                                                                              dir_dest=path_dir_dest),
+                                saving_path=compute_file_saving_path(dataset=dataset,
+                                                                     clustering_algorithm=clustering_algorithm,
+                                                                     components=components,
+                                                                     seed=seed,
+                                                                     dir_dest=path_dir_dest,
+                                                                     extension="png",
+                                                                     is_3d_visualisation=True),
                                 show=True,
-                                save=save_3d)
+                                save=save_visu_3d)
 
 
 if __name__ == '__main__':
