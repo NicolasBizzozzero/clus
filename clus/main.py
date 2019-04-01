@@ -177,7 +177,10 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
         empty_clusters_method=empty_clusters_method,
     )
     if use_medoids(clustering_algorithm):
+        medoids_indexes = clusters_center
         clusters_center = data[clusters_center, :]
+    else:
+        medoids_indexes = None
 
     if save_clus:
         file_path = compute_file_saving_path(dataset=dataset,
@@ -187,7 +190,8 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                              dir_dest=path_dir_dest,
                                              extension="npz",
                                              is_3d_visualisation=False)
-        np.savez(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses)
+        np.savez(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses,
+                 medoids_indexes=medoids_indexes)
 
     if visualise:
         visualise_clustering_2d(data=data,
