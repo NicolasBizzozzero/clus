@@ -94,7 +94,8 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            "clus = clus.main:main"
+            "clus = clus.main:clus",
+            "hclus = clus.main:hclus"
         ],
     },
 )

@@ -24,19 +24,22 @@ import click
 
 import pandas as pd
 import numpy as np
+from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single
+from scipy.spatial.distance import pdist, squareform
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids
 from clus.src.core.normalization import normalization as normalize
+from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.random import set_manual_seed
-from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d
+from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
 from clus.src.utils.path import compute_file_saving_path
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
 
-@click.command(help=__doc__, context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
+@click.group(help=__doc__, context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
@@ -126,10 +129,10 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "cross-covariance and cross-correlation matrices.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
-@click.option("--path-dir-dest", type=str, default="results", show_default=True,
+@click.option("--path-dir-dest", default="results", show_default=True, type=click.Path(exists=True),
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
-def main(dataset, clustering_algorithm, delimiter, header, initialization_method,
+def clus(dataset, clustering_algorithm, delimiter, header, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
          membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
          quiet, path_dir_dest):
@@ -225,6 +228,114 @@ def main(dataset, clustering_algorithm, delimiter, header, initialization_method
                                                                      is_3d_visualisation=True),
                                 show=True,
                                 save=save_visu_3d)
+
+
+@click.command()
+@click.argument("dataset", type=click.Path(exists=True))
+# CSV parsing options
+@click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
+              help="Character or REGEX used for separating data in the CSV data file.")
+@click.option("--header", is_flag=True,
+              help="Set this flag if your dataset contains a header, it will then be ignored by the clustering "
+                   "algorithm. If you set this flag while not having a header, the first example of the dataset will "
+                   "be ignored.")
+# Clustering option
+@click.option("--distance-metric", type=str, default="euclidean", show_default=True,
+              help="Metric used to compute distance between examples. If set to \"weighted_euclidean\", the --weights "
+                   "parameter also needs to be set. All possible metrics are described at the following link :\n"
+                   "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
+@click.option("--weights", cls=OptionInfiniteArgs,
+              help="Weights used for the \"weighted_euclidean\" distance. You need as much weights as you have "
+                   "features in your data.")
+@click.option("--save-z", is_flag=True,
+              help="Set this flag if you want to save the Z matrix containing the hierarchical clustering result. A "
+                   "(n - 1) by 4 matrix Z is then saved. At the i-th iteration, clusters with indices Z[i, 0] and "
+                   "Z[i, 1] are combined to form cluster n+1. A cluster with an index less than n corresponds to one "
+                   "of the n original observations. The distance between clusters Z[i, 0] and Z[i, 1] is given by "
+                   "Z[i, 2]. The fourth value Z[i, 3] represents the number of original observations in the newly "
+                   "formed cluster.")
+# Visualisation options
+@click.option("--visualise", is_flag=True,
+              help="Set this flag if you want to visualise the resulting dendrogram.")
+@click.option("--save-dendrogram", is_flag=True,
+              help="Set this flag if you want to save the resulting dendrogram.")
+@click.option("--depth-cut", type=int, default=8, show_default=True,
+              help="Max size of the plotted dendrogram.")
+# Miscellaneous options
+@click.option("--seed", type=int, default=None, show_default=True,
+              help="Random seed to set.")
+@click.option("--normalization", type=str, default=None, show_default=True,
+              help="Normalize your data with any of the proposed methods below :\n"
+                   "- 'rescaling', rescale the range of features into the [0, 1] range.\n"
+                   "- 'mean' or 'mean_normalization', normalize the features to zero mean.\n"
+                   "- 'standardization', normalize the features to zero mean and unit std.\n"
+                   "- 'unit_length', scale the components by dividing each features by their p-norm.\n"
+                   "- 'whitening_zca' or 'zca', maximizes the average cross-covariance between each dimension of the "
+                   "whitened and original data, and uniquely produces a symmetric cross-covariance matrix.\n"
+                   "- 'whitening_pca' or 'pca', maximally compresses all dimensions of the original data into each "
+                   "dimension of the whitened data using the cross-covariance matrix as the compression metric.\n"
+                   "- 'whitening_zca_cor' or 'zca_cor', maximizes the average cross-correlation between each dimension "
+                   "of the whitened and original data, and uniquely produces a symmetric cross-correlation matrix.\n"
+                   "- 'whitening_pca_cor' or 'pca_cor', maximally compresses all dimensions of the original data into "
+                   "each dimension of the whitened data using the cross-correlation matrix as the compression metric.\n"
+                   "- 'whitening_cholesky' or 'cholesky', Uniquely results in lower triangular positive diagonal "
+                   "cross-covariance and cross-correlation matrices.")
+@click.option("--quiet", is_flag=True,
+              help="Set this flag if you want to completely silence all outputs to stdout.")
+@click.option("--path-dir-dest", default="results", show_default=True, type=click.Path(exists=True),
+              help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
+                   "not already exists.")
+def hclus(dataset, delimiter, header, distance_metric, weights, save_z, visualise, save_dendrogram, depth_cut, seed,
+          normalization, quiet, path_dir_dest):
+    parameters = locals()
+
+    if quiet:
+        sys.stdout = open(os.devnull, 'w')
+
+    if seed is not None:
+        set_manual_seed(seed)
+
+    print("Starting hierarchical clustering with the following parameters :", parameters)
+
+    # Load data
+    dataset_name = os.path.splitext(ntpath.basename(dataset))[0]
+    data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
+
+    if normalization is not None:
+        data = data.astype(np.float64)
+        normalize(data, strategy=normalization)
+
+    # Load distance
+    distance_mtx = None
+    distance_metric = distance_metric.lower()
+    if distance_metric == "euclidean":
+        pass
+    elif distance_metric == "weighted_euclidean":
+        # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
+        # weighted by the square root of the weights, see [5]
+        assert len(weights) == data.shape[0],\
+            "You need as much weights as you have features in your data. Expected %d, got %d" % \
+            (data.shape[0], len(weights))
+
+        data = data * np.sqrt(weights)
+    else:
+        distance_mtx = pdist(data, distance_metric, w=weights)
+        distance_mtx = squareform(distance_mtx)
+        distance_mtx = distance_mtx[np.triu_indices_from(distance_mtx, k=1)]
+
+    # Compute linkage
+    if distance_mtx is not None:
+        linkage_mtx = linkage_pairwise_single(distance_mtx)
+    else:
+        linkage_mtx = linkage(data)
+
+    if save_z:
+        dir_file_linkage_mtx = os.path.join(path_dir_dest, "z_" + dataset_name)
+        np.save(dir_file_linkage_mtx, linkage_mtx)
+
+    if visualise or save_dendrogram:
+        plot_dendrogram(linkage_mtx=linkage_mtx, depth_cut=depth_cut, dataset_name=dataset_name,
+                        show=visualise, save=save_dendrogram)
 
 
 if __name__ == '__main__':

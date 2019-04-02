@@ -1,8 +1,10 @@
 import warnings
 from textwrap import wrap
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.cluster.hierarchy import dendrogram
 
 from clus.src.core.normalization import rescaling
 
@@ -118,6 +120,36 @@ def visualise_clustering_loss(losses, show=True):
 
     if show:
         plt.show()
+
+
+def plot_dendrogram(linkage_mtx: np.ndarray, depth_cut: int, dataset_name: str = None, title: str = None,
+                    dpi: int = 1000, show: bool = True, save: bool = True):
+    # Plot the dendrogram
+    fig, ax = plt.subplots()
+    fig.set_size_inches(12, 18)
+    matplotlib.rcParams['figure.dpi'] = dpi
+    matplotlib.rc("font", size=6)
+
+    dendrogram(linkage_mtx, p=depth_cut, truncate_mode="level", orientation="right", ax=ax)
+
+    if title is None:
+        if dataset_name is None:
+            title = "Dendrogram of the hierarchical clustering with parameters : p={p}".format(
+                p=depth_cut
+            )
+        else:
+            title = "Dendrogram of the hierarchical clustering computed from {dataset} with parameters : p={p}".format(
+                dataset=dataset_name,
+                p=depth_cut
+            )
+    plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
+    plt.xlabel("fusion_cost")
+
+    if save:
+        fig.savefig("%s_%d.png" % (dataset_name, depth_cut))
+    if show:
+        plt.show()
+    plt.close()
 
 
 def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):
