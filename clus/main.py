@@ -128,12 +128,9 @@ def clus(dataset, clustering_algorithm, delimiter, header, initialization_method
     The following clustering algorithms are supported :
     * kmeans
     * fuzzy_c_means (or fcm)
-    * possibilistic_c_means (or pcm)
     * fuzzy_c_medoids (or fcmdd)
     * hard_c_medoids (or hcmdd)
     * linearized_fuzzy_c_medoids (or lfcmdd, l_fc_med)
-    * linearized_fuzzy_c_medoids_select (or l_fcmed_select)
-    * datastream_linearized_fuzzy_c_medoids_select (or ds_lfcmed_select)
     """
     parameters = locals()
 
