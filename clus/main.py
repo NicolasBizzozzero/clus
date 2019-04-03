@@ -11,6 +11,7 @@ from scipy.spatial.distance import pdist, squareform
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
+from clus.src.core.data_loading import load_data
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
@@ -33,13 +34,22 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
     "linearized_fuzzy_c_medoids_select", "l_fcmed_select",
     "datastream_linearized_fuzzy_c_medoids_select", "ds_lfcmed_select",
 ]))
-# CSV parsing options
+# Data loading options
+@click.option("--file-type", type=str, default="guess", show_default=True,
+              help="The type of file from which the data is read. Possible values are :\n"
+                   "- 'guess', automatically guess the filetype from the file extension.\n"
+                   "- 'csv', load the data with a call to the pandas.read_csv method.\n"
+                   "- 'npy', load the only array contained in a numpy file.\n"
+                   "- 'npz', load one of the array contained in a numpy file. The `--array-name` option needs to be "
+                   "set.")
 @click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
               help="Character or REGEX used for separating data in the CSV data file.")
 @click.option("--header", is_flag=True,
               help="Set this flag if your dataset contains a header, it will then be ignored by the clustering "
                    "algorithm. If you set this flag while not having a header, the first example of the dataset will "
                    "be ignored.")
+@click.option("--array-name", type=str, default=None, show_default=True,
+              help="Used to load a specific array from a numpy npz file.")
 # Clustering options
 @click.option("--initialization-method", type=str, default="random_choice", show_default=True,
               help="Method used to initialize the clusters' center. The following methods are available :\b\n"
@@ -114,7 +124,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--path-dir-dest", default="results", show_default=True, type=click.Path(exists=True),
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
-def clus(dataset, clustering_algorithm, delimiter, header, initialization_method,
+def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
          membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
          quiet, path_dir_dest):
@@ -146,7 +156,7 @@ def clus(dataset, clustering_algorithm, delimiter, header, initialization_method
     clustering_function = get_clustering_function(clustering_algorithm)
 
     # Load data
-    data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
+    data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
 
     if normalization is not None:
         data = data.astype(np.float64)
@@ -304,7 +314,7 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
 
     # Load data
     dataset_name = os.path.splitext(ntpath.basename(dataset))[0]
-    data = pd.read_csv(dataset, delimiter=delimiter, header=0 if header else None).values
+    data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
 
     if normalization is not None:
         data = data.astype(np.float64)

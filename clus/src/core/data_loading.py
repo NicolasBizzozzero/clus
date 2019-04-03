@@ -30,8 +30,8 @@ class CannotGuessFileType(Exception):
         ))
 
 
-def data_loading(path_file: str, strategy: str, delimiter: str, header: bool, array_name: str) -> np.ndarray:
-    strategy = _str_to_dataloading(strategy)
+def load_data(path_file: str, file_type: str, delimiter: str, header: bool, array_name: str) -> np.ndarray:
+    strategy = _str_to_dataloading(file_type)
     return strategy(path_file=path_file, array_name=array_name, delimiter=delimiter, header=header)
 
 
