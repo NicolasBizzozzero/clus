@@ -61,20 +61,9 @@ def npy(path_file: str) -> np.ndarray:
 
 @remove_unexpected_arguments
 def npz(path_file: str, array_name: str) -> np.ndarray:
+    assert array_name is not None, "You need to pass the --array-name option for the NPZ file type."
+
     return np.load(path_file)[array_name]
-
-
-def random_gaussian(data: np.ndarray, components: int) -> np.ndarray:
-    return np.random.normal(loc=data.mean(axis=0), scale=data.std(axis=0),
-                            size=(components, data.shape[0])).astype(np.float64)
-
-
-def random_choice(data: np.ndarray, components: int) -> np.ndarray:
-    assert data.shape[0] >= components, ("Cannot take a number of components larger than the number of samples with thi"
-                                         "s initialization method")
-
-    idx = np.random.choice(np.arange(data.shape[0]), size=components, replace=False)
-    return data[idx, :]
 
 
 def _str_to_dataloading(string: str) -> Callable:
