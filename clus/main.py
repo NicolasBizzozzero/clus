@@ -1,21 +1,3 @@
-""" Apply a clustering algorithm to a CSV dataset.
-
-Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
-matrix (eg: with not the same number of examples and dimensions), the software will compute it itself with a pairwise
-euclidean distance.
-
-\b
-The following clustering algorithms are supported :
-* kmeans
-* fuzzy_c_means (or fcm)
-* possibilistic_c_means (or pcm)
-* fuzzy_c_medoids (or fcmdd)
-* hard_c_medoids (or hcmdd)
-* linearized_fuzzy_c_medoids (or lfcmdd, l_fc_med)
-* linearized_fuzzy_c_medoids_select (or l_fcmed_select)
-* datastream_linearized_fuzzy_c_medoids_select (or ds_lfcmed_select)
-"""
-
 import ntpath
 import os
 import sys
@@ -39,7 +21,7 @@ from clus.src.utils.path import compute_file_saving_path
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
 
-@click.group(help=__doc__, context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
+@click.group(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
@@ -136,6 +118,23 @@ def clus(dataset, clustering_algorithm, delimiter, header, initialization_method
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
          membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
          quiet, path_dir_dest):
+    """ Apply a clustering algorithm to a CSV dataset.
+
+    Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
+    matrix (eg: with not the same number of examples and dimensions), the software will compute it itself with a pairwise
+    euclidean distance.
+
+    \b
+    The following clustering algorithms are supported :
+    * kmeans
+    * fuzzy_c_means (or fcm)
+    * possibilistic_c_means (or pcm)
+    * fuzzy_c_medoids (or fcmdd)
+    * hard_c_medoids (or hcmdd)
+    * linearized_fuzzy_c_medoids (or lfcmdd, l_fc_med)
+    * linearized_fuzzy_c_medoids_select (or l_fcmed_select)
+    * datastream_linearized_fuzzy_c_medoids_select (or ds_lfcmed_select)
+    """
     parameters = locals()
 
     if quiet:
@@ -230,7 +229,7 @@ def clus(dataset, clustering_algorithm, delimiter, header, initialization_method
                                 save=save_visu_3d)
 
 
-@click.command()
+@click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
 # CSV parsing options
 @click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
