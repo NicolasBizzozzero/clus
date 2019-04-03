@@ -228,13 +228,22 @@ def clus(dataset, clustering_algorithm, delimiter, header, initialization_method
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
-# CSV parsing options
+# Data loading options
+@click.option("--file-type", type=str, default="guess", show_default=True,
+              help="The type of file from which the data is read. Possible values are :\n"
+                   "- 'guess', automatically guess the filetype from the file extension.\n"
+                   "- 'csv', load the data with a call to the pandas.read_csv method.\n"
+                   "- 'npy', load the only array contained in a numpy file.\n"
+                   "- 'npz', load one of the array contained in a numpy file. The `--array-name` option needs to be "
+                   "set.")
 @click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
               help="Character or REGEX used for separating data in the CSV data file.")
 @click.option("--header", is_flag=True,
-              help="Set this flag if your dataset contains a header, it will then be ignored by the clustering "
+              help="Set this flag if your CSV dataset contains a header, it will then be ignored by the clustering "
                    "algorithm. If you set this flag while not having a header, the first example of the dataset will "
                    "be ignored.")
+@click.option("--array-name", type=str, default=None, show_default=True,
+              help="Used to load a specific array from a numpy npz file.")
 # Clustering option
 @click.option("--distance-metric", type=str, default="euclidean", show_default=True,
               help="Metric used to compute distance between examples. If set to \"weighted_euclidean\", the --weights "
@@ -281,8 +290,8 @@ def clus(dataset, clustering_algorithm, delimiter, header, initialization_method
 @click.option("--path-dir-dest", default="results", show_default=True, type=click.Path(exists=True),
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
-def hclus(dataset, delimiter, header, distance_metric, weights, save_z, visualise, save_dendrogram, depth_cut, seed,
-          normalization, quiet, path_dir_dest):
+def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, weights, save_z, visualise,
+          save_dendrogram, depth_cut, seed, normalization, quiet, path_dir_dest):
     parameters = locals()
 
     if quiet:
@@ -312,7 +321,6 @@ def hclus(dataset, delimiter, header, distance_metric, weights, save_z, visualis
         assert len(weights) == data.shape[0],\
             "You need as much weights as you have features in your data. Expected %d, got %d" % \
             (data.shape[0], len(weights))
-
         data = data * np.sqrt(weights)
     else:
         distance_mtx = pdist(data, distance_metric, w=weights)
