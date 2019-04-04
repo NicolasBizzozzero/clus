@@ -12,7 +12,7 @@ from scipy.spatial.distance import pdist, squareform
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.random import set_manual_seed
@@ -196,6 +196,8 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              clustering_algorithm=clustering_algorithm,
                                              components=components,
                                              seed=seed,
+                                             distance=pairwise_distance,
+                                             fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
                                              dir_dest=path_dir_dest,
                                              extension="npz",
                                              is_3d_visualisation=False)
@@ -213,6 +215,9 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                                                      clustering_algorithm=clustering_algorithm,
                                                                      components=components,
                                                                      seed=seed,
+                                                                     distance=pairwise_distance,
+                                                                     fuzzifier=None if is_hard_clustering(
+                                                                         clustering_algorithm) else fuzzifier,
                                                                      dir_dest=path_dir_dest,
                                                                      extension="png"),
                                 show=True,
@@ -229,6 +234,9 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                                                      clustering_algorithm=clustering_algorithm,
                                                                      components=components,
                                                                      seed=seed,
+                                                                     distance=pairwise_distance,
+                                                                     fuzzifier=None if is_hard_clustering(
+                                                                         clustering_algorithm) else fuzzifier,
                                                                      dir_dest=path_dir_dest,
                                                                      extension="png",
                                                                      is_3d_visualisation=True),
@@ -328,7 +336,7 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
     elif distance_metric == "weighted_euclidean":
         # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
         # weighted by the square root of the weights, see [5]
-        assert len(weights) == data.shape[0],\
+        assert len(weights) == data.shape[0], \
             "You need as much weights as you have features in your data. Expected %d, got %d" % \
             (data.shape[0], len(weights))
         data = data * np.sqrt(weights)

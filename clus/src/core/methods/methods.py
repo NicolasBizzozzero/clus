@@ -46,6 +46,13 @@ def use_medoids(clustering_method: str) -> bool:
     )
 
 
+def is_hard_clustering(clustering_method: str) -> bool:
+    return clustering_method in list(
+        ALIASES_KMEANS +
+        ALIASES_HARD_C_MEDOIDS
+    )
+
+
 def get_clustering_function(string: str) -> Callable:
     string = string.lower()
     if string in ALIASES_KMEANS:
