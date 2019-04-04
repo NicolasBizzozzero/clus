@@ -22,7 +22,7 @@ from clus.src.utils.path import compute_file_saving_path
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
 
-@click.group(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
+@click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
