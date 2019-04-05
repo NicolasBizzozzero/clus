@@ -1,5 +1,4 @@
 import os
-from typing import Callable
 
 import numpy as np
 import pandas as pd
@@ -17,26 +16,26 @@ EXTENSION_NPZ = ("npz",)
 
 
 class UnknownDataLoadingMethod(Exception):
-    def __init__(self, method_name: str):
+    def __init__(self, method_name):
         Exception.__init__(self, "The data loading method \"{method_name}\" doesn't exists".format(
             method_name=method_name
         ))
 
 
 class CannotGuessFileType(Exception):
-    def __init__(self, file_name: str):
+    def __init__(self, file_name):
         Exception.__init__(self, "The file type of \"{file_name}\" cannot be guessed.".format(
             file_name=file_name
         ))
 
 
-def load_data(path_file: str, file_type: str, delimiter: str, header: bool, array_name: str) -> np.ndarray:
+def load_data(path_file, file_type, delimiter, header, array_name):
     strategy = _str_to_dataloading(file_type)
     return strategy(path_file=path_file, array_name=array_name, delimiter=delimiter, header=header)
 
 
 @remove_unexpected_arguments
-def guess(path_file: str, array_name: str, delimiter: str, header: bool) -> np.ndarray:
+def guess(path_file, array_name, delimiter, header):
     file_name, extension = os.path.splitext(path_file)
     extension = extension.lower()
 
@@ -50,23 +49,23 @@ def guess(path_file: str, array_name: str, delimiter: str, header: bool) -> np.n
 
 
 @remove_unexpected_arguments
-def csv(path_file: str, delimiter: str, header: bool) -> np.ndarray:
+def csv(path_file, delimiter, header):
     return pd.read_csv(path_file, delimiter=delimiter, header=0 if header else None).values
 
 
 @remove_unexpected_arguments
-def npy(path_file: str) -> np.ndarray:
+def npy(path_file):
     return np.load(path_file)
 
 
 @remove_unexpected_arguments
-def npz(path_file: str, array_name: str) -> np.ndarray:
+def npz(path_file, array_name):
     assert array_name is not None, "You need to pass the --array-name option for the NPZ file type."
 
     return np.load(path_file)[array_name]
 
 
-def _str_to_dataloading(string: str) -> Callable:
+def _str_to_dataloading(string):
     global ALIASES_GUESS, ALIASES_CSV, ALIASES_NPY, ALIASES_NPZ
 
     string = string.lower()

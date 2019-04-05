@@ -122,8 +122,8 @@ def visualise_clustering_loss(losses, show=True):
         plt.show()
 
 
-def plot_dendrogram(linkage_mtx: np.ndarray, depth_cut: int, dataset_name: str = None, title: str = None,
-                    dpi: int = 1000, show: bool = True, save: bool = True):
+def plot_dendrogram(linkage_mtx, depth_cut, dataset_name=None, title=None,
+                    dpi=1000, show=True, save=True):
     # Plot the dendrogram
     fig, ax = plt.subplots()
     fig.set_size_inches(12, 18)

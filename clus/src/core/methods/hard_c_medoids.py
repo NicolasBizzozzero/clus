@@ -1,20 +1,18 @@
-from typing import Optional, Tuple
-
 import numpy as np
 from tqdm import tqdm
 
-from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.core.cluster_initialization import cluster_initialization
+from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
 @remove_unexpected_arguments
-def hard_c_medoids(data: np.ndarray, distance_matrix: np.ndarray, components: int = 10, eps: float = 1e-4,
-                   max_iter: int = 1000, initialization_method: str = "random_choice",
-                   empty_clusters_method: str = "nothing",
-                   medoids_idx: Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
+                   max_iter=1000, initialization_method="random_choice",
+                   empty_clusters_method="nothing",
+                   medoids_idx=None):
     """ Performs the hard c-medoids clustering algorithm on a dataset.
 
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as

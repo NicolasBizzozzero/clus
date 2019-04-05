@@ -1,10 +1,6 @@
 from collections import Counter
-from typing import Optional, Tuple
 
 import numpy as np
-from tqdm import tqdm
-from clus.src.core.handle_empty_clusters import handle_empty_clusters
-from scipy.sparse import csr_matrix
 from scipy.cluster.hierarchy import linkage
 
 from clus.src.core.cluster_initialization import cluster_initialization
@@ -15,13 +11,12 @@ _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{r
 
 
 @remove_unexpected_arguments
-def linearized_fuzzy_c_medoids_select(data: np.ndarray, distance_matrix: np.ndarray, components: int = 1000,
-                                      eps: float = 1e-4, max_iter: int = 100, fuzzifier: float = 2,
-                                      batch_size: int = 64, membership_subset_size: Optional[int] = None,
-                                      initialization_method: str = "random_choice",
-                                      empty_clusters_method: str = "nothing",
-                                      medoids_idx: Optional[np.ndarray] = None) \
-        -> np.ndarray:
+def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
+                                      eps=1e-4, max_iter=100, fuzzifier=2,
+                                      batch_size=64, membership_subset_size=None,
+                                      initialization_method="random_choice",
+                                      empty_clusters_method="nothing",
+                                      medoids_idx=None):
     """ Performs the linearized fuzzy c-medoids select clustering algorithm on a dataset.
 
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
@@ -138,7 +133,7 @@ def _delete_cluster(data, distance_mtx, i_cluster, closest_cluster, trashcan_dat
     return data, distance_mtx
 
 
-def _compute_cluster_diameter(batch_data, batch_distance, i_cluster) -> float:
+def _compute_cluster_diameter(batch_data, batch_distance, i_cluster):
     pass
 
 

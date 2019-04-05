@@ -1,4 +1,4 @@
-def retrieve_decimals(number: float, number_of_decimals_wanted=2) -> str:
+def retrieve_decimals(number, number_of_decimals_wanted=2):
     """ Return the decimals of a number.
 
     Examples:

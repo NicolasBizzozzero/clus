@@ -1,10 +1,8 @@
-from typing import Iterator, Tuple
-
 import numpy as np
 
 
-def mini_batches(inputs: np.ndarray, batch_size: int = 1, allow_dynamic_batch_size: bool = False,
-                 shuffle: bool = True) -> Iterator[np.ndarray]:
+def mini_batches(inputs, batch_size=1, allow_dynamic_batch_size=False,
+                 shuffle=True):
     """ Generator that inputs a group of examples in numpy.ndarray by the given batch size.
 
     Parameters
@@ -59,9 +57,8 @@ def mini_batches(inputs: np.ndarray, batch_size: int = 1, allow_dynamic_batch_si
             yield inputs[excerpt]
 
 
-def mini_batches_dist(inputs: np.ndarray, distance_matrix: np.ndarray, batch_size: int = 1,
-                      allow_dynamic_batch_size: bool = False, shuffle: bool = True)\
-        -> Tuple[Iterator[np.ndarray], Iterator[np.ndarray]]:
+def mini_batches_dist(inputs, distance_matrix, batch_size=1,
+                      allow_dynamic_batch_size=False, shuffle=True):
     """ Generator that inputs a group of examples in numpy.ndarray and a respective distance matrix by the given batch
     size.
 

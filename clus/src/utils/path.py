@@ -3,7 +3,7 @@ import ntpath
 
 
 def compute_file_saving_path(dataset, clustering_algorithm, components, seed, distance, fuzzifier, dir_dest, extension,
-                             is_3d_visualisation=False) -> str:
+                             is_3d_visualisation=False):
     os.makedirs(dir_dest, exist_ok=True)
 
     return os.path.join(dir_dest,

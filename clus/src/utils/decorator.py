@@ -1,10 +1,9 @@
-import inspect
 import functools
+import inspect
 from time import time
-from typing import List, Callable
 
 
-def remove_unexpected_arguments(func: Callable) -> Callable:
+def remove_unexpected_arguments(func):
     """ The decorated function silently ignore unexpected parameters without
     raising any error.
 
@@ -15,14 +14,14 @@ def remove_unexpected_arguments(func: Callable) -> Callable:
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        possible_parameters: List[str] = inspect.getfullargspec(func).args
+        possible_parameters = inspect.getfullargspec(func).args
         new_kwargs = dict(filter(lambda a: a[0] in possible_parameters, kwargs.items()))
 
         return func(*args, **new_kwargs)
     return wrapper
 
 
-def time_this(func: Callable) -> Callable:
+def time_this(func):
     """ Print the execution time of the wrapped function. """
 
     @functools.wraps(func)

@@ -10,8 +10,6 @@ All methods must take as input :
 All methods do not return anything, they handle the empty clusters in-place.
 """
 
-from typing import Callable
-
 import numpy as np
 
 
@@ -21,14 +19,14 @@ ALIASES_FURTHEST_EXAMPLE_FROM_ITS_CENTROID = ("furthest_example_from_its_centroi
 
 
 class UnknownEmptyClustersMethod(Exception):
-    def __init__(self, method_name: str):
+    def __init__(self, method_name):
         Exception.__init__(self, "The empty clusters method \"{method_name}\" doesn't exists".format(
             method_name=method_name
         ))
 
 
-def handle_empty_clusters(data: np.ndarray, clusters_center: np.ndarray, memberships: np.ndarray,
-                          strategy: str = "nothing") -> None:
+def handle_empty_clusters(data, clusters_center, memberships,
+                          strategy="nothing"):
     global ALIASES_NOTHING
 
     if strategy in ALIASES_NOTHING:
@@ -40,21 +38,21 @@ def handle_empty_clusters(data: np.ndarray, clusters_center: np.ndarray, members
         strategy(data, clusters_center, memberships, empty_clusters_idx)
 
 
-def random_example(data: np.ndarray, clusters_center: np.ndarray, memberships: np.ndarray,
-                   empty_clusters_idx: np.ndarray) -> None:
+def random_example(data, clusters_center, memberships,
+                   empty_clusters_idx):
     new_examples_idx = np.random.choice(np.arange(data.shape[0]),
                                         size=empty_clusters_idx.size, replace=False)
     memberships[new_examples_idx, :] = 0
     memberships[new_examples_idx, empty_clusters_idx] = 1
 
 
-def furthest_example_from_its_centroid(data: np.ndarray, clusters_center: np.ndarray,
-                                       memberships: np.ndarray,
-                                       empty_clusters_idx: np.ndarray) -> None:
+def furthest_example_from_its_centroid(data, clusters_center,
+                                       memberships,
+                                       empty_clusters_idx):
     pass
 
 
-def _str_to_emptyclustermethod(string: str) -> Callable:
+def _str_to_emptyclustermethod(string):
     global ALIASES_RANDOM_EXAMPLE, ALIASES_FURTHEST_EXAMPLE_FROM_ITS_CENTROID
 
     string = string.lower()
