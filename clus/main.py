@@ -124,7 +124,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "cross-covariance and cross-correlation matrices.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
-@click.option("--path-dir-dest", default="results", show_default=True, type=click.Path(exists=True),
+@click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
 def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
@@ -313,7 +313,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                    "cross-covariance and cross-correlation matrices.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
-@click.option("--path-dir-dest", default="results", show_default=True, type=click.Path(exists=True),
+@click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
 def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, weights, save_z, visualise,
