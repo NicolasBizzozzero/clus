@@ -81,6 +81,9 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "\"precomputed\" if your data is already a distance matrix. All possible metrics are described at "
                    "the following link :\n"
                    "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
+@click.option("--weights", cls=OptionInfiniteArgs,
+              help="Weights used for the \"weighted_euclidean\" pairwise distance. You need as much weights as "
+                    "you have features in your data.")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 @click.option("--save-clus", is_flag=True,
@@ -125,7 +128,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
 def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
-         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance,
+         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
          membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
          quiet, path_dir_dest):
     """ Apply a clustering algorithm to a CSV dataset.
@@ -170,6 +173,8 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
             assert data.shape[0] != data.shape[1], ("Your precomputed distance matrix is not square (shape: {})."
                                                     "").format(data.shape)
             distance_matrix = data
+        elif pairwise_distance == "weighted_euclidean":
+            distance_matrix = DistanceMetric.get_metric("euclidean").pairwise(data * np.sqrt(weights))
         else:
             distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
 
