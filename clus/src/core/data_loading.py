@@ -50,7 +50,11 @@ def guess(path_file, array_name, delimiter, header):
 
 @remove_unexpected_arguments
 def csv(path_file, delimiter, header):
-    return pd.read_csv(path_file, delimiter=delimiter, header=0 if header else None).values
+    if (len(delimiter) >= 2) and (delimiter != r"\s+"):
+        engine = "python"
+    else:
+        engine = "c"
+    return pd.read_csv(path_file, delimiter=delimiter, header=0 if header else None, engine=engine).values
 
 
 @remove_unexpected_arguments
