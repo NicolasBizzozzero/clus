@@ -196,6 +196,9 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     else:
         medoids_indexes = None
 
+    # Create destination directory if it does not already exists
+    os.makedirs(path_dir_dest, exist_ok=True)
+
     if save_clus:
         file_path = compute_file_saving_path(dataset=dataset,
                                              clustering_algorithm=clustering_algorithm,
@@ -355,6 +358,9 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
         linkage_mtx = linkage_pairwise_single(distance_mtx)
     else:
         linkage_mtx = linkage(data)
+
+    # Create destination directory if it does not already exists
+    os.makedirs(path_dir_dest, exist_ok=True)
 
     if save_z:
         dir_file_linkage_mtx = os.path.join(path_dir_dest, "z_" + dataset_name)
