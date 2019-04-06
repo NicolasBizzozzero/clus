@@ -16,14 +16,12 @@ from clus.src.core.methods.methods import get_clustering_function, use_distance_
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
+from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
 from clus.src.utils.path import compute_file_saving_path
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
-
-_ENABLE_SCP = True
-_URL_SSH_GATE = "bizzozzero@gate.lip6.fr:Documents/OARSUB"
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
@@ -131,10 +129,14 @@ _URL_SSH_GATE = "bizzozzero@gate.lip6.fr:Documents/OARSUB"
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
+@click.option("--url-scp", default=None, show_default=True, type=str,
+              help="If given, any saved result will be sent to this ssh address by using the `scp` command. The file "
+                   "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
+                   "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
 def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
          membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
-         quiet, path_dir_dest):
+         quiet, path_dir_dest, url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
@@ -220,51 +222,57 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              is_3d_visualisation=False)
         np.savez_compressed(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses,
                             medoids_indexes=medoids_indexes)
-
-        if _ENABLE_SCP:
-            os.system("scp \"%s\" %s" % (file_path, _URL_SSH_GATE))
+        if url_scp is not None:
+            execute("scp", file_path, url_scp + ":" + path_dir_dest)
             os.remove(file_path)
 
     if visualise:
+        file_path = compute_file_saving_path(dataset=dataset,
+                                             clustering_algorithm=clustering_algorithm,
+                                             components=components,
+                                             seed=seed,
+                                             distance=pairwise_distance,
+                                             weights=weights,
+                                             fuzzifier=None if is_hard_clustering(
+                                                 clustering_algorithm) else fuzzifier,
+                                             dir_dest=path_dir_dest,
+                                             extension="png")
         visualise_clustering_2d(data=data,
                                 clusters_center=clusters_center,
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                saving_path=compute_file_saving_path(dataset=dataset,
-                                                                     clustering_algorithm=clustering_algorithm,
-                                                                     components=components,
-                                                                     seed=seed,
-                                                                     distance=pairwise_distance,
-                                                                     weights=weights,
-                                                                     fuzzifier=None if is_hard_clustering(
-                                                                         clustering_algorithm) else fuzzifier,
-                                                                     dir_dest=path_dir_dest,
-                                                                     extension="png"),
+                                saving_path=file_path,
                                 show=True,
                                 save=save_visu)
+        if url_scp is not None:
+            execute("scp", file_path, url_scp + ":" + path_dir_dest)
+            os.remove(file_path)
 
     if visualise_3d:
+        file_path = compute_file_saving_path(dataset=dataset,
+                                             clustering_algorithm=clustering_algorithm,
+                                             components=components,
+                                             seed=seed,
+                                             distance=pairwise_distance,
+                                             weights=weights,
+                                             fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                             dir_dest=path_dir_dest,
+                                             extension="png",
+                                             is_3d_visualisation=True)
         visualise_clustering_3d(data=data,
                                 clusters_center=clusters_center,
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
-                                saving_path=compute_file_saving_path(dataset=dataset,
-                                                                     clustering_algorithm=clustering_algorithm,
-                                                                     components=components,
-                                                                     seed=seed,
-                                                                     distance=pairwise_distance,
-                                                                     weights=weights,
-                                                                     fuzzifier=None if is_hard_clustering(
-                                                                         clustering_algorithm) else fuzzifier,
-                                                                     dir_dest=path_dir_dest,
-                                                                     extension="png",
-                                                                     is_3d_visualisation=True),
+                                saving_path=file_path,
                                 show=True,
                                 save=save_visu_3d)
+        if url_scp is not None:
+            execute("scp", file_path, url_scp + ":" + path_dir_dest)
+            os.remove(file_path)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
