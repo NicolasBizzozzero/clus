@@ -170,7 +170,8 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
         normalize(data, strategy=normalization)
 
     # Properly process weights
-    weights = tuple(map(lambda s: str_to_number(s), weights))
+    if weights is not None:
+        weights = tuple(map(lambda s: str_to_number(s), weights))
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
