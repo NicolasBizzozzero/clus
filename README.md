@@ -13,8 +13,6 @@
 * La loss n'est pas une mesure efficace pour comparer des clusterings à differentes tailles de composantes. Implémenter des méthodes d'évaluations :
   * silhouette (https://en.wikipedia.org/wiki/Silhouette_(clustering))
   * ARI (https://en.wikipedia.org/wiki/Rand_index, https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=4&ved=2ahUKEwiPyoOkvuvgAhUHuRoKHf_aAggQFjADegQIBxAB&url=https%3A%2F%2Fdavetang.org%2Fmuse%2F2017%2F09%2F21%2Fadjusted-rand-index%2F&usg=AOvVaw2O53qsxo75pv4xn8HfHBin)
-* Mettre les informations ci-dessous dans un rapport
-  * Après discussion avec MJ et Adrien, la loss peut remonter. Il arrive qu'elle "rate" le minimum local et remonte un peu, mais bien souvent cette différence est négligeable. En effet, la loss va converger et chaque mise à jour ne la fera varier que très peu. Il arrive aussi que la loss se remette à décroite après être remontée un peu. MJ Explique ce phénomène comme un "trop de choix" pour l'algorithme dans un grand nombre de clusters, et il arrive que la loss fasse des variations comme ça
 
 
 ## References
