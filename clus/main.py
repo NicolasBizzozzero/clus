@@ -21,6 +21,9 @@ from clus.src.utils.path import compute_file_saving_path
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
+_ENABLE_SCP = True
+_URL_SSH_GATE = "bizzozzero@gate.lip6.fr:Documents/OARSUB"
+
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("dataset", type=click.Path(exists=True))
@@ -209,8 +212,12 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              dir_dest=path_dir_dest,
                                              extension="npz",
                                              is_3d_visualisation=False)
-        np.savez(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses,
-                 medoids_indexes=medoids_indexes)
+        np.savez_compressed(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses,
+                            medoids_indexes=medoids_indexes)
+
+        if _ENABLE_SCP:
+            os.system("scp %s %s" % (file_path, _URL_SSH_GATE))
+            os.remove(file_path)
 
     if visualise:
         visualise_clustering_2d(data=data,
