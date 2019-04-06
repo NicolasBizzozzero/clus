@@ -65,7 +65,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2,
         current_iter = 0
         losses = []
         while (current_iter < max_iter) and \
-              ((current_iter < 2) or (abs(losses[-2] - losses[-1] > eps))):
+              ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
             memberships = _compute_memberships(data, centroids, fuzzifier)
             handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
 
