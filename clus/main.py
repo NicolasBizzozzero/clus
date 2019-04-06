@@ -221,7 +221,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                             medoids_indexes=medoids_indexes)
 
         if _ENABLE_SCP:
-            os.system("scp %s %s" % (file_path, _URL_SSH_GATE))
+            os.system("scp \"%s\" %s" % (file_path, _URL_SSH_GATE))
             os.remove(file_path)
 
     if visualise:

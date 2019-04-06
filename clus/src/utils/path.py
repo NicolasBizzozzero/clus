@@ -6,7 +6,10 @@ def compute_file_saving_path(dataset, clustering_algorithm, components, seed, di
                              extension, is_3d_visualisation=False):
     os.makedirs(dir_dest, exist_ok=True)
 
-    dest = os.path.join(dir_dest,
+    if weights is not None:
+        weights = tuple(map(lambda n: str(n), weights))
+
+    return os.path.join(dir_dest,
                         "{dataset}_{clustering_algorithm}_{components}_{seed}_{distance}{weights}{fuzzifier}"
                         "{is_3d_visualisation}.{extension}".format(
                             dataset=os.path.splitext(ntpath.basename(dataset))[0],
@@ -19,10 +22,6 @@ def compute_file_saving_path(dataset, clustering_algorithm, components, seed, di
                             is_3d_visualisation="_3d" if is_3d_visualisation else "",
                             extension=extension
                         ))
-    print(dest)
-    print(type(weights))
-    print(weights)
-    return dest
 
 
 if __name__ == "__main__":
