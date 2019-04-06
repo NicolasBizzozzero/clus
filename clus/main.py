@@ -86,7 +86,7 @@ _URL_SSH_GATE = "bizzozzero@gate.lip6.fr:Documents/OARSUB"
                    "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
 @click.option("--weights", cls=OptionInfiniteArgs,
               help="Weights used for the \"weighted_euclidean\" pairwise distance. You need as much weights as "
-                    "you have features in your data.")
+                   "you have features in your data.")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 @click.option("--save-clus", is_flag=True,
@@ -208,6 +208,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              components=components,
                                              seed=seed,
                                              distance=pairwise_distance,
+                                             weights=weights,
                                              fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
                                              dir_dest=path_dir_dest,
                                              extension="npz",
@@ -231,6 +232,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                                                      components=components,
                                                                      seed=seed,
                                                                      distance=pairwise_distance,
+                                                                     weights=weights,
                                                                      fuzzifier=None if is_hard_clustering(
                                                                          clustering_algorithm) else fuzzifier,
                                                                      dir_dest=path_dir_dest,
@@ -250,6 +252,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                                                      components=components,
                                                                      seed=seed,
                                                                      distance=pairwise_distance,
+                                                                     weights=weights,
                                                                      fuzzifier=None if is_hard_clustering(
                                                                          clustering_algorithm) else fuzzifier,
                                                                      dir_dest=path_dir_dest,
