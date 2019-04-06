@@ -74,6 +74,7 @@ def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
 
     # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
     # in a cluster
+    # TODO: I suggest to take 10%  of this
     if membership_subset_size is None:
         membership_subset_size = distance_matrix.shape[0] // components
 
