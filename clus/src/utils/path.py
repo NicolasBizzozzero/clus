@@ -26,4 +26,4 @@ def compute_file_saving_path(dataset, clustering_algorithm, components, seed, di
 
 
 if __name__ == "__main__":
-    weights = ()
+    pass

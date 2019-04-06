@@ -15,6 +15,7 @@ from clus.src.core.data_loading import load_data
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
+from clus.src.utils.common import str_to_number
 from clus.src.utils.random import set_manual_seed
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
 from clus.src.utils.path import compute_file_saving_path
@@ -167,6 +168,9 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     if normalization is not None:
         data = data.astype(np.float64)
         normalize(data, strategy=normalization)
+
+    # Properly process weights
+    weights = tuple(map(lambda s: str_to_number(s), weights))
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
