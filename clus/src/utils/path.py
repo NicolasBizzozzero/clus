@@ -13,15 +13,17 @@ def compute_file_saving_path(dataset, clustering_algorithm, components, seed, di
                             clustering_algorithm=clustering_algorithm,
                             components=components,
                             distance=distance,
-                            weights=("_(" + '-'.join(str(weights)) + ")") if distance == "weighted_euclidean" else "",
+                            weights=("_(" + '-'.join(weights) + ")") if distance == "weighted_euclidean" else "",
                             fuzzifier=("_" + str(fuzzifier)) if fuzzifier is not None else "",
                             seed=seed,
                             is_3d_visualisation="_3d" if is_3d_visualisation else "",
                             extension=extension
                         ))
     print(dest)
+    print(type(weights))
+    print(weights)
     return dest
 
 
 if __name__ == "__main__":
-    pass
+    weights = ()
