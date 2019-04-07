@@ -384,9 +384,10 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
             (data.shape[0], len(weights))
         data = data * np.sqrt(weights)
     else:
+        # Apply a scipy pairwise distance (list of available methods here :
+        # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
+        # Returns a condensed distance matrix.
         distance_mtx = pdist(data, distance_metric, w=weights)
-        distance_mtx = squareform(distance_mtx)
-        distance_mtx = distance_mtx[np.triu_indices_from(distance_mtx, k=1)]
 
     # Compute linkage
     if distance_mtx is not None:
