@@ -173,7 +173,11 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
 
     # Properly process weights
     if weights is not None:
-        weights = tuple(map(lambda s: str_to_number(s), weights))
+        # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
+        if isinstance(weights, tuple):
+            weights = tuple(map(lambda s: str_to_number(s), weights))
+        else:
+            weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
@@ -365,6 +369,14 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
     if distance_metric == "euclidean":
         pass
     elif distance_metric == "weighted_euclidean":
+        assert weights is not None, "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
+
+        # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
+        if isinstance(weights, tuple):
+            weights = tuple(map(lambda s: str_to_number(s), weights))
+        else:
+            weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+
         # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
         # weighted by the square root of the weights, see [5]
         assert len(weights) == data.shape[0], \
