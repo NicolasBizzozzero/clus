@@ -171,7 +171,6 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
         data = data.astype(np.float64)
         normalize(data, strategy=normalization)
 
-    # Properly process weights
     if weights is not None:
         # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
         if " " in weights[0]:
