@@ -175,7 +175,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     if weights is not None:
         # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
         if " " in weights[0]:
-            weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+            weights = tuple(map(lambda s: str_to_number(s), weights[0].split(" ")))
         else:
             weights = tuple(map(lambda s: str_to_number(s), weights))
 
