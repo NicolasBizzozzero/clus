@@ -9,7 +9,7 @@ _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{r
 
 
 @remove_unexpected_arguments
-def kmeans(data, components=10, eps=1e-4, max_iter=1000,
+def kmeans(data, components=10, eps=1e-4, max_iter=1000, weights=None,
            initialization_method="random_choice", empty_clusters_method="nothing",
            centroids=None):
     """ Performs the k-means clustering algorithm on a dataset.
@@ -20,6 +20,8 @@ def kmeans(data, components=10, eps=1e-4, max_iter=1000,
     :param eps: Criterion used to define convergence. If the absolute differences between two consecutive losses is
     lower than `eps`, the clustering stop.
     :param max_iter: Criterion used to stop the clustering if the number of iterations exceeds `max_iter`.
+    :param weights: Weighting of each features during clustering. Must be an Iterable of weights with the same size as
+    the number of features.
     :param initialization_method: Method used to initialise the centroids. Can take one of the following values :
     * "random_uniform" or "uniform", samples values between the min and max across each dimension.
     * "random_gaussian" or "gaussian", samples values from a gaussian with the same mean and std as each data's
@@ -45,6 +47,9 @@ def kmeans(data, components=10, eps=1e-4, max_iter=1000,
     assert data.shape[1] > 0, "The data must have at least one feature"
     assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
     assert 0 <= max_iter, "The number of max iterations must be positive"
+    assert (weights is None) or (len(weights) == data.shape[1]),\
+        "The number of weights given must be the same as the number of features. Expected size : %s, given size : %s" %\
+        (data.shape[1], len(weights))
     assert (centroids is None) or (centroids.shape == (components, data.shape[1])), \
         "The given centroids do not have a correct shape. Expected shape : {}, given shape : {}".format(
             (components, data.shape[1]), centroids.shape
@@ -53,6 +58,11 @@ def kmeans(data, components=10, eps=1e-4, max_iter=1000,
     # Initialisation
     if centroids is None:
         centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
+
+    if weights is not None:
+        # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
+        # weighted by the square root of the weights, see [5]
+        data = data * np.sqrt(weights)
 
     with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
         best_memberships = None

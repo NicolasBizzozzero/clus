@@ -200,6 +200,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
         eps=eps,
         max_iter=max_iter,
         fuzzifier=fuzzifier,
+        weights=weights,
         membership_subset_size=membership_subset_size,
         initialization_method=initialization_method,
         empty_clusters_method=empty_clusters_method,
