@@ -174,10 +174,10 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     # Properly process weights
     if weights is not None:
         # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
-        if isinstance(weights, tuple):
-            weights = tuple(map(lambda s: str_to_number(s), weights))
-        else:
+        if " " in weights[0]:
             weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+        else:
+            weights = tuple(map(lambda s: str_to_number(s), weights))
 
     # Some methods need the data to be a pairwise distance matrix
     # If it is not the case, default to the euclidean distance
