@@ -7,7 +7,7 @@ import click
 import pandas as pd
 import numpy as np
 from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single, fcluster
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import pdist, squareform
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
@@ -199,7 +199,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     # Perform the clustering method
     clustering_result = clustering_function(
         data=data,
-        distance_matrix=distance_matrix,
+        distance_matrix=squareform(distance_matrix),
         components=components,
         eps=eps,
         max_iter=max_iter,
