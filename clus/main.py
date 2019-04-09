@@ -12,6 +12,7 @@ from scipy.spatial.distance import pdist
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
+from clus.src.core.evaluation_metric import evaluate
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
@@ -422,6 +423,39 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
     if visualise or save_dendrogram:
         plot_dendrogram(linkage_mtx=linkage_mtx, depth_cut=depth_cut, dataset_name=dataset_name,
                         show=visualise, save=save_dendrogram)
+
+
+@click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
+@click.argument("metric", type=click.Choice([
+    "ari", "adjusted_rand_index"
+]))
+# Data loading options
+@click.option("--file-affectations-true", type=click.Path(exists=True), default=None,
+              help="npz file used to load the true affectations.")
+@click.option("--file-affectations-pred", type=click.Path(exists=True), default=None,
+              help="npz file used to load the predicted affectations.")
+@click.option("--name-affectations-true", type=str, default=None,
+              help="Array name of the true affectations in the npz file.")
+@click.option("--name-affectations-pred", type=str, default=None,
+              help="Array name of the predicted affectations in the npz file.")
+# Miscellaneous options
+@click.option("--seed", type=int, default=None, show_default=True,
+              help="Random seed to set.")
+@click.option("--quiet", is_flag=True,
+              help="Set this flag if you want to completely silence all outputs to stdout.")
+def eclus(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred, seed,
+          quiet):
+    parameters = locals()
+
+    if quiet:
+        sys.stdout = open(os.devnull, 'w')
+
+    if seed is not None:
+        set_manual_seed(seed)
+
+    print("Starting clustering evaluation with the following parameters :", parameters)
+
+    evaluate(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred)
 
 
 if __name__ == '__main__':
