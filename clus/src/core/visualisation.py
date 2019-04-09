@@ -5,6 +5,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.cluster.hierarchy import dendrogram
+from scipy.spatial.distance import cdist
 
 from clus.src.core.normalization import rescaling
 
@@ -40,13 +41,13 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     elif header is None:
         header = ["dimension_1", "dimension_2"]
 
-    closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # Plot the visualisation
     fig, ax = plt.subplots()
 
     # Set the most diverse colormap possible
-    c = _get_rainbow_color_cycle(closest_cluster)
+    c = _get_rainbow_color_cycle(affectations)
 
     ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES,
                marker=_MARKER_EXAMPLES)
@@ -80,8 +81,7 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
     elif header is None:
         header = ["dimension_1", "dimension_2", "dimension_3"]
 
-    closest_cluster = np.linalg.norm(
-        data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
 
     # Plot the visualisation
     fig = plt.figure()
