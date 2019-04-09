@@ -6,13 +6,13 @@ import click
 
 import pandas as pd
 import numpy as np
-from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single
-from scipy.spatial.distance import pdist, squareform
+from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single, fcluster
+from scipy.spatial.distance import pdist
 
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, use_medoids, is_hard_clustering
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
@@ -144,8 +144,8 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
-    matrix (eg: with not the same number of examples and dimensions), the software will compute it itself with a pairwise
-    euclidean distance.
+    matrix (eg: with not the same number of examples and dimensions), the software will compute it itself with a
+    pairwise euclidean distance.
 
     \b
     The following clustering algorithms are supported :
@@ -312,6 +312,17 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                    "of the n original observations. The distance between clusters Z[i, 0] and Z[i, 1] is given by "
                    "Z[i, 2]. The fourth value Z[i, 3] represents the number of original observations in the newly "
                    "formed cluster.")
+@click.option("--save-flat-clusters", is_flag=True,
+              help="Set this flag if you want to save the clusters in a flattened form (as an affectation array). If "
+                   "this flag has been set, you also need to user the `--flat-clusters-criterion` and "
+                   "`--flat-clusters-value` parameters.")
+@click.option("--flat-clusters-criterion", default="distance", show_default=True, type=str,
+              help="The criterion to use in forming flat clusters. Possible values can be found at :\n"
+                   "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.fcluster.html")
+@click.option("--flat-clusters-value", default=0.0, show_default=True, type=float,
+              help="For criteria 'inconsistent', 'distance' or 'monocrit', this is the threshold to apply when forming "
+                   "flat clusters. For 'maxclust' or 'maxclust_monocrit' criteria, this would be max number of "
+                   "clusters requested.")
 # Visualisation options
 @click.option("--visualise", is_flag=True,
               help="Set this flag if you want to visualise the resulting dendrogram.")
@@ -343,8 +354,9 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
-def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, weights, save_z, visualise,
-          save_dendrogram, depth_cut, seed, normalization, quiet, path_dir_dest):
+def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, weights, save_z, save_flat_clusters,
+          flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed, normalization,
+          quiet, path_dir_dest):
     parameters = locals()
 
     if quiet:
@@ -401,6 +413,11 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
     if save_z:
         dir_file_linkage_mtx = os.path.join(path_dir_dest, "z_" + dataset_name)
         np.save(dir_file_linkage_mtx, linkage_mtx)
+
+    if save_flat_clusters:
+        flat_clusters = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
+        dir_file_linkage_mtx = os.path.join(path_dir_dest, "f_" + dataset_name)
+        np.save(dir_file_linkage_mtx, flat_clusters)
 
     if visualise or save_dendrogram:
         plot_dendrogram(linkage_mtx=linkage_mtx, depth_cut=depth_cut, dataset_name=dataset_name,
