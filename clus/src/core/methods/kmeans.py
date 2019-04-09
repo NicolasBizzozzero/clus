@@ -107,19 +107,7 @@ def _optim_memberships(data, centroids):
     # Compute euclidean distance between data and centroids
     # dist_data_centroids = np.array([np.linalg.norm(data - c, ord=2, axis=1) for c in centroids]).T
     # dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1).T
-    import time
-
-    t1 = time.time()
-    dist_data_centroids1 = np.linalg.norm(np.expand_dims(data, 2) - np.expand_dims(centroids.T, 0), axis=1)
-    t2 = time.time()
-    dist_data_centroids2 = cdist(data, centroids, metric="euclidean")
-    t3 = time.time()
-
-    print(t2 - t1, t3 - t2)
-    print(dist_data_centroids1.shape, dist_data_centroids2.shape)
-    print(dist_data_centroids1, dist_data_centroids2)
-
-    exit(0)
+    dist_data_centroids = cdist(data, centroids, metric="euclidean")
 
     # Set all binary affectations
     mask_closest_centroid = (np.arange(data.shape[0]), dist_data_centroids.argmin(axis=1))
@@ -141,8 +129,7 @@ def _compute_loss(data, memberships, centroids):
     """ Compute the loss of the clustering algorithm.
     This method do not have any purpose in the clustering algorithm. It is only invoked for result analysis.
     """
-    dist_data_centroids = data - centroids[:, np.newaxis]
-    return (memberships * np.power(np.linalg.norm(dist_data_centroids, axis=-1, ord=2), 2).T).sum()
+    return (memberships * cdist(data, centroids, metric="euclidean")).sum()
 
 
 if __name__ == '__main__':
