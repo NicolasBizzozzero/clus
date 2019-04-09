@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
 from clus.src.core.cluster_initialization import cluster_initialization
@@ -102,7 +103,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
 def _compute_memberships(data, centroids, fuzzifier):
     # TODO: If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership
     #  to 1, and the memberships of others to 0. See [3]
-    dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1) ** 2
+    dist_data_centroids = cdist(data, centroids, metric="euclidean").T
 
     tmp = np.power(dist_data_centroids, -2 / (fuzzifier - 1), where=dist_data_centroids != 0)
     big_sum = tmp.sum(axis=0, keepdims=True)
@@ -119,8 +120,8 @@ def _compute_centroids(data, memberships, fuzzifier):
 
 
 def _compute_loss(data, memberships, centroids, fuzzifier):
-    dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1) ** 2
-    return ((memberships ** fuzzifier) * dist_data_centroids.T).sum()
+    dist_data_centroids = cdist(data, centroids, metric="euclidean")
+    return ((memberships ** fuzzifier) * dist_data_centroids).sum()
 
 
 def __compute_memberships(data, centroids, fuzzifier):

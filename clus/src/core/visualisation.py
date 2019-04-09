@@ -81,13 +81,13 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
     elif header is None:
         header = ["dimension_1", "dimension_2", "dimension_3"]
 
-    closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # Plot the visualisation
     fig = plt.figure()
 
     # Set the most diverse colormap possible
-    c = _get_rainbow_color_cycle(closest_cluster)
+    c = _get_rainbow_color_cycle(affectations)
 
     ax = Axes3D(fig, rect=[0, 0, 1, 1], elev=_ELEVATION, azim=_AZIMUTH)
 
