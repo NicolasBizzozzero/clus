@@ -19,3 +19,4 @@
 * [3] Ross, Timothy J., Fuzzy Logic With Engineering Applications, 3rd ed. Wiley. 2010. ISBN 978-0-470-74376-8 pp 352-353
 * [4] Joe Marino, statistical whitening, http://joelouismarino.github.io/blog_posts/blog_whitening.html (archive: https://web.archive.org/web/20180813034201/http://joelouismarino.github.io/blog_posts/blog_whitening.html)
 * [5] TODO: Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data weighted by the square root of the weights
+* [6] James C.Bezdek, Robert Ehrlich, William Full, FCM: The fuzzy c-means clustering algorithm, https://doi.org/10.1016/0098-3004(84)90020-7, 1983
