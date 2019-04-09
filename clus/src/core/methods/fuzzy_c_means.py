@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
-from clus.src.core.analysis import ambiguity
+from clus.src.core.analysis import ambiguity, partition_coefficient, partition_entropy
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.utils.decorator import remove_unexpected_arguments
@@ -103,7 +103,9 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
         "clusters_center": best_centroids,
         "losses": np.array(losses),
         "affectations": cdist(data, best_centroids, metric='euclidean').argmin(axis=-1),
-        "ambiguity": ambiguity(memberships)
+        "ambiguity": ambiguity(memberships),
+        "partition_coefficient": partition_coefficient(memberships),
+        "partition_entropy": partition_entropy(memberships),
     }
 
 
