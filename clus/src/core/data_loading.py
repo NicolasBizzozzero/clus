@@ -37,7 +37,7 @@ def load_data(path_file, file_type, delimiter, header, array_name):
 @remove_unexpected_arguments
 def guess(path_file, array_name, delimiter, header):
     file_name, extension = os.path.splitext(path_file)
-    extension = extension.lower()
+    extension = extension[1:].lower()
 
     if extension in EXTENSION_CSV:
         return csv(path_file=path_file, delimiter=delimiter, header=header)
@@ -45,7 +45,7 @@ def guess(path_file, array_name, delimiter, header):
         return npy(path_file=path_file)
     if extension in EXTENSION_NPZ:
         return npz(path_file=path_file, array_name=array_name)
-    raise CannotGuessFileType(file_name=file_name)
+    raise CannotGuessFileType(file_name=path_file)
 
 
 @remove_unexpected_arguments
