@@ -83,7 +83,7 @@ def fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
 
             medoids_idx = _compute_medoids(distance_matrix, memberships, fuzzifier)
 
-            loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
+            loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
             losses.append(loss)
             if loss < best_loss:
                 best_loss = loss
