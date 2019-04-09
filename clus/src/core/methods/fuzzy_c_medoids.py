@@ -134,7 +134,7 @@ def _compute_medoids(distance_matrix, memberships, fuzzifier):
 
 
 def _compute_loss(data, medoids_idx, memberships, fuzzifier):
-    dist_data_centroids = cdist(data, data[: medoids_idx], metric="euclidean")
+    dist_data_centroids = cdist(data, data[medoids_idx, :], metric="euclidean")
     return ((memberships ** fuzzifier) * dist_data_centroids).sum()
 
 
