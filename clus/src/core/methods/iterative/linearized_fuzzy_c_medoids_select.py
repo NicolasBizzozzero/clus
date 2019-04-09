@@ -2,6 +2,7 @@ from collections import Counter
 
 import numpy as np
 from scipy.cluster.hierarchy import linkage
+from scipy.spatial.distance import cdist
 
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.array import mini_batches_dist
@@ -101,7 +102,7 @@ def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
             #  So I need to updated all the code below, and probably not use the "closest_cluster"
             #  computation but the distance matrix.
             # Minimal cardinal filtering
-            closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+            closest_cluster = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
             least_common = reversed(Counter(closest_cluster).most_common())
             for i_cluster, n_of_elements in least_common:
                 if n_of_elements > MIN_MEDOID_SIZE:
@@ -110,7 +111,7 @@ def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
                     batch_data, batch_distance = _delete_cluster(batch_data, batch_distance, i_cluster, closest_cluster,
                                                                  trashcan_data, trashcan_distance)
             # Maximal diameter filtering
-            closest_cluster = np.linalg.norm(data - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+            closest_cluster = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
             for i_cluster in np.unique(closest_cluster):
                 cluster_diameter = _compute_cluster_diameter(batch_data, batch_distance, i_cluster)
                 if cluster_diameter > MAX_MEDOID_DIAMETER:

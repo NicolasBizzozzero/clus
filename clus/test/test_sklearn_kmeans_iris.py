@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.spatial.distance import cdist
 
 from sklearn.cluster import KMeans
 
@@ -13,8 +14,7 @@ def main(random_state):
     kmeans = KMeans(n_clusters=3, random_state=random_state)
     kmeans.fit(X)
     clusters_center = kmeans.cluster_centers_
-    closest_cluster = np.linalg.norm(
-        X - clusters_center[:, np.newaxis], axis=-1, ord=2).argmin(axis=0)
+    closest_cluster = cdist(X, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # plot
     plt.scatter(X[:, 0], X[:, 1], s=3, c=closest_cluster, marker='o')
