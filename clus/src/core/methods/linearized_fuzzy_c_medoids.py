@@ -167,7 +167,7 @@ def _compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
 
 
 def _compute_loss(data, medoids_idx, memberships, fuzzifier):
-    return ((memberships ** fuzzifier) * data[:, medoids_idx]).sum(axis=(1, 0))
+    return ((memberships ** fuzzifier) * data[medoids_idx, :]).sum(axis=(1, 0))
 
 
 def __compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
