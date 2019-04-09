@@ -1,6 +1,8 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
+from clus.src.core.analysis import ambiguity
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.utils.decorator import remove_unexpected_arguments
@@ -94,7 +96,13 @@ def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
                 "best_loss": "{0:.6f}".format(best_loss)
             })
 
-    return best_memberships, best_medoids_idx, np.array(losses)
+    return {
+        "memberships": best_memberships,
+        "medoids_indexes": best_medoids_idx,
+        "clusters_center": data[best_medoids_idx, :],
+        "losses": np.array(losses),
+        "affectations": cdist(data, data[best_medoids_idx, :], metric='euclidean').argmin(axis=-1),
+    }
 
 
 def _compute_memberships(distance_matrix, medoids_idx):

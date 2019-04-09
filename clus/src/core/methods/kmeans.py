@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
+from clus.src.core.analysis import ambiguity
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.utils.decorator import remove_unexpected_arguments, time_this
@@ -95,7 +96,12 @@ def kmeans(data, components=10, eps=1e-4, max_iter=1000, weights=None,
                 "best_loss": "{0:.6f}".format(best_loss)
             })
 
-    return best_memberships, best_centroids, np.array(losses)
+    return {
+        "memberships": best_memberships,
+        "clusters_center": best_centroids,
+        "losses": np.array(losses),
+        "affectations": cdist(data, best_centroids, metric='euclidean').argmin(axis=-1),
+    }
 
 
 def _optim_memberships(data, centroids):

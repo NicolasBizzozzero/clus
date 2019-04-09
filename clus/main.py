@@ -92,19 +92,23 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Set this flag if you want to save the clustering result. A .npz file will be created, containing "
                    "the memberships matrix 'memberships', the clusters' center matrix 'clusters_center' and the losses "
                    "across all iterations 'losses'.")
+@click.option("--keep-memberships", is_flag=True,
+              help="Set this flag if you want to keep the memberships matrix in your results. It has been removed by "
+                   "default because it is usually not used, take a large amount of disk space and can be resumed by "
+                   "the 'ambiguity' and 'entropy' scalars.")
 # Visualisation options
 @click.option("--visualise", is_flag=True,
               help="Set this flag if you want to visualise the clustering result. If your data's dimension is more "
-                   "than 2, a 2-components PCA is applied to the data before visualising.")
+                   "than 2, a 2-components t-SNE is applied to the data before visualising.")
 @click.option("--visualise-3d", is_flag=True,
               help="Set this flag if you want to visualise the clustering result in 3D. If your data's dimension is "
-                   "more than 3, a 3-components PCA is applied to the data before visualising.")
+                   "more than 3, a 3-components t-SNE is applied to the data before visualising.")
 @click.option("--save-visu", is_flag=True,
               help="Set this flag if you want to save the visualisation of the clustering result. If your data's "
-                   "dimension is more than 2, a 2-components PCA is applied to the data before visualising.")
+                   "dimension is more than 2, a 2-components t-SNE is applied to the data before visualising.")
 @click.option("--save-visu-3d", is_flag=True,
               help="Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's "
-                   "dimension is more than 3, a 3-components PCA is applied to the data before visualising.")
+                   "dimension is more than 3, a 3-components t-SNE is applied to the data before visualising.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
               help="Random seed to set.")
@@ -135,8 +139,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
 def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
-         membership_subset_size, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
-         quiet, path_dir_dest, url_scp):
+         membership_subset_size, save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
+         normalization, quiet, path_dir_dest, url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
@@ -192,7 +196,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
             distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
 
     # Perform the clustering method
-    memberships, clusters_center, losses = clustering_function(
+    clustering_result = clustering_function(
         data=data,
         distance_matrix=distance_matrix,
         components=components,
@@ -204,11 +208,8 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
         initialization_method=initialization_method,
         empty_clusters_method=empty_clusters_method,
     )
-    if use_medoids(clustering_algorithm):
-        medoids_indexes = clusters_center
-        clusters_center = data[clusters_center, :]
-    else:
-        medoids_indexes = None
+    if not keep_memberships:
+        del clustering_result["memberships"]
 
     # Create destination directory if it does not already exists
     os.makedirs(path_dir_dest, exist_ok=True)
@@ -224,8 +225,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              dir_dest=path_dir_dest,
                                              extension="npz",
                                              is_3d_visualisation=False)
-        np.savez_compressed(file_path, memberships=memberships, clusters_center=clusters_center, losses=losses,
-                            medoids_indexes=medoids_indexes)
+        np.savez_compressed(file_path, **clustering_result)
         if url_scp is not None:
             execute("scp", file_path, url_scp + ":" + path_dir_dest)
             os.remove(file_path)
@@ -242,7 +242,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              dir_dest=path_dir_dest,
                                              extension="png")
         visualise_clustering_2d(data=data,
-                                clusters_center=clusters_center,
+                                clusters_center=clustering_result["clusters_center"],
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
@@ -266,7 +266,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              extension="png",
                                              is_3d_visualisation=True)
         visualise_clustering_3d(data=data,
-                                clusters_center=clusters_center,
+                                clusters_center=clustering_result["clusters_center"],
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,

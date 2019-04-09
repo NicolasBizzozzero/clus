@@ -10,7 +10,6 @@ from scipy.spatial.distance import cdist
 from clus.src.core.normalization import rescaling
 
 from mpl_toolkits.mplot3d import Axes3D
-from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 # Plot configuration
@@ -31,17 +30,16 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
                             show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
 
-    # Apply a 2-components PCA if the data has more than 2 dimensions
-    data, clusters_center, applied_pca = _apply_pca_if_too_many_dimensions(
-        data, clusters_center, n_components=2)
+    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
-    # Transform the header if it exists or if a PCA has been applied
-    if applied_pca:
+    # Apply a 2-components t-SNE if the data has more than 2 dimensions
+    data, applied_tsne = _apply_tsne_if_too_many_dimensions(data, n_components=2)
+
+    # Transform the header if it exists or if a t-SNE has been applied
+    if applied_tsne:
         header = ["component_1", "component_2"]
     elif header is None:
         header = ["dimension_1", "dimension_2"]
-
-    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # Plot the visualisation
     fig, ax = plt.subplots()
@@ -49,15 +47,18 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     # Set the most diverse colormap possible
     c = _get_rainbow_color_cycle(affectations)
 
+    # Plot the data
     ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES,
                marker=_MARKER_EXAMPLES)
-    ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
-               marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
+    if not applied_tsne:
+        ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
+                   marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
 
+    # Configure labels and title
     plt.xlabel(header[0])
     plt.ylabel(header[1])
-    title = _compute_title(clusters_center, clustering_method,
-                           dataset_name, applied_pca, n_components_pca=2)
+    title = _compute_title(clusters_center.shape[0], clustering_method,
+                           dataset_name, applied_tsne, n_components_tsne=2)
     plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 
     if save:
@@ -71,17 +72,16 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
                             show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 3, "Data must have at least 3 dimensions for a 3D-visualisation"
 
-    # Apply a 3-components PCA if the data has more than 3 dimensions
-    data, clusters_center, applied_pca = _apply_pca_if_too_many_dimensions(
-        data, clusters_center, n_components=3)
+    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
-    # Transform the header if it exists or if a PCA has been applied
-    if applied_pca:
+    # Apply a 3-components t-SNE if the data has more than 3 dimensions
+    data, applied_tsne = _apply_tsne_if_too_many_dimensions(data, n_components=3)
+
+    # Transform the header if it exists or if a t-SNE has been applied
+    if applied_tsne:
         header = ["component_1", "component_2", "component_3"]
     elif header is None:
         header = ["dimension_1", "dimension_2", "dimension_3"]
-
-    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # Plot the visualisation
     fig = plt.figure()
@@ -89,13 +89,15 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
     # Set the most diverse colormap possible
     c = _get_rainbow_color_cycle(affectations)
 
+    # Plot the data
     ax = Axes3D(fig, rect=[0, 0, 1, 1], elev=_ELEVATION, azim=_AZIMUTH)
-
     ax.scatter(data[:, 0], data[:, 1], data[:, 2],
                c=c, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES)
-    ax.scatter(clusters_center[:, 0], clusters_center[:, 1], clusters_center[:, 2], c=_COLOR_CLUSTERS_CENTER,
-               s=_SIZE_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER, marker=_MARKER_CLUSTERS_CENTER)
+    if not applied_tsne:
+        ax.scatter(clusters_center[:, 0], clusters_center[:, 1], clusters_center[:, 2], c=_COLOR_CLUSTERS_CENTER,
+                   s=_SIZE_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER, marker=_MARKER_CLUSTERS_CENTER)
 
+    # Configure labels and title
     ax.w_xaxis.set_ticklabels([])
     ax.w_yaxis.set_ticklabels([])
     ax.w_zaxis.set_ticklabels([])
@@ -103,9 +105,8 @@ def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_na
     ax.set_ylabel(header[1])
     ax.set_zlabel(header[2])
     ax.dist = _DISTANCE_3D
-
-    title = _compute_title(clusters_center, clustering_method,
-                           dataset_name, applied_pca, n_components_pca=3)
+    title = _compute_title(clusters_center.shape[0], clustering_method,
+                           dataset_name, applied_tsne, n_components_tsne=3)
     ax.set_title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 
     if save:
@@ -152,39 +153,32 @@ def plot_dendrogram(linkage_mtx, depth_cut, dataset_name=None, title=None,
     plt.close()
 
 
-def _apply_pca_if_too_many_dimensions(data, clusters_center, n_components):
-    applied_pca = False
-    if data.shape[-1] > n_components:
-        applied_pca = True
-        pca = PCA(n_components=n_components)
-        data = pca.fit_transform(data)
-        clusters_center = pca.transform(clusters_center)
-    return data, clusters_center, applied_pca
+def _apply_tsne_if_too_many_dimensions(data, n_components):
+    # TODO: Impossible to apply t-SNE twice (for the data and the cluster's center) : https://lvdmaaten.github.io/tsne
+    #  Multiple ideas:
+    #  - Keep the affectations vector, apply the TSNE on the data then recompute the clusters center.
+    #  - Keep the affectations vector and only apply TSNE to the data, do not care about the clusters center.
+    #  - Do a linear regression between the data before applying TSNE and after. Then apply this regression to the
+    #    clusters center.
 
-
-def _apply_tsne_if_too_many_dimensions(data, clusters_center, n_components):
-    # TODO: Impossible selon l'auteur de t-SNE : https://lvdmaaten.github.io/tsne/
-    # Solution potentielle : Je me dis faire une regression linéaire qui apprends le mapping et l'appliquer sur les
-    # position des clusters comme il le suggère peut être pas mal
-    applied_pca = False
+    applied_tsne = False
     if data.shape[-1] > n_components:
-        applied_pca = True
+        applied_tsne = True
         tsne = TSNE(n_components=n_components)
         data = tsne.fit_transform(data)
-        clusters_center = tsne.transform(clusters_center)
-    return data, clusters_center, applied_pca
+        # clusters_center = tsne.transform(clusters_center)
+    return data, applied_tsne
 
 
-def _compute_title(clusters_center, clustering_method, dataset_name, applied_pca, n_components_pca):
+def _compute_title(n_components, clustering_method, dataset_name, applied_tsne, n_components_tsne):
     if dataset_name is None:
         dataset_name = "."
     else:
         dataset_name = " applied to the \"{}\" dataset.".format(dataset_name)
 
-    n_components = clusters_center.shape[0]
-    if applied_pca:
-        return ("{}-components PCA applied to the results of the \"{}\" clus algorithm "
-                "with {} clusters{}").format(n_components_pca, clustering_method, n_components, dataset_name)
+    if applied_tsne:
+        return ("{}-components t-SNE applied to the results of the \"{}\" clus algorithm "
+                "with {} clusters{}").format(n_components_tsne, clustering_method, n_components, dataset_name)
     else:
         return ("Results of the \"{}\" clus algorithm "
                 "with {} clusters{}").format(clustering_method, n_components, dataset_name)
