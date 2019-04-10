@@ -26,11 +26,9 @@ _AZIMUTH = 134
 _DISTANCE_3D = 12
 
 
-def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_name=None, header=None,
+def visualise_clustering_2d(data, clusters_center, affectations, clustering_method, dataset_name=None, header=None,
                             show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
-
-    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # Apply a 2-components t-SNE if the data has more than 2 dimensions
     data, applied_tsne = _apply_tsne_if_too_many_dimensions(data, n_components=2)
@@ -48,8 +46,7 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     c = _get_rainbow_color_cycle(affectations)
 
     # Plot the data
-    ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES,
-               marker=_MARKER_EXAMPLES)
+    ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES, marker=_MARKER_EXAMPLES)
     if not applied_tsne:
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
                    marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
@@ -57,8 +54,7 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     # Configure labels and title
     plt.xlabel(header[0])
     plt.ylabel(header[1])
-    title = _compute_title(clusters_center.shape[0], clustering_method,
-                           dataset_name, applied_tsne, n_components_tsne=2)
+    title = _compute_title(clusters_center.shape[0], clustering_method, dataset_name, applied_tsne, n_components_tsne=2)
     plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 
     if save:
@@ -68,11 +64,9 @@ def visualise_clustering_2d(data, clusters_center, clustering_method, dataset_na
     plt.close()
 
 
-def visualise_clustering_3d(data, clusters_center, clustering_method, dataset_name, header=None,
+def visualise_clustering_3d(data, clusters_center, affectations, clustering_method, dataset_name, header=None,
                             show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 3, "Data must have at least 3 dimensions for a 3D-visualisation"
-
-    affectations = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
 
     # Apply a 3-components t-SNE if the data has more than 3 dimensions
     data, applied_tsne = _apply_tsne_if_too_many_dimensions(data, n_components=3)

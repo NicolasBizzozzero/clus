@@ -115,10 +115,10 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         "medoids_indexes": best_medoids_idx,
         "clusters_center": data[best_medoids_idx, :],
         "losses": np.array(losses),
-        "affectations": cdist(data, data[best_medoids_idx, :], metric='euclidean').argmin(axis=-1),
-        "ambiguity": ambiguity(memberships),
-        "partition_coefficient": partition_coefficient(memberships),
-        "partition_entropy": partition_entropy(memberships),
+        "affectations": best_memberships.argmax(axis=1),
+        "ambiguity": ambiguity(best_memberships),
+        "partition_coefficient": partition_coefficient(best_memberships),
+        "partition_entropy": partition_entropy(best_memberships),
     }
 
 

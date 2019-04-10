@@ -100,7 +100,7 @@ def kmeans(data, components=10, eps=1e-4, max_iter=1000, weights=None,
         "memberships": best_memberships,
         "clusters_center": best_centroids,
         "losses": np.array(losses),
-        "affectations": cdist(data, best_centroids, metric='euclidean').argmin(axis=-1),
+        "affectations": best_memberships.argmax(axis=1),
     }
 
 

@@ -244,6 +244,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              extension="png")
         visualise_clustering_2d(data=data,
                                 clusters_center=clustering_result["clusters_center"],
+                                affectations=clustering_result["affectations"],
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
@@ -268,6 +269,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                              is_3d_visualisation=True)
         visualise_clustering_3d(data=data,
                                 clusters_center=clustering_result["clusters_center"],
+                                affectations=clustering_result["affectations"],
                                 clustering_method=clustering_algorithm,
                                 dataset_name=ntpath.basename(dataset),
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,

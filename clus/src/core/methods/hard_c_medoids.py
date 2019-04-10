@@ -101,7 +101,7 @@ def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         "medoids_indexes": best_medoids_idx,
         "clusters_center": data[best_medoids_idx, :],
         "losses": np.array(losses),
-        "affectations": cdist(data, data[best_medoids_idx, :], metric='euclidean').argmin(axis=-1),
+        "affectations": best_memberships.argmax(axis=1),
     }
 
 

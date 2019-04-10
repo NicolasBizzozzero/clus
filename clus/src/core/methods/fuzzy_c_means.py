@@ -102,10 +102,10 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
         "memberships": best_memberships,
         "clusters_center": best_centroids,
         "losses": np.array(losses),
-        "affectations": cdist(data, best_centroids, metric='euclidean').argmin(axis=-1),
-        "ambiguity": ambiguity(memberships),
-        "partition_coefficient": partition_coefficient(memberships),
-        "partition_entropy": partition_entropy(memberships),
+        "affectations": best_memberships.argmax(axis=1),
+        "ambiguity": ambiguity(best_memberships),
+        "partition_coefficient": partition_coefficient(best_memberships),
+        "partition_entropy": partition_entropy(best_memberships),
     }
 
 
