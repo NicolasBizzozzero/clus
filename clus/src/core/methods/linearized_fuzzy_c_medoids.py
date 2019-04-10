@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.sparse import csr_matrix
-from scipy.spatial.distance import cdist
+from scipy.spatial.distance import cdist, is_valid_y
 from tqdm import tqdm
 
 from clus.src.core.analysis import ambiguity, partition_coefficient, partition_entropy
@@ -21,7 +21,8 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
     examples and columns as features.
     :param distance_matrix: The pairwise distance matrix applied across all examples from the data matrix. The distance
-    matrix must be a square matrix.
+    matrix must be encoded into a condensed distance vector (see:
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.squareform.html)
     :param components: The number of components (clusters) wanted.
     :param eps: Criterion used to define convergence. If the absolute differences between two consecutive losses is
     lower than `eps`, the clustering stop.
@@ -52,19 +53,20 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
     assert len(data.shape) == 2, "The data must be a 2D array"
     assert data.shape[0] > 0, "The data must have at least one example"
     assert data.shape[1] > 0, "The data must have at least one feature"
-    assert (len(distance_matrix.shape) == 2) and (distance_matrix.shape[0] == distance_matrix.shape[1]), \
-        "The distance matrix is not a square matrix"
+    assert is_valid_y(distance_matrix), "The distance matrix is not encoded into a condensed distance vector"
     assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
     assert 0 <= max_iter, "The number of max iterations must be positive"
     assert fuzzifier > 1, "The fuzzifier must be greater than 1"
-    assert (membership_subset_size is None) or (1 <= membership_subset_size <= data.shape[0]),\
+    assert (membership_subset_size is None) or (1 <= membership_subset_size <= data.shape[0]), \
         "The membership subset size wanted must be between 1 and %s" % data.shape[0]
     assert (medoids_idx is None) or (medoids_idx.shape == components), \
         "The given medoids indexes do not have a correct shape. Expected shape : {}, given shape : {}".format(
             (components,), medoids_idx.shape
         )
-    assert (medoids_idx is None) or np.all(medoids_idx < data.shape[0]),\
+    assert (medoids_idx is None) or np.all(medoids_idx < data.shape[0]), \
         "The provided medoid indexes array contains unreachable indexes"
+
+    raise NotImplementedError("TODO")
 
     # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
     # in a cluster
@@ -85,8 +87,8 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         losses = []
         current_iter = 0
         while (current_iter < max_iter) and \
-              ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and\
-              ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
+                ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
+                ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
 
             medoids_idx_old = medoids_idx
             memberships = _compute_memberships(distance_matrix, medoids_idx, fuzzifier)
@@ -162,7 +164,8 @@ def _compute_top_membership_subset(memberships, membership_subset_size):
 
 def _compute_medoids(data, memberships, fuzzifier, top_memberships_mask):
     fuzzified_memberships = memberships ** fuzzifier
-    iterable = ((data * top_memberships_mask[:, i] * fuzzified_memberships[:, i]).sum(axis=1).argmin(axis=0) for i in range(memberships.shape[1]))
+    iterable = ((data * top_memberships_mask[:, i] * fuzzified_memberships[:, i]).sum(axis=1).argmin(axis=0) for i in
+                range(memberships.shape[1]))
     return np.fromiter(iterable, count=memberships.shape[1], dtype=np.int64)
 
 
