@@ -27,7 +27,7 @@ def partition_entropy(memberships):
     The partition entropy is defined in [6]. The value $H_c$ it returns is
     contained between $$0 \leq H_c \leq log_a(c)$$
     """
-    return -(memberships * np.log2(memberships, where=memberships != 0) / memberships.shape[0]).sum()
+    return -(memberships * np.log(memberships, where=memberships != 0) / memberships.shape[0]).sum()
 
 
 def entropy():
