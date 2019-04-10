@@ -51,7 +51,7 @@ def fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
     assert len(data.shape) == 2, "The data must be a 2D array"
     assert data.shape[0] > 0, "The data must have at least one example"
     assert data.shape[1] > 0, "The data must have at least one feature"
-    assert is_valid_y(distance_matrix), "The distance matrix is not encoded into a condensed distance vector"
+    # assert is_valid_y(distance_matrix), "The distance matrix is not encoded into a condensed distance vector"
     assert 1 <= components <= data.shape[0], "The number of components wanted must be between 1 and %s" % data.shape[0]
     assert 0 <= max_iter, "The number of max iterations must be positive"
     assert fuzzifier > 1, "The fuzzifier must be greater than 1"
@@ -61,8 +61,6 @@ def fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         )
     assert (medoids_idx is None) or np.all(medoids_idx < data.shape[0]), \
         "The provided medoid indexes array contains unreachable indexes"
-
-    raise NotImplementedError("TODO")
 
     # Initialisation
     if medoids_idx is None:
