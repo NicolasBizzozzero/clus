@@ -231,7 +231,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
             execute("scp", file_path, url_scp + ":" + path_dir_dest)
             os.remove(file_path)
 
-    if visualise:
+    if visualise or save_visu:
         file_path = compute_file_saving_path(dataset=dataset,
                                              clustering_algorithm=clustering_algorithm,
                                              components=components,
@@ -250,13 +250,13 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
                                 saving_path=file_path,
-                                show=True,
+                                show=visualise,
                                 save=save_visu)
         if url_scp is not None:
             execute("scp", file_path, url_scp + ":" + path_dir_dest)
             os.remove(file_path)
 
-    if visualise_3d:
+    if visualise_3d or save_visu_3d:
         file_path = compute_file_saving_path(dataset=dataset,
                                              clustering_algorithm=clustering_algorithm,
                                              components=components,
@@ -275,7 +275,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
                                 header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                            header=0).columns.tolist(),
                                 saving_path=file_path,
-                                show=True,
+                                show=visualise_3d,
                                 save=save_visu_3d)
         if url_scp is not None:
             execute("scp", file_path, url_scp + ":" + path_dir_dest)
