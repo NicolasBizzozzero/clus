@@ -27,7 +27,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("dataset", type=str)
+@click.argument("datasets", type=str, nargs=-1)
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
     "fuzzy_c_means", "fcm",
@@ -139,7 +139,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="If given, any saved result will be sent to this ssh address by using the `scp` command. The file "
                    "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
                    "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
-def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
+def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
          membership_subset_size, save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
          normalization, quiet, path_dir_dest, url_scp):
@@ -162,7 +162,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     if quiet:
         sys.stdout = open(os.devnull, 'w')
 
-    for file_dataset in glob.glob(dataset):
+    for dataset in glob.glob(datasets):
         print("Starting clustering with the following parameters :", parameters)
 
         if seed is not None:
@@ -286,7 +286,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("dataset", type=str)
+@click.argument("datasets", type=str, nargs=-1)
 # Data loading options
 @click.option("--file-type", type=str, default="guess", show_default=True,
               help="The type of file from which the data is read. Possible values are :\n"
@@ -360,7 +360,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
-def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, weights, save_z, save_flat_clusters,
+def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, weights, save_z, save_flat_clusters,
           flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed, normalization,
           quiet, path_dir_dest):
     parameters = locals()
@@ -368,15 +368,15 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
     if quiet:
         sys.stdout = open(os.devnull, 'w')
 
-    for file_dataset in glob.glob(dataset):
+    for dataset in glob.glob(datasets):
         print("Starting hierarchical clustering with the following parameters :", parameters)
 
         if seed is not None:
             set_manual_seed(seed)
 
         # Load data
-        dataset_name = os.path.splitext(ntpath.basename(file_dataset))[0]
-        data = load_data(file_dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+        dataset_name = os.path.splitext(ntpath.basename(dataset))[0]
+        data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
 
         if normalization is not None:
             data = data.astype(np.float64)
