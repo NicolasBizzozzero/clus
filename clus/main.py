@@ -27,7 +27,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("dataset", type=click.Path(exists=True))
+@click.argument("dataset", type=str
+                )
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
     "fuzzy_c_means", "fcm",
