@@ -286,7 +286,7 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("dataset", type="str")
+@click.argument("dataset", type=str)
 # Data loading options
 @click.option("--file-type", type=str, default="guess", show_default=True,
               help="The type of file from which the data is read. Possible values are :\n"
