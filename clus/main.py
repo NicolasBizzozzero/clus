@@ -27,7 +27,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("datasets", type=str, nargs=-1)
+@click.argument("datasets", type=str, nargs=-1, required=True)
 @click.argument("clustering_algorithm", type=click.Choice([
     "kmeans",
     "fuzzy_c_means", "fcm",
@@ -162,7 +162,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
     if quiet:
         sys.stdout = open(os.devnull, 'w')
 
-    for dataset in glob.glob(datasets):
+    for dataset in datasets:
         print("Starting clustering with the following parameters :", parameters)
 
         if seed is not None:
@@ -286,7 +286,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("datasets", type=str, nargs=-1)
+@click.argument("datasets", type=str, nargs=-1, required=True)
 # Data loading options
 @click.option("--file-type", type=str, default="guess", show_default=True,
               help="The type of file from which the data is read. Possible values are :\n"
@@ -364,11 +364,13 @@ def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, w
           flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed, normalization,
           quiet, path_dir_dest):
     parameters = locals()
+    del parameters["datasets"]
 
     if quiet:
         sys.stdout = open(os.devnull, 'w')
 
-    for dataset in glob.glob(datasets):
+    for dataset in datasets:
+        parameters["dataset"] = dataset
         print("Starting hierarchical clustering with the following parameters :", parameters)
 
         if seed is not None:
