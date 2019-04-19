@@ -1,6 +1,7 @@
 import ntpath
 import os
 import sys
+import glob
 
 import click
 
@@ -161,129 +162,131 @@ def clus(dataset, clustering_algorithm, file_type, delimiter, header, array_name
     if quiet:
         sys.stdout = open(os.devnull, 'w')
 
-    if seed is not None:
-        set_manual_seed(seed)
+    for file_dataset in glob.glob(dataset):
+        print("Starting clustering with the following parameters :", parameters)
 
-    print("Starting clustering with the following parameters :", parameters)
+        if seed is not None:
+            set_manual_seed(seed)
 
-    # Load the clustering algorithm
-    clustering_function = get_clustering_function(clustering_algorithm)
+        # Load the clustering algorithm
+        clustering_function = get_clustering_function(clustering_algorithm)
 
-    # Load data
-    data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+        # Load data
+        data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
 
-    if normalization is not None:
-        data = data.astype(np.float64)
-        normalize(data, strategy=normalization)
+        if normalization is not None:
+            data = data.astype(np.float64)
+            normalize(data, strategy=normalization)
 
-    if weights is not None:
-        # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
-        if " " in weights[0]:
-            weights = tuple(map(lambda s: str_to_number(s), weights[0].split(" ")))
-        else:
-            weights = tuple(map(lambda s: str_to_number(s), weights))
+        if weights is not None:
+            # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
+            # consideration
+            if " " in weights[0]:
+                weights = tuple(map(lambda s: str_to_number(s), weights[0].split(" ")))
+            else:
+                weights = tuple(map(lambda s: str_to_number(s), weights))
 
-    # Some methods need the data to be a pairwise distance matrix
-    # If it is not the case, default to the euclidean distance
-    distance_matrix = None
-    if use_distance_matrix(clustering_algorithm):
-        if pairwise_distance == "precomputed":
-            assert data.shape[0] != data.shape[1], ("Your precomputed distance matrix is not square (shape: {})."
-                                                    "").format(data.shape)
-            distance_matrix = data
-        elif pairwise_distance == "weighted_euclidean":
-            distance_matrix = DistanceMetric.get_metric("euclidean").pairwise(data * np.sqrt(weights))
-        else:
-            distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
+        # Some methods need the data to be a pairwise distance matrix
+        # If it is not the case, default to the euclidean distance
+        distance_matrix = None
+        if use_distance_matrix(clustering_algorithm):
+            if pairwise_distance == "precomputed":
+                assert data.shape[0] != data.shape[1], ("Your precomputed distance matrix is not square (shape: {})."
+                                                        "").format(data.shape)
+                distance_matrix = data
+            elif pairwise_distance == "weighted_euclidean":
+                distance_matrix = DistanceMetric.get_metric("euclidean").pairwise(data * np.sqrt(weights))
+            else:
+                distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
 
-    # Perform the clustering method
-    clustering_result = clustering_function(
-        data=data,
-        distance_matrix=distance_matrix,
-        components=components,
-        eps=eps,
-        max_iter=max_iter,
-        fuzzifier=fuzzifier,
-        weights=weights,
-        membership_subset_size=membership_subset_size,
-        initialization_method=initialization_method,
-        empty_clusters_method=empty_clusters_method,
-    )
-    if not keep_memberships:
-        del clustering_result["memberships"]
+        # Perform the clustering method
+        clustering_result = clustering_function(
+            data=data,
+            distance_matrix=distance_matrix,
+            components=components,
+            eps=eps,
+            max_iter=max_iter,
+            fuzzifier=fuzzifier,
+            weights=weights,
+            membership_subset_size=membership_subset_size,
+            initialization_method=initialization_method,
+            empty_clusters_method=empty_clusters_method,
+        )
+        if not keep_memberships:
+            del clustering_result["memberships"]
 
-    # Create destination directory if it does not already exists
-    os.makedirs(path_dir_dest, exist_ok=True)
+        # Create destination directory if it does not already exists
+        os.makedirs(path_dir_dest, exist_ok=True)
 
-    if save_clus:
-        file_path = compute_file_saving_path(dataset=dataset,
-                                             clustering_algorithm=clustering_algorithm,
-                                             components=components,
-                                             seed=seed,
-                                             distance=pairwise_distance,
-                                             weights=weights,
-                                             fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
-                                             dir_dest=path_dir_dest,
-                                             extension="npz",
-                                             is_3d_visualisation=False)
-        np.savez_compressed(file_path, **clustering_result)
-        if url_scp is not None:
-            execute("scp", file_path, url_scp + ":" + path_dir_dest)
-            os.remove(file_path)
+        if save_clus:
+            file_path = compute_file_saving_path(dataset=dataset,
+                                                 clustering_algorithm=clustering_algorithm,
+                                                 components=components,
+                                                 seed=seed,
+                                                 distance=pairwise_distance,
+                                                 weights=weights,
+                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                 dir_dest=path_dir_dest,
+                                                 extension="npz",
+                                                 is_3d_visualisation=False)
+            np.savez_compressed(file_path, **clustering_result)
+            if url_scp is not None:
+                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                os.remove(file_path)
 
-    if visualise or save_visu:
-        file_path = compute_file_saving_path(dataset=dataset,
-                                             clustering_algorithm=clustering_algorithm,
-                                             components=components,
-                                             seed=seed,
-                                             distance=pairwise_distance,
-                                             weights=weights,
-                                             fuzzifier=None if is_hard_clustering(
-                                                 clustering_algorithm) else fuzzifier,
-                                             dir_dest=path_dir_dest,
-                                             extension="png")
-        visualise_clustering_2d(data=data,
-                                clusters_center=clustering_result["clusters_center"],
-                                affectations=clustering_result["affectations"],
-                                clustering_method=clustering_algorithm,
-                                dataset_name=ntpath.basename(dataset),
-                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
-                                                                           header=0).columns.tolist(),
-                                saving_path=file_path,
-                                show=visualise,
-                                save=save_visu)
-        if url_scp is not None:
-            execute("scp", file_path, url_scp + ":" + path_dir_dest)
-            os.remove(file_path)
+        if visualise or save_visu:
+            file_path = compute_file_saving_path(dataset=dataset,
+                                                 clustering_algorithm=clustering_algorithm,
+                                                 components=components,
+                                                 seed=seed,
+                                                 distance=pairwise_distance,
+                                                 weights=weights,
+                                                 fuzzifier=None if is_hard_clustering(
+                                                     clustering_algorithm) else fuzzifier,
+                                                 dir_dest=path_dir_dest,
+                                                 extension="png")
+            visualise_clustering_2d(data=data,
+                                    clusters_center=clustering_result["clusters_center"],
+                                    affectations=clustering_result["affectations"],
+                                    clustering_method=clustering_algorithm,
+                                    dataset_name=ntpath.basename(dataset),
+                                    header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                               header=0).columns.tolist(),
+                                    saving_path=file_path,
+                                    show=visualise,
+                                    save=save_visu)
+            if url_scp is not None:
+                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                os.remove(file_path)
 
-    if visualise_3d or save_visu_3d:
-        file_path = compute_file_saving_path(dataset=dataset,
-                                             clustering_algorithm=clustering_algorithm,
-                                             components=components,
-                                             seed=seed,
-                                             distance=pairwise_distance,
-                                             weights=weights,
-                                             fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
-                                             dir_dest=path_dir_dest,
-                                             extension="png",
-                                             is_3d_visualisation=True)
-        visualise_clustering_3d(data=data,
-                                clusters_center=clustering_result["clusters_center"],
-                                affectations=clustering_result["affectations"],
-                                clustering_method=clustering_algorithm,
-                                dataset_name=ntpath.basename(dataset),
-                                header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
-                                                                           header=0).columns.tolist(),
-                                saving_path=file_path,
-                                show=visualise_3d,
-                                save=save_visu_3d)
-        if url_scp is not None:
-            execute("scp", file_path, url_scp + ":" + path_dir_dest)
-            os.remove(file_path)
+        if visualise_3d or save_visu_3d:
+            file_path = compute_file_saving_path(dataset=dataset,
+                                                 clustering_algorithm=clustering_algorithm,
+                                                 components=components,
+                                                 seed=seed,
+                                                 distance=pairwise_distance,
+                                                 weights=weights,
+                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                 dir_dest=path_dir_dest,
+                                                 extension="png",
+                                                 is_3d_visualisation=True)
+            visualise_clustering_3d(data=data,
+                                    clusters_center=clustering_result["clusters_center"],
+                                    affectations=clustering_result["affectations"],
+                                    clustering_method=clustering_algorithm,
+                                    dataset_name=ntpath.basename(dataset),
+                                    header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                               header=0).columns.tolist(),
+                                    saving_path=file_path,
+                                    show=visualise_3d,
+                                    save=save_visu_3d)
+            if url_scp is not None:
+                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                os.remove(file_path)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
-@click.argument("dataset", type=click.Path(exists=True))
+@click.argument("dataset", type="str")
 # Data loading options
 @click.option("--file-type", type=str, default="guess", show_default=True,
               help="The type of file from which the data is read. Possible values are :\n"
@@ -365,66 +368,69 @@ def hclus(dataset, file_type, delimiter, header, array_name, distance_metric, we
     if quiet:
         sys.stdout = open(os.devnull, 'w')
 
-    if seed is not None:
-        set_manual_seed(seed)
+    for file_dataset in glob.glob(dataset):
+        print("Starting hierarchical clustering with the following parameters :", parameters)
 
-    print("Starting hierarchical clustering with the following parameters :", parameters)
+        if seed is not None:
+            set_manual_seed(seed)
 
-    # Load data
-    dataset_name = os.path.splitext(ntpath.basename(dataset))[0]
-    data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+        # Load data
+        dataset_name = os.path.splitext(ntpath.basename(file_dataset))[0]
+        data = load_data(file_dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
 
-    if normalization is not None:
-        data = data.astype(np.float64)
-        normalize(data, strategy=normalization)
+        if normalization is not None:
+            data = data.astype(np.float64)
+            normalize(data, strategy=normalization)
 
-    # Load distance
-    distance_mtx = None
-    distance_metric = distance_metric.lower()
-    if distance_metric == "euclidean":
-        pass
-    elif distance_metric == "weighted_euclidean":
-        assert weights is not None, "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
+        # Load distance
+        distance_mtx = None
+        distance_metric = distance_metric.lower()
+        if distance_metric == "euclidean":
+            pass
+        elif distance_metric == "weighted_euclidean":
+            assert weights is not None,\
+                "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
 
-        # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in consideration
-        if isinstance(weights, tuple):
-            weights = tuple(map(lambda s: str_to_number(s), weights))
+            # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
+            # consideration
+            if isinstance(weights, tuple):
+                weights = tuple(map(lambda s: str_to_number(s), weights))
+            else:
+                weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+
+            # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
+            # weighted by the square root of the weights, see [5]
+            assert len(weights) == data.shape[0], \
+                "You need as much weights as you have features in your data. Expected %d, got %d" % \
+                (data.shape[0], len(weights))
+            data = data * np.sqrt(weights)
         else:
-            weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+            # Apply a scipy pairwise distance (list of available methods here :
+            # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
+            # Returns a condensed distance matrix.
+            distance_mtx = pdist(data, distance_metric, w=weights)
 
-        # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
-        # weighted by the square root of the weights, see [5]
-        assert len(weights) == data.shape[0], \
-            "You need as much weights as you have features in your data. Expected %d, got %d" % \
-            (data.shape[0], len(weights))
-        data = data * np.sqrt(weights)
-    else:
-        # Apply a scipy pairwise distance (list of available methods here :
-        # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
-        # Returns a condensed distance matrix.
-        distance_mtx = pdist(data, distance_metric, w=weights)
+        # Compute linkage
+        if distance_mtx is not None:
+            linkage_mtx = linkage_pairwise_single(distance_mtx)
+        else:
+            linkage_mtx = linkage(data)
 
-    # Compute linkage
-    if distance_mtx is not None:
-        linkage_mtx = linkage_pairwise_single(distance_mtx)
-    else:
-        linkage_mtx = linkage(data)
+        # Create destination directory if it does not already exists
+        os.makedirs(path_dir_dest, exist_ok=True)
 
-    # Create destination directory if it does not already exists
-    os.makedirs(path_dir_dest, exist_ok=True)
+        if save_z:
+            dir_file_linkage_mtx = os.path.join(path_dir_dest, "z_" + dataset_name)
+            np.save(dir_file_linkage_mtx, linkage_mtx)
 
-    if save_z:
-        dir_file_linkage_mtx = os.path.join(path_dir_dest, "z_" + dataset_name)
-        np.save(dir_file_linkage_mtx, linkage_mtx)
+        if save_flat_clusters:
+            flat_clusters = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
+            dir_file_linkage_mtx = os.path.join(path_dir_dest, "f_" + dataset_name)
+            np.save(dir_file_linkage_mtx, flat_clusters)
 
-    if save_flat_clusters:
-        flat_clusters = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
-        dir_file_linkage_mtx = os.path.join(path_dir_dest, "f_" + dataset_name)
-        np.save(dir_file_linkage_mtx, flat_clusters)
-
-    if visualise or save_dendrogram:
-        plot_dendrogram(linkage_mtx=linkage_mtx, depth_cut=depth_cut, dataset_name=dataset_name,
-                        show=visualise, save=save_dendrogram)
+        if visualise or save_dendrogram:
+            plot_dendrogram(linkage_mtx=linkage_mtx, depth_cut=depth_cut, dataset_name=dataset_name,
+                            show=visualise, save=save_dendrogram)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
