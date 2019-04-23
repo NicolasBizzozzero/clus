@@ -360,9 +360,15 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
+@click.option("--format-filename-dest-z", default="z_{dataset_name}", show_default=True, type=str,
+              help="Format of the destination filename for the z matrix. Variables need to be enclosed in brackets. "
+                   "Possible variables are : {dataset_name}.")
+@click.option("--format-filename-dest-f", default="f_{dataset_name}", show_default=True, type=str,
+              help="Format of the destination filename for the flat clustering vector. Variables need to be enclosed "
+                   "in brackets. Possible variables are : {dataset_name}.")
 def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, weights, save_z, save_flat_clusters,
           flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed, normalization,
-          quiet, path_dir_dest):
+          quiet, path_dir_dest, format_filename_dest_z, format_filename_dest_f):
     parameters = locals()
     del parameters["datasets"]
 
@@ -402,9 +408,9 @@ def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, w
 
             # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
             # weighted by the square root of the weights, see [5]
-            assert len(weights) == data.shape[0], \
+            assert len(weights) == data.shape[1], \
                 "You need as much weights as you have features in your data. Expected %d, got %d" % \
-                (data.shape[0], len(weights))
+                (data.shape[1], len(weights))
             data = data * np.sqrt(weights)
         else:
             # Apply a scipy pairwise distance (list of available methods here :
@@ -422,12 +428,18 @@ def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, w
         os.makedirs(path_dir_dest, exist_ok=True)
 
         if save_z:
-            dir_file_linkage_mtx = os.path.join(path_dir_dest, "z_" + dataset_name)
+            file_name = format_filename_dest_z.format(
+                dataset_name=dataset_name
+            )
+            dir_file_linkage_mtx = os.path.join(path_dir_dest, file_name)
             np.save(dir_file_linkage_mtx, linkage_mtx)
 
         if save_flat_clusters:
             flat_clusters = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
-            dir_file_linkage_mtx = os.path.join(path_dir_dest, "f_" + dataset_name)
+            file_name = format_filename_dest_f.format(
+                dataset_name=dataset_name
+            )
+            dir_file_linkage_mtx = os.path.join(path_dir_dest, file_name)
             np.save(dir_file_linkage_mtx, flat_clusters)
 
         if visualise or save_dendrogram:
