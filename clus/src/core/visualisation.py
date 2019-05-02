@@ -20,7 +20,8 @@ _CMAP_EXAMPLES = "hsv"
 _COLOR_CLUSTERS_CENTER = "black"
 _MARKER_EXAMPLES = 'o'
 _MARKER_CLUSTERS_CENTER = 'x'
-_ALPHA_CLUSTERS_CENTER = 0.9
+_ALPHA_EXAMPLES = 0.01
+_ALPHA_CLUSTERS_CENTER = 1.0
 _ELEVATION = 48
 _AZIMUTH = 134
 _DISTANCE_3D = 12
@@ -46,7 +47,7 @@ def visualise_clustering_2d(data, clusters_center, affectations, clustering_meth
     c = _get_rainbow_color_cycle(affectations)
 
     # Plot the data
-    ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES, marker=_MARKER_EXAMPLES)
+    ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES, marker=_MARKER_EXAMPLES, alpha=_ALPHA_EXAMPLES)
     if not applied_tsne:
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
                    marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
@@ -86,7 +87,7 @@ def visualise_clustering_3d(data, clusters_center, affectations, clustering_meth
     # Plot the data
     ax = Axes3D(fig, rect=[0, 0, 1, 1], elev=_ELEVATION, azim=_AZIMUTH)
     ax.scatter(data[:, 0], data[:, 1], data[:, 2],
-               c=c, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES)
+               c=c, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES, alpha=_ALPHA_EXAMPLES)
     if not applied_tsne:
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], clusters_center[:, 2], c=_COLOR_CLUSTERS_CENTER,
                    s=_SIZE_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER, marker=_MARKER_CLUSTERS_CENTER)

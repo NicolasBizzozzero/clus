@@ -5,6 +5,7 @@ from tqdm import tqdm
 from clus.src.core.analysis import ambiguity, partition_coefficient, partition_entropy
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
+from clus.src.core.visualisation import visualise_clustering_3d, visualise_clustering_2d
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
@@ -59,14 +60,14 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
             (components, data.shape[1]), centroids.shape
         )
 
-    # Initialisation
-    if centroids is None:
-        centroids = cluster_initialization(data, components, initialization_method, need_idx=False)
-
     if weights is not None:
         # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
         # weighted by the square root of the weights, see [5]
         data = data * np.sqrt(weights)
+
+    # Initialisation
+    if centroids is None:
+        centroids = cluster_initialization(data, components, initialization_method, need_idx=False)
 
     with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
         best_memberships = None
@@ -80,6 +81,11 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
               ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
             memberships = _compute_memberships(data, centroids, fuzzifier)
             handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
+            # TODO: Remove this, only for testing
+            if current_iter == 0:
+                visualise_clustering_3d(data[:, :-1], centroids[:, :-1], memberships.argmax(axis=1),
+                                        clustering_method="fcm", dataset_name="rhocut", header=["x", "y", "v"],
+                                        show=False, save=True, saving_path="test2/rhocut_" + str(current_iter) + ".png")
 
             centroids = _compute_centroids(data, memberships, fuzzifier)
 
@@ -90,6 +96,24 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
                 best_memberships = memberships
                 best_centroids = centroids
 
+            """
+            # TODO:
+            print("\n________________\nmemberships :")
+            print(memberships)
+            print(__compute_memberships(data, centroids, fuzzifier))
+            print("\n")
+
+            print(centroids)
+            print("\n")
+
+            print(loss)
+            print(__compute_loss(data, memberships, centroids, fuzzifier))
+            print("\n")
+            """
+            # real_loss = __compute_loss(data, memberships, centroids, fuzzifier)
+            real_real_loss = ___compute_loss(data, memberships, centroids, fuzzifier)
+            print("\n\n", loss, real_loss, real_real_loss, "\n\n")
+
             # Update the progress bar
             current_iter += 1
             progress_bar.update()
@@ -97,6 +121,14 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
                 "loss": "{0:.6f}".format(loss),
                 "best_loss": "{0:.6f}".format(best_loss)
             })
+            # TODO: Remove this, only for testing
+            visualise_clustering_3d(data[:, :-1], centroids[:, :-1], memberships.argmax(axis=1),
+                                    clustering_method="fcm", dataset_name="rhocut", header=["x", "y", "v"],
+                                    show=False, save=True, saving_path="test2/rhocut_" + str(current_iter) + ".png")
+
+    visualise_clustering_3d(data[:, :-1], best_centroids[:, :-1], best_memberships.argmax(axis=1),
+                            clustering_method="fcm", dataset_name="rhocut", header=["x", "y", "v"],
+                            show=True, save=False, saving_path="test2/rhocut_" + str(current_iter) + ".png")
 
     return {
         "memberships": best_memberships,
@@ -112,13 +144,31 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
 def _compute_memberships(data, centroids, fuzzifier):
     # TODO: If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership
     #  to 1, and the memberships of others to 0. See [3]
-    dist_data_centroids = cdist(data, centroids, metric="euclidean").T
+    dist_data_centroids = cdist(data, centroids, metric="euclidean")
 
     tmp = np.power(dist_data_centroids, -2 / (fuzzifier - 1), where=dist_data_centroids != 0)
-    big_sum = tmp.sum(axis=0, keepdims=True)
-    res = np.divide(tmp, big_sum, where=big_sum != 0).T
+    big_sum = tmp.sum(axis=1, keepdims=True)
+    res = np.divide(tmp, big_sum, where=big_sum != 0)
     res = np.fmax(res, 0.)  # Float manipulation sometimes cause a 0. to be set to -0.
     return res
+
+
+"""
+memberships, on devrait trouver ça :
+[[2.14329233e-06 2.16417805e-06 1.75012183e-06 ... 1.00174269e-06
+  9.24806978e-07 9.20941396e-07]
+ [2.16349689e-06 2.18517620e-06 1.76360931e-06 ... 1.00637118e-06
+  9.28596963e-07 9.24587933e-07]
+ [2.18389428e-06 2.20638976e-06 1.77717758e-06 ... 1.01099706e-06
+  9.32377983e-07 9.28223106e-07]
+ ...
+ [5.92730794e-07 5.56126034e-07 7.23210122e-07 ... 1.12070477e-06
+  1.23302104e-06 1.35028562e-06]
+ [6.00138287e-07 5.62944776e-07 7.33135364e-07 ... 1.14013592e-06
+  1.25524884e-06 1.37478733e-06]
+ [6.12203604e-07 5.73522007e-07 7.49499639e-07 ... 1.16957141e-06
+  1.28906069e-06 1.41727407e-06]]
+"""
 
 
 def _compute_centroids(data, memberships, fuzzifier):
@@ -162,6 +212,23 @@ def __compute_loss(data, memberships, centroids, fuzzifier):
             membership_fuzzified = memberships[j][i] ** fuzzifier
             dist_data_centroid = np.linalg.norm(data[j] - centroids[i], ord=2)
             res += membership_fuzzified * dist_data_centroid
+    return res
+
+
+def ___compute_loss(x, u, w, m):
+    """ DEPRECATED: old method used to compute the loss.
+    Much slower than the existing method.
+    """
+    res = 0
+    c = w.shape[0]
+    n = x.shape[0]
+    print("C:", c)
+    print("N:", n)
+    exit(0)
+
+    for r in range(c):
+        for i in range(n):
+            res += (u[i][r] ** m) * np.sqrt(((x[i] - w[r]) ** 2).sum())
     return res
 
 
