@@ -135,7 +135,8 @@ def _compute_loss(data, memberships, centroids):
     """ Compute the loss of the clustering algorithm.
     This method do not have any purpose in the clustering algorithm. It is only invoked for result analysis.
     """
-    return (memberships * (cdist(data, centroids, metric="euclidean") ** 2)).sum()
+    dist_data_centroids = cdist(data, centroids, metric="euclidean") ** 2
+    return (memberships * dist_data_centroids).sum()
 
 
 if __name__ == '__main__':

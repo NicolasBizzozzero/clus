@@ -78,7 +78,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Minimal threshold characterizing an algorithm's convergence.")
 @click.option("--max-iter", type=int, default=1000, show_default=True,
               help="Maximal number of iteration to make before stopping an algorithm.")
-@click.option("-m", "--fuzzifier", type=float, default=2, show_default=True,
+@click.option("-m", "--fuzzifier", type=float, default=2.0, show_default=True,
               help="Fuzzification exponent applied to the membership degrees.")
 @click.option("--pairwise-distance", type=str, default="euclidean", show_default=True,
               help="Metric used to compute the distance matrix when the clustering algorithm need it. Set to "
