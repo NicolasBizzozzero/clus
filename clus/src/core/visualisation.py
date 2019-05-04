@@ -189,15 +189,15 @@ def _get_rainbow_color_cycle(clusters_center, borned_range=2000000):
     not easily visibles in a plot, and black are already used for clusters' center.
     :return:
     """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        # Normalize clusters ID to the int values of color codes [#000000, #FFFFFF]
-        clusters_center = rescaling(clusters_center.reshape(-1, 1),
-                                    floor=0 + borned_range, ceil=16777215 - borned_range)
-        clusters_center = clusters_center.astype(np.uint32).squeeze()
+    unique_clusters = np.unique(clusters_center)
+    spaced_values = np.linspace(borned_range, 16777215 - borned_range, num=unique_clusters.size, dtype=np.uint64)
+    spaced_clusters_center = clusters_center.copy()
+
+    for id_cluster in unique_clusters:
+        spaced_clusters_center[spaced_clusters_center == id_cluster] = spaced_values[id_cluster]
 
     # Convert clusters' value to hex color code
-    return np.array(['#{0:06X}'.format(c) for c in clusters_center])
+    return np.array(['#{0:06X}'.format(c) for c in spaced_clusters_center])
 
 
 if __name__ == "__main__":
