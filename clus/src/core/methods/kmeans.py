@@ -111,9 +111,9 @@ def _optim_memberships(data, centroids):
     * https://codereview.stackexchange.com/questions/61598/k-mean-with-numpy
     """
     # Compute euclidean distance between data and centroids
-    # dist_data_centroids = np.array([np.linalg.norm(data - c, ord=2, axis=1) for c in centroids]).T
-    # dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1).T
-    dist_data_centroids = cdist(data, centroids, metric="euclidean")
+    # dist_data_centroids = np.array([np.linalg.norm(data - c, ord=2, axis=1) for c in centroids]).T ** 2
+    # dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1).T ** 2
+    dist_data_centroids = cdist(data, centroids, metric="euclidean") ** 2
 
     # Set all binary affectations
     mask_closest_centroid = (np.arange(data.shape[0]), dist_data_centroids.argmin(axis=1))
@@ -135,7 +135,7 @@ def _compute_loss(data, memberships, centroids):
     """ Compute the loss of the clustering algorithm.
     This method do not have any purpose in the clustering algorithm. It is only invoked for result analysis.
     """
-    return (memberships * cdist(data, centroids, metric="euclidean")).sum()
+    return (memberships * (cdist(data, centroids, metric="euclidean") ** 2)).sum()
 
 
 if __name__ == '__main__':

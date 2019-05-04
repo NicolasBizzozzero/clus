@@ -5,7 +5,6 @@ from tqdm import tqdm
 from clus.src.core.analysis import ambiguity, partition_coefficient, partition_entropy
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
-from clus.src.core.visualisation import visualise_clustering_3d, visualise_clustering_2d
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
@@ -80,16 +79,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
         while (current_iter < max_iter) and \
               ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
             memberships = _compute_memberships(data, centroids, fuzzifier)
-
             handle_empty_clusters(data, centroids, memberships, strategy=empty_clusters_method)
-            """
-            # TODO: Remove this, only for testing
-            if current_iter == 0:
-                visualise_clustering_3d(data, centroids, memberships.argmax(axis=1),
-                                        clustering_method="fcm", dataset_name="rhocut", header=["x", "y", "v"],
-                                        show=False, save=True, saving_path="test2/rhocut_" + str(current_iter) + ".png")
-            """
-
             centroids = _compute_centroids(data, memberships, fuzzifier)
 
             loss = _compute_loss(data, memberships, centroids, fuzzifier)
@@ -99,21 +89,6 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
                 best_memberships = memberships
                 best_centroids = centroids
 
-            """
-            # TODO:
-            print("\n________________\nmemberships :")
-            print(memberships)
-            print(__compute_memberships(data, centroids, fuzzifier))
-            print("\n")
-
-            print(centroids)
-            print("\n")
-
-            print(loss)
-            print(__compute_loss(data, memberships, centroids, fuzzifier))
-            print("\n")
-            """
-
             # Update the progress bar
             current_iter += 1
             progress_bar.update()
@@ -121,16 +96,6 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
                 "loss": "{0:.6f}".format(loss),
                 "best_loss": "{0:.6f}".format(best_loss)
             })
-            """
-            # TODO: Remove this, only for testing
-            visualise_clustering_3d(data, centroids, memberships.argmax(axis=1),
-                                    clustering_method="fcm", dataset_name="rhocut", header=["x", "y", "v"],
-                                    show=False, save=True, saving_path="test2/rhocut_" + str(current_iter) + ".png")
-            """
-
-    visualise_clustering_3d(data, best_centroids, best_memberships.argmax(axis=1),
-                            clustering_method="fcm", dataset_name="rhocut", header=["x", "y", "v"],
-                            show=True, save=False, saving_path="test2/rhocut_" + str(current_iter) + ".png")
 
     return {
         "memberships": best_memberships,
