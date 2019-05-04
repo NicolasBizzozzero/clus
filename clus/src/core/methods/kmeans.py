@@ -57,14 +57,14 @@ def kmeans(data, components=10, eps=1e-4, max_iter=1000, weights=None,
             (components, data.shape[1]), centroids.shape
         )
 
-    # Initialisation
-    if centroids is None:
-        centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
-
     if weights is not None:
         # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
         # weighted by the square root of the weights, see [5]
         data = data * np.sqrt(weights)
+
+    # Initialisation
+    if centroids is None:
+        centroids = cluster_initialization(data, components, strategy=initialization_method, need_idx=False)
 
     with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
         best_memberships = None

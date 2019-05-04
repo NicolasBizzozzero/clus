@@ -303,6 +303,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                    "be ignored.")
 @click.option("--array-name", type=str, default=None, show_default=True,
               help="Used to load a specific array from a numpy npz file.")
+@click.option("--is-linkage-mtx", is_flag=True,
+              help="Set this flag if your dataset is already a linkage matrix.")
 # Clustering option
 @click.option("--distance-metric", type=str, default="euclidean", show_default=True,
               help="Metric used to compute distance between examples. If set to \"weighted_euclidean\", the --weights "
@@ -366,9 +368,9 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 @click.option("--format-filename-dest-f", default="f_{dataset_name}", show_default=True, type=str,
               help="Format of the destination filename for the flat clustering vector. Variables need to be enclosed "
                    "in brackets. Possible variables are : {dataset_name}.")
-def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, weights, save_z, save_flat_clusters,
-          flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed, normalization,
-          quiet, path_dir_dest, format_filename_dest_z, format_filename_dest_f):
+def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, distance_metric, weights, save_z,
+          save_flat_clusters, flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed,
+          normalization, quiet, path_dir_dest, format_filename_dest_z, format_filename_dest_f):
     parameters = locals()
     del parameters["datasets"]
 
@@ -386,43 +388,46 @@ def hclus(datasets, file_type, delimiter, header, array_name, distance_metric, w
         dataset_name = os.path.splitext(ntpath.basename(dataset))[0]
         data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
 
-        if normalization is not None:
-            data = data.astype(np.float64)
-            normalize(data, strategy=normalization)
+        if is_linkage_mtx:
+            linkage_mtx = data
+        else:
+            if normalization is not None:
+                data = data.astype(np.float64)
+                normalize(data, strategy=normalization)
 
-        # Load distance
-        distance_mtx = None
-        distance_metric = distance_metric.lower()
-        if distance_metric == "euclidean":
-            pass
-        elif distance_metric == "weighted_euclidean":
-            assert weights is not None,\
-                "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
+            # Load distance
+            distance_mtx = None
+            distance_metric = distance_metric.lower()
+            if distance_metric == "euclidean":
+                pass
+            elif distance_metric == "weighted_euclidean":
+                assert weights is not None,\
+                    "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
 
-            # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
-            # consideration
-            if isinstance(weights, tuple):
-                weights = tuple(map(lambda s: str_to_number(s), weights))
+                # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
+                # consideration
+                if isinstance(weights, tuple):
+                    weights = tuple(map(lambda s: str_to_number(s), weights))
+                else:
+                    weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+
+                # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into
+                # data weighted by the square root of the weights, see [5]
+                assert len(weights) == data.shape[1], \
+                    "You need as much weights as you have features in your data. Expected %d, got %d" % \
+                    (data.shape[1], len(weights))
+                data = data * np.sqrt(weights)
             else:
-                weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+                # Apply a scipy pairwise distance (list of available methods here :
+                # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
+                # Returns a condensed distance matrix.
+                distance_mtx = pdist(data, distance_metric, w=weights)
 
-            # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
-            # weighted by the square root of the weights, see [5]
-            assert len(weights) == data.shape[1], \
-                "You need as much weights as you have features in your data. Expected %d, got %d" % \
-                (data.shape[1], len(weights))
-            data = data * np.sqrt(weights)
-        else:
-            # Apply a scipy pairwise distance (list of available methods here :
-            # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
-            # Returns a condensed distance matrix.
-            distance_mtx = pdist(data, distance_metric, w=weights)
-
-        # Compute linkage
-        if distance_mtx is not None:
-            linkage_mtx = linkage_pairwise_single(distance_mtx)
-        else:
-            linkage_mtx = linkage(data)
+            # Compute linkage
+            if distance_mtx is not None:
+                linkage_mtx = linkage_pairwise_single(distance_mtx)
+            else:
+                linkage_mtx = linkage(data)
 
         # Create destination directory if it does not already exists
         os.makedirs(path_dir_dest, exist_ok=True)
