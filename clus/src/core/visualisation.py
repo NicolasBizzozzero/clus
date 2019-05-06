@@ -179,19 +179,19 @@ def _compute_title(n_components, clustering_method, dataset_name, applied_tsne, 
                 "with {} clusters{}").format(clustering_method, n_components, dataset_name)
 
 
-def _get_rainbow_color_cycle(clusters_center, borned_range=2000000):
+def _get_rainbow_color_cycle(affectations, borned_range=2000000):
     """
 
     Source:
     * https://stackoverflow.com/a/36802487
-    :param clusters_center:
+    :param affectations:
     :param borned_range: This value is added to the hex color codes to skip the white and black colors, white colors are
     not easily visibles in a plot, and black are already used for clusters' center.
     :return:
     """
-    unique_clusters = np.unique(clusters_center)
+    unique_clusters = np.unique(affectations)
     spaced_values = np.linspace(borned_range, 16777215 - borned_range, num=unique_clusters.size, dtype=np.uint64)
-    spaced_clusters_center = clusters_center.copy()
+    spaced_clusters_center = affectations.copy()
 
     for id_cluster in unique_clusters:
         spaced_clusters_center[spaced_clusters_center == id_cluster] = spaced_values[id_cluster]
