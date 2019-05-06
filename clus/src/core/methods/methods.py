@@ -5,6 +5,9 @@ from clus.src.core.methods import kmeans
 from clus.src.core.methods import linearized_fuzzy_c_medoids
 from clus.src.core.methods import linearized_fuzzy_c_medoids_select
 
+from clus.src.core.methods.density_based import dbscan, optics
+
+# Centroids-based
 ALIASES_KMEANS = ("kmeans",)
 ALIASES_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
 ALIASES_POSSIBILISTIC_C_MEANS = ("possibilistic_c_means", "pcm")
@@ -14,6 +17,10 @@ ALIASES_LINEARIZED_FUZZY_C_MEDOIDS = ("linearized_fuzzy_c_medoids", "lfcmdd", "l
 ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = ("linearized_fuzzy_c_medoids_select", "l_fcmed_select")
 ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = ("datastream_linearized_fuzzy_c_medoids_select",
                                                         "ds_lfcmed_select")
+
+# Density-based
+ALIASES_DBSCAN = ("dbscan",)
+ALIASES_OPTICS = ("optics",)
 
 
 class UnknownClusteringMethods(Exception):
@@ -46,7 +53,9 @@ def use_medoids(clustering_method):
 def is_hard_clustering(clustering_method):
     return clustering_method in list(
         ALIASES_KMEANS +
-        ALIASES_HARD_C_MEDOIDS
+        ALIASES_HARD_C_MEDOIDS +
+        ALIASES_DBSCAN +
+        ALIASES_OPTICS
     )
 
 
@@ -68,6 +77,10 @@ def get_clustering_function(string):
         return linearized_fuzzy_c_medoids_select
     elif string in ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT:
         raise NotImplementedError()
+    elif string in ALIASES_DBSCAN:
+        return dbscan
+    elif string in ALIASES_OPTICS:
+        return optics
     else:
         raise UnknownClusteringMethods(string)
 

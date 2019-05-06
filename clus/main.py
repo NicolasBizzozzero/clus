@@ -453,6 +453,200 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
+@click.argument("datasets", type=str, nargs=-1, required=True)
+@click.argument("clustering_algorithm", type=click.Choice([
+    "dbscan",
+    "optics"
+]))
+# Data loading options
+@click.option("--file-type", type=str, default="guess", show_default=True,
+              help="The type of file from which the data is read. Possible values are :\n"
+                   "- 'guess', automatically guess the filetype from the file extension.\n"
+                   "- 'csv', load the data with a call to the pandas.read_csv method.\n"
+                   "- 'npy', load the only array contained in a numpy file.\n"
+                   "- 'npz', load one of the array contained in a numpy file. The `--array-name` option needs to be "
+                   "set.")
+@click.option("--delimiter", "--sep", type=str, default=",", show_default=True,
+              help="Character or REGEX used for separating data in the CSV data file.")
+@click.option("--header", is_flag=True,
+              help="Set this flag if your dataset contains a header, it will then be ignored by the clustering "
+                   "algorithm. If you set this flag while not having a header, the first example of the dataset will "
+                   "be ignored.")
+@click.option("--array-name", type=str, default=None, show_default=True,
+              help="Used to load a specific array from a numpy npz file.")
+# Clustering options
+@click.option("--eps", type=float, default=1e-6, show_default=True,
+              help="The maximum distance between two samples for them to be considered as in the same neighborhood.")
+@click.option("--min-samples", type=int, default=3, show_default=True,
+              help="The number of samples (or total weight) in a neighborhood for a point to be considered as a core "
+                   "point. This includes the point itself.")
+@click.option("--max-eps", type=float, default=np.inf, show_default=True,
+              help="The maximum distance between two samples for them to be considered as in the same neighborhood. "
+                   "Default value of np.inf will identify clusters across all scales; reducing max_eps will result in "
+                   "shorter run times.")
+@click.option("--pairwise-distance", type=str, default="euclidean", show_default=True,
+              help="Metric used to compute the distance matrix when the clustering algorithm need it. Set to "
+                   "\"precomputed\" if your data is already a distance matrix. All possible metrics are described at "
+                   "the following link :\n"
+                   "https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.DistanceMetric.html")
+@click.option("--weights", cls=OptionInfiniteArgs,
+              help="Weights used for the \"weighted_euclidean\" pairwise distance. You need as much weights as "
+                   "you have features in your data.")
+@click.option("--save-clus", is_flag=True,
+              help="Set this flag if you want to save the clustering result. A .npz file will be created, containing TODO")
+# Visualisation options
+@click.option("--visualise", is_flag=True,
+              help="Set this flag if you want to visualise the clustering result. If your data's dimension is more "
+                   "than 2, a 2-components t-SNE is applied to the data before visualising.")
+@click.option("--visualise-3d", is_flag=True,
+              help="Set this flag if you want to visualise the clustering result in 3D. If your data's dimension is "
+                   "more than 3, a 3-components t-SNE is applied to the data before visualising.")
+@click.option("--save-visu", is_flag=True,
+              help="Set this flag if you want to save the visualisation of the clustering result. If your data's "
+                   "dimension is more than 2, a 2-components t-SNE is applied to the data before visualising.")
+@click.option("--save-visu-3d", is_flag=True,
+              help="Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's "
+                   "dimension is more than 3, a 3-components t-SNE is applied to the data before visualising.")
+# Miscellaneous options
+@click.option("--seed", type=int, default=None, show_default=True,
+              help="Random seed to set.")
+@click.option("--normalization", type=str, default=None, show_default=True,
+              help="Normalize your data with any of the proposed methods below :\n"
+                   "- 'rescaling', rescale the range of features into the [0, 1] range.\n"
+                   "- 'mean' or 'mean_normalization', normalize the features to zero mean.\n"
+                   "- 'standardization', normalize the features to zero mean and unit std.\n"
+                   "- 'unit_length', scale the components by dividing each features by their p-norm.\n"
+                   "- 'whitening_zca' or 'zca', maximizes the average cross-covariance between each dimension of the "
+                   "whitened and original data, and uniquely produces a symmetric cross-covariance matrix.\n"
+                   "- 'whitening_pca' or 'pca', maximally compresses all dimensions of the original data into each "
+                   "dimension of the whitened data using the cross-covariance matrix as the compression metric.\n"
+                   "- 'whitening_zca_cor' or 'zca_cor', maximizes the average cross-correlation between each dimension "
+                   "of the whitened and original data, and uniquely produces a symmetric cross-correlation matrix.\n"
+                   "- 'whitening_pca_cor' or 'pca_cor', maximally compresses all dimensions of the original data into "
+                   "each dimension of the whitened data using the cross-correlation matrix as the compression metric.\n"
+                   "- 'whitening_cholesky' or 'cholesky', Uniquely results in lower triangular positive diagonal "
+                   "cross-covariance and cross-correlation matrices.")
+@click.option("--quiet", is_flag=True,
+              help="Set this flag if you want to completely silence all outputs to stdout.")
+@click.option("--path-dir-dest", default="results", show_default=True, type=str,
+              help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
+                   "not already exists.")
+@click.option("--url-scp", default=None, show_default=True, type=str,
+              help="If given, any saved result will be sent to this ssh address by using the `scp` command. The file "
+                   "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
+                   "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
+def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, eps, min_samples, max_eps,
+          pairwise_distance, weights, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
+          quiet, path_dir_dest, url_scp):
+    """ Apply a density-based clustering algorithm to a CSV dataset. """
+    parameters = locals()
+
+    if quiet:
+        sys.stdout = open(os.devnull, 'w')
+
+    for dataset in datasets:
+        print("Starting clustering with the following parameters :", parameters)
+
+        if seed is not None:
+            set_manual_seed(seed)
+
+        # Load the clustering algorithm
+        clustering_function = get_clustering_function(clustering_algorithm)
+
+        # Load data
+        data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+
+        if normalization is not None:
+            data = data.astype(np.float64)
+            normalize(data, strategy=normalization)
+
+        if weights is not None:
+            # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
+            # consideration
+            if " " in weights[0]:
+                weights = tuple(map(lambda s: str_to_number(s), weights[0].split(" ")))
+            else:
+                weights = tuple(map(lambda s: str_to_number(s), weights))
+
+        # Perform the clustering method
+        clustering_result = clustering_function(
+            data=data,
+            eps=eps,
+            min_samples=min_samples,
+            max_eps=max_eps,
+            weights=weights
+        )
+
+        # Create destination directory if it does not already exists
+        os.makedirs(path_dir_dest, exist_ok=True)
+
+        if save_clus:
+            file_path = compute_file_saving_path(dataset=dataset,
+                                                 clustering_algorithm=clustering_algorithm,
+                                                 components=None,
+                                                 seed=seed,
+                                                 distance=pairwise_distance,
+                                                 weights=weights,
+                                                 fuzzifier=None,
+                                                 dir_dest=path_dir_dest,
+                                                 extension="npz",
+                                                 is_3d_visualisation=False)
+            np.savez_compressed(file_path, **clustering_result)
+            if url_scp is not None:
+                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                os.remove(file_path)
+
+        if visualise or save_visu:
+            file_path = compute_file_saving_path(dataset=dataset,
+                                                 clustering_algorithm=clustering_algorithm,
+                                                 components=None,
+                                                 seed=seed,
+                                                 distance=pairwise_distance,
+                                                 weights=weights,
+                                                 fuzzifier=None,
+                                                 dir_dest=path_dir_dest,
+                                                 extension="png")
+            visualise_clustering_2d(data=data,
+                                    clusters_center=None,
+                                    affectations=clustering_result["affectations"],
+                                    clustering_method=clustering_algorithm,
+                                    dataset_name=ntpath.basename(dataset),
+                                    header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                               header=0).columns.tolist(),
+                                    saving_path=file_path,
+                                    show=visualise,
+                                    save=save_visu)
+            if url_scp is not None:
+                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                os.remove(file_path)
+
+        if visualise_3d or save_visu_3d:
+            file_path = compute_file_saving_path(dataset=dataset,
+                                                 clustering_algorithm=clustering_algorithm,
+                                                 components=None,
+                                                 seed=seed,
+                                                 distance=pairwise_distance,
+                                                 weights=weights,
+                                                 fuzzifier=None,
+                                                 dir_dest=path_dir_dest,
+                                                 extension="png",
+                                                 is_3d_visualisation=True)
+            visualise_clustering_3d(data=data,
+                                    clusters_center=None,
+                                    affectations=clustering_result["affectations"],
+                                    clustering_method=clustering_algorithm,
+                                    dataset_name=ntpath.basename(dataset),
+                                    header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
+                                                                               header=0).columns.tolist(),
+                                    saving_path=file_path,
+                                    show=visualise_3d,
+                                    save=save_visu_3d)
+            if url_scp is not None:
+                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                os.remove(file_path)
+
+
+@click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("metric", type=click.Choice([
     "ari", "adjusted_rand_index"
 ]))
@@ -472,6 +666,7 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
               help="Set this flag if you want to completely silence all outputs to stdout.")
 def eclus(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred, seed,
           quiet):
+    """ Evaluate a clustering performance. """
     parameters = locals()
 
     if quiet:
