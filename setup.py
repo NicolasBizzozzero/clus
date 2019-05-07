@@ -95,7 +95,9 @@ setup(
     entry_points={
         'console_scripts': [
             "clus = clus.main:clus",
-            "hclus = clus.main:hclus"
+            "hclus = clus.main:hclus",
+            "dclus = clus.main:dclus",
+            "eclus = clus.main:eclus"
         ],
     },
 )
