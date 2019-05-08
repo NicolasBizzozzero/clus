@@ -20,7 +20,7 @@
   * https://github.com/vitordeatorreao/amproj/blob/844842a532524d5f514e7534da65c7a64ab7ef57/amproj/distance/kmedoids.py
   * https://github.com/agartland/utils/blob/e200d7e41039ca0053bd817c1d1857aab33bd503/kmedoids.py#L172
   * https://github.com/Brain-Mapper/BrainMapperV2/blob/63075bdca2428197fc18a1cf6c7403c2764e0664/ourLib/clustering.py#L293
-* Créer un decorateur "memoryerror_fallback". Il sera appliqué dans l'affectation, au lieu de tout calculer, on découpe les donnes et on calcule progressivement. Le decorateur prends donc cette fonction en param.
+* Application du decorateur "memoryerror_fallback".
 
 
 ## References

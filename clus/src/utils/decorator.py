@@ -15,7 +15,8 @@ def remove_unexpected_arguments(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         possible_parameters = inspect.getfullargspec(func).args
-        new_kwargs = dict(filter(lambda a: a[0] in possible_parameters, kwargs.items()))
+        new_kwargs = dict(filter(lambda a: a[0] in possible_parameters,
+                                 kwargs.items()))
 
         return func(*args, **new_kwargs)
     return wrapper
@@ -36,6 +37,18 @@ def time_this(func):
                                                         second_or_seconds))
         return result
     return wrapper
+
+
+def error_fallback(error, fallback_function):
+    def real_decorator(function):
+        @functools.wraps(function)
+        def wrapper(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except error:
+                return fallback_function(*args, **kwargs)
+        return wrapper
+    return real_decorator
 
 
 if __name__ == "__main__":
