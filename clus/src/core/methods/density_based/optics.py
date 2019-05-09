@@ -24,6 +24,7 @@ def optics(data, min_samples=3, max_eps=np.inf, weights=None):
 
     return {
         "affectations": clustering.labels_,
+        "number_of_clusters": np.unique(clustering.labels_).size,
         "ordering": clustering.ordering_,
         "reachability": clustering.reachability_,
         "core_distances": clustering.core_distances_,

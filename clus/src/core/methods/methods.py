@@ -4,8 +4,9 @@ from clus.src.core.methods import hard_c_medoids
 from clus.src.core.methods import kmeans
 from clus.src.core.methods import linearized_fuzzy_c_medoids
 from clus.src.core.methods import linearized_fuzzy_c_medoids_select
+from clus.src.core.methods.density_based.dbscan import dbscan
+from clus.src.core.methods.density_based.optics import optics
 
-from clus.src.core.methods.density_based import dbscan, optics
 
 # Centroids-based
 ALIASES_KMEANS = ("kmeans",)

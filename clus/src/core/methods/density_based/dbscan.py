@@ -24,6 +24,7 @@ def dbscan(data, eps=1e-6, min_samples=3, weights=None):
 
     return {
         "affectations": clustering.labels_,
+        "number_of_clusters": np.unique(clustering.labels_).size
     }
 
 

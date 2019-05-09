@@ -7,6 +7,7 @@ import click
 
 import pandas as pd
 import numpy as np
+from clus.src.core.saving_path import compute_file_saving_path_dclus
 from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single, fcluster
 from scipy.spatial.distance import pdist, squareform
 
@@ -225,7 +226,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                  seed=seed,
                                                  distance=pairwise_distance,
                                                  weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                 fuzzifier=None if is_hard_clustering(
+                                                     clustering_algorithm) else fuzzifier,
                                                  dir_dest=path_dir_dest,
                                                  extension="npz",
                                                  is_3d_visualisation=False)
@@ -266,7 +268,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                  seed=seed,
                                                  distance=pairwise_distance,
                                                  weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                 fuzzifier=None if is_hard_clustering(
+                                                     clustering_algorithm) else fuzzifier,
                                                  dir_dest=path_dir_dest,
                                                  extension="png",
                                                  is_3d_visualisation=True)
@@ -401,7 +404,7 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
             if distance_metric == "euclidean":
                 pass
             elif distance_metric == "weighted_euclidean":
-                assert weights is not None,\
+                assert weights is not None, \
                     "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
 
                 # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
@@ -581,31 +584,27 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
         os.makedirs(path_dir_dest, exist_ok=True)
 
         if save_clus:
-            file_path = compute_file_saving_path(dataset=dataset,
-                                                 clustering_algorithm=clustering_algorithm,
-                                                 components=None,
-                                                 seed=seed,
-                                                 distance=pairwise_distance,
-                                                 weights=weights,
-                                                 fuzzifier=None,
-                                                 dir_dest=path_dir_dest,
-                                                 extension="npz",
-                                                 is_3d_visualisation=False)
+            file_path = compute_file_saving_path_dclus(dataset=dataset,
+                                                       clustering_algorithm=clustering_algorithm,
+                                                       seed=seed,
+                                                       distance=pairwise_distance,
+                                                       weights=weights,
+                                                       dir_dest=path_dir_dest,
+                                                       extension="npz",
+                                                       is_3d_visualisation=False)
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
                 execute("scp", file_path, url_scp + ":" + path_dir_dest)
                 os.remove(file_path)
 
         if visualise or save_visu:
-            file_path = compute_file_saving_path(dataset=dataset,
-                                                 clustering_algorithm=clustering_algorithm,
-                                                 components=None,
-                                                 seed=seed,
-                                                 distance=pairwise_distance,
-                                                 weights=weights,
-                                                 fuzzifier=None,
-                                                 dir_dest=path_dir_dest,
-                                                 extension="png")
+            file_path = compute_file_saving_path_dclus(dataset=dataset,
+                                                       clustering_algorithm=clustering_algorithm,
+                                                       seed=seed,
+                                                       distance=pairwise_distance,
+                                                       weights=weights,
+                                                       dir_dest=path_dir_dest,
+                                                       extension="png")
             visualise_clustering_2d(data=data,
                                     clusters_center=None,
                                     affectations=clustering_result["affectations"],
@@ -621,16 +620,14 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
-            file_path = compute_file_saving_path(dataset=dataset,
-                                                 clustering_algorithm=clustering_algorithm,
-                                                 components=None,
-                                                 seed=seed,
-                                                 distance=pairwise_distance,
-                                                 weights=weights,
-                                                 fuzzifier=None,
-                                                 dir_dest=path_dir_dest,
-                                                 extension="png",
-                                                 is_3d_visualisation=True)
+            file_path = compute_file_saving_path_dclus(dataset=dataset,
+                                                       clustering_algorithm=clustering_algorithm,
+                                                       seed=seed,
+                                                       distance=pairwise_distance,
+                                                       weights=weights,
+                                                       dir_dest=path_dir_dest,
+                                                       extension="png",
+                                                       is_3d_visualisation=True)
             visualise_clustering_3d(data=data,
                                     clusters_center=None,
                                     affectations=clustering_result["affectations"],
