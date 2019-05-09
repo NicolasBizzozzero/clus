@@ -15,7 +15,8 @@ from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
 from clus.src.core.evaluation_metric import evaluate
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
+    ALIASES_OPTICS
 from clus.src.core.normalization import normalization as normalize
 from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
@@ -586,6 +587,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
         if save_clus:
             file_path = compute_file_saving_path_dclus(dataset=dataset,
                                                        clustering_algorithm=clustering_algorithm,
+                                                       min_samples=min_samples,
+                                                       eps=max_eps if clustering_algorithm in ALIASES_OPTICS else eps,
                                                        seed=seed,
                                                        distance=pairwise_distance,
                                                        weights=weights,
@@ -600,6 +603,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
         if visualise or save_visu:
             file_path = compute_file_saving_path_dclus(dataset=dataset,
                                                        clustering_algorithm=clustering_algorithm,
+                                                       min_samples=min_samples,
+                                                       eps=max_eps if clustering_algorithm in ALIASES_OPTICS else eps,
                                                        seed=seed,
                                                        distance=pairwise_distance,
                                                        weights=weights,
@@ -622,6 +627,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
         if visualise_3d or save_visu_3d:
             file_path = compute_file_saving_path_dclus(dataset=dataset,
                                                        clustering_algorithm=clustering_algorithm,
+                                                       min_samples=min_samples,
+                                                       eps=max_eps if clustering_algorithm in ALIASES_OPTICS else eps,
                                                        seed=seed,
                                                        distance=pairwise_distance,
                                                        weights=weights,
