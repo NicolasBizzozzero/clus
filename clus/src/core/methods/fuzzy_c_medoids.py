@@ -84,7 +84,7 @@ def fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
 
             medoids_idx = _compute_medoids(distance_matrix, memberships, fuzzifier)
 
-            loss = _compute_loss(data, medoids_idx, memberships, fuzzifier)
+            loss = _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier)
             losses.append(loss)
             if loss < best_loss:
                 best_loss = loss
@@ -135,8 +135,8 @@ def _compute_medoids(distance_matrix, memberships, fuzzifier):
     return np.fromiter(iterable, count=memberships.shape[1], dtype=np.int64)
 
 
-def _compute_loss(data, medoids_idx, memberships, fuzzifier):
-    dist_data_centroids = cdist(data, data[medoids_idx, :], metric="euclidean") ** 2
+def _compute_loss(distance_matrix, medoids_idx, memberships, fuzzifier):
+    dist_data_centroids = distance_matrix[:, medoids_idx]
     return ((memberships ** fuzzifier) * dist_data_centroids).sum()
 
 
@@ -148,20 +148,28 @@ def __compute_memberships(distance_matrix, medoids_idx, fuzzifier):
     """ DEPRECATED: old method used to compute the medoids.
     The distance matrix is now in a condensed distance vector form.
     """
-    dist_data_medoids = distance_matrix[:, medoids_idx]
+    u = np.zeros((distance_matrix.shape[0], medoids_idx.shape[0]))
 
-    # If two examples are of equals distance, the computation will make divisions by zero. We add this
-    # small coefficient to not divide by zero while keeping our distances as correct as possible
-    dist_data_medoids += np.fmax(dist_data_medoids, np.finfo(distance_matrix.dtype).eps)
+    for i in range(distance_matrix.shape[0]):
+        if i in medoids_idx:
+            u[i, :] = 0
+            u[i, np.where(medoids_idx == i)[0]] = 1
+            continue
 
-    tmp = (1 / dist_data_medoids) ** (1 / (fuzzifier - 1))
-    memberships = tmp / tmp.sum(axis=1, keepdims=True)
+        for idx_j, j in enumerate(medoids_idx):
+            if np.isclose(distance_matrix[i, j], 0.):
+                u[i, :] = 0
+                u[i, idx_j] = 1
+                break
 
-    for index_medoid, medoid in enumerate(medoids_idx):
-        memberships[medoid, :] = 0.
-        memberships[medoid, index_medoid] = 1.
+            top = (1 / (distance_matrix[i, j])) ** (1 / (fuzzifier - 1))
 
-    return memberships
+            if np.any(np.isclose(distance_matrix[i, medoids_idx], 0)):
+                bottom = 1
+            else:
+                bottom = sum((1 / (distance_matrix[i, k])) ** (1 / (fuzzifier - 1)) for k in medoids_idx)
+            u[i, idx_j] = top / bottom
+    return u
 
 
 def __compute_medoids(distance_matrix, memberships, fuzzifier):

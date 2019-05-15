@@ -41,7 +41,6 @@ def test_compute_centroids():
 
 
 def test_compute_loss():
-    set_manual_seed(1)
     components = 3
     fuzzifier = 2.0
 
