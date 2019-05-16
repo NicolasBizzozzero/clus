@@ -1,5 +1,7 @@
 import numpy as np
 
+from scipy.stats import binom
+
 
 def mini_batches(inputs, batch_size=1, allow_dynamic_batch_size=False,
                  shuffle=True):
@@ -118,6 +120,13 @@ def mini_batches_dist(inputs, distance_matrix, batch_size=1,
             yield [inputs[i] for i in excerpt], [distance_matrix[i] for i in excerpt]
         else:
             yield inputs[excerpt], distance_matrix[excerpt][:, excerpt]
+
+
+def square_idx_to_condensed_idx(idx, n):
+    """ With `idx` being an iterable of indexes from a square matrix and `n` one shape of this square matrix,
+    return the same iterable of indexes matching indexes from the corresponding condensed matrix.
+    """
+    return [(binom(2, n) - binom(2, n - 1) + (-i - 1), binom(2, n) - binom(2, n - 1) + ((n - 1) - i - 1)) for i in idx]
 
 
 if __name__ == "__main__":

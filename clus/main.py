@@ -406,7 +406,7 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
                 pass
             elif distance_metric == "weighted_euclidean":
                 assert weights is not None, \
-                    "You need to precise the --weights parameter for th 'weighted_euclidean' distance."
+                    "You need to precise the --weights parameter for the 'weighted_euclidean' distance."
 
                 # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
                 # consideration
