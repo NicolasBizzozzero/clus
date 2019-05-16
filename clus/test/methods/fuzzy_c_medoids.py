@@ -99,4 +99,4 @@ if __name__ == "__main__":
         test_compute_memberships_condensed(data, distance_matrix, distance_matrix_condensed, components, fuzzifier)
         # test_compute_medoids_condensed(data, distance_matrix, distance_matrix_condensed, components, fuzzifier)
         # test_compute_loss_condensed(data, distance_matrix, distance_matrix_condensed, components, fuzzifier)
-        break
+
