@@ -23,7 +23,7 @@ from clus.src.utils.common import str_to_number
 from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
-from clus.src.utils.path import compute_file_saving_path
+from clus.src.core.saving_path import compute_file_saving_path
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
@@ -137,6 +137,22 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
+@click.option("--zero-fill-components", default=3, show_default=True, type=int,
+              help="The desired length of the 'number of components' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
+@click.option("--zero-fill-seed", default=3, show_default=True, type=int,
+              help="The desired length of the 'seed' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
+@click.option("--zero-fill-weights", default=3, show_default=True, type=int,
+              help="The desired length of the 'weights' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
+@click.option("--zero-fill-fuzzifier", default=3, show_default=True, type=int,
+              help="The desired length of the 'fuzzifier' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
 @click.option("--url-scp", default=None, show_default=True, type=str,
               help="If given, any saved result will be sent to this ssh address by using the `scp` command. The file "
                    "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
@@ -144,7 +160,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
          membership_subset_size, save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
-         normalization, quiet, path_dir_dest, url_scp):
+         normalization, quiet, path_dir_dest, zero_fill_components, zero_fill_seed, zero_fill_weights,
+         zero_fill_fuzzifier, url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
@@ -227,10 +244,13 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                  seed=seed,
                                                  distance=pairwise_distance,
                                                  weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(
-                                                     clustering_algorithm) else fuzzifier,
+                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
                                                  dir_dest=path_dir_dest,
                                                  extension="npz",
+                                                 zero_fill_components=zero_fill_components,
+                                                 zero_fill_seed=zero_fill_seed,
+                                                 zero_fill_weights=zero_fill_weights,
+                                                 zero_fill_fuzzifier=zero_fill_fuzzifier,
                                                  is_3d_visualisation=False)
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
@@ -244,10 +264,13 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                  seed=seed,
                                                  distance=pairwise_distance,
                                                  weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(
-                                                     clustering_algorithm) else fuzzifier,
+                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
                                                  dir_dest=path_dir_dest,
-                                                 extension="png")
+                                                 extension="png",
+                                                 zero_fill_components=zero_fill_components,
+                                                 zero_fill_seed=zero_fill_seed,
+                                                 zero_fill_weights=zero_fill_weights,
+                                                 zero_fill_fuzzifier=zero_fill_fuzzifier)
             visualise_clustering_2d(data=data,
                                     clusters_center=clustering_result["clusters_center"],
                                     affectations=clustering_result["affectations"],
@@ -269,10 +292,13 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                  seed=seed,
                                                  distance=pairwise_distance,
                                                  weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(
-                                                     clustering_algorithm) else fuzzifier,
+                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
                                                  dir_dest=path_dir_dest,
                                                  extension="png",
+                                                 zero_fill_components=zero_fill_components,
+                                                 zero_fill_seed=zero_fill_seed,
+                                                 zero_fill_weights=zero_fill_weights,
+                                                 zero_fill_fuzzifier=zero_fill_fuzzifier,
                                                  is_3d_visualisation=True)
             visualise_clustering_3d(data=data,
                                     clusters_center=clustering_result["clusters_center"],
@@ -535,13 +561,29 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
+@click.option("--zero-fill-eps", default=3, show_default=True, type=int,
+              help="The desired length of the 'eps' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
+@click.option("--zero-fill-min-samples", default=3, show_default=True, type=int,
+              help="The desired length of the 'min_samples' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
+@click.option("--zero-fill-seed", default=3, show_default=True, type=int,
+              help="The desired length of the 'seed' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
+@click.option("--zero-fill-weights", default=3, show_default=True, type=int,
+              help="The desired length of the 'weights' parameter displayed on any output filename. If "
+                   "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
+                   "string.")
 @click.option("--url-scp", default=None, show_default=True, type=str,
               help="If given, any saved result will be sent to this ssh address by using the `scp` command. The file "
                    "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
                    "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
 def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, eps, min_samples, max_eps,
           pairwise_distance, weights, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
-          quiet, path_dir_dest, url_scp):
+          quiet, path_dir_dest, zero_fill_eps, zero_fill_min_samples, zero_fill_seed, zero_fill_weights, url_scp):
     """ Apply a density-based clustering algorithm to a CSV dataset. """
     parameters = locals()
 
@@ -594,6 +636,10 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                                        weights=weights,
                                                        dir_dest=path_dir_dest,
                                                        extension="npz",
+                                                       zero_fill_eps=zero_fill_eps,
+                                                       zero_fill_min_samples=zero_fill_min_samples,
+                                                       zero_fill_seed=zero_fill_seed,
+                                                       zero_fill_weights=zero_fill_weights,
                                                        is_3d_visualisation=False)
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
@@ -609,7 +655,11 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                                        distance=pairwise_distance,
                                                        weights=weights,
                                                        dir_dest=path_dir_dest,
-                                                       extension="png")
+                                                       extension="png",
+                                                       zero_fill_eps=zero_fill_eps,
+                                                       zero_fill_min_samples=zero_fill_min_samples,
+                                                       zero_fill_seed=zero_fill_seed,
+                                                       zero_fill_weights=zero_fill_weights)
             visualise_clustering_2d(data=data,
                                     clusters_center=None,
                                     affectations=clustering_result["affectations"],
@@ -634,6 +684,10 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                                        weights=weights,
                                                        dir_dest=path_dir_dest,
                                                        extension="png",
+                                                       zero_fill_eps=zero_fill_eps,
+                                                       zero_fill_min_samples=zero_fill_min_samples,
+                                                       zero_fill_seed=zero_fill_seed,
+                                                       zero_fill_weights=zero_fill_weights,
                                                        is_3d_visualisation=True)
             visualise_clustering_3d(data=data,
                                     clusters_center=None,
