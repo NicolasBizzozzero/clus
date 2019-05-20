@@ -11,9 +11,9 @@ def compute_file_saving_path_clus(format_filename, dataset, clustering_algorithm
 
     dataset = os.path.splitext(ntpath.basename(dataset))[0]
     clustering_algorithm = clustering_algorithm.replace("_", "-")
-    components = components.zfill(zero_fill_components)
+    components = str(components).zfill(zero_fill_components)
     fuzzifier = str(fuzzifier).ljust(zero_fill_fuzzifier, "0") if fuzzifier is not None else fuzzifier
-    seed = seed.zfill(zero_fill_seed)
+    seed = str(seed).zfill(zero_fill_seed)
     distance = distance.replace("_", "-")
     if weights is not None:
         weights = tuple(map(lambda n: str(n).zfill(zero_fill_weights), weights))
@@ -37,12 +37,12 @@ def compute_file_saving_path_dclus(format_filename, dataset, clustering_algorith
 
     dataset = os.path.splitext(ntpath.basename(dataset))[0]
     clustering_algorithm = clustering_algorithm.replace("_", "-")
-    min_samples = min_samples.zfill(zero_fill_min_samples)
+    min_samples = str(min_samples).zfill(zero_fill_min_samples)
     if np.isinf(eps):
         eps = "inf"
     else:
-        eps = eps.zfill(zero_fill_eps)
-    seed = seed.zfill(zero_fill_seed)
+        eps = float(eps).zfill(zero_fill_eps)
+    seed = str(seed).zfill(zero_fill_seed)
     distance = distance.replace("_", "-")
     if weights is not None:
         weights = tuple(map(lambda n: str(n).zfill(zero_fill_weights), weights))
