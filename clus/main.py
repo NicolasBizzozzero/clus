@@ -23,7 +23,7 @@ from clus.src.utils.common import str_to_number
 from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
-from clus.src.core.saving_path import compute_file_saving_path
+from clus.src.core.saving_path import compute_file_saving_path_clus
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
@@ -137,6 +137,21 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
+@click.option("--format-filename-dest-results", show_default=True, type=str,
+              default="{dataset}_{clustering_algorithm}_{components}_{fuzzifier}_{seed}_{distance}",
+              help="Format of the destination filename for the clustering results. Variables need to be enclosed in "
+                   "brackets. Possible variables are : {dataset}, {clustering_algorithm}, {components}, {fuzzifier}, "
+                   "{seed}, {distance}.")
+@click.option("--format-filename-dest-visu", show_default=True, type=str,
+              default="{dataset}_{clustering_algorithm}_{components}_{fuzzifier}_{seed}_{distance}",
+              help="Format of the destination filename for the visualisation picture. Variables need to be enclosed in "
+                   "brackets. Possible variables are : {dataset}, {clustering_algorithm}, {components}, {fuzzifier}, "
+                   "{seed}, {distance}.")
+@click.option("--format-filename-dest-visu-3d", show_default=True, type=str,
+              default="{dataset}_{clustering_algorithm}_{components}_{fuzzifier}_{seed}_{distance}_3d",
+              help="Format of the destination filename for the 3D-visualisation picture. Variables need to be enclosed "
+                   "in brackets. Possible variables are : {dataset}, {clustering_algorithm}, {components}, "
+                   "{fuzzifier}, {seed}, {distance}.")
 @click.option("--zero-fill-components", default=3, show_default=True, type=int,
               help="The desired length of the 'number of components' parameter displayed on any output filename. If "
                    "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
@@ -160,8 +175,9 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
          membership_subset_size, save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
-         normalization, quiet, path_dir_dest, zero_fill_components, zero_fill_seed, zero_fill_weights,
-         zero_fill_fuzzifier, url_scp):
+         normalization, quiet, path_dir_dest, format_filename_dest_results, format_filename_dest_visu,
+         format_filename_dest_visu_3d, zero_fill_components, zero_fill_seed, zero_fill_weights, zero_fill_fuzzifier,
+         url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
@@ -238,39 +254,41 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
         os.makedirs(path_dir_dest, exist_ok=True)
 
         if save_clus:
-            file_path = compute_file_saving_path(dataset=dataset,
-                                                 clustering_algorithm=clustering_algorithm,
-                                                 components=components,
-                                                 seed=seed,
-                                                 distance=pairwise_distance,
-                                                 weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
-                                                 dir_dest=path_dir_dest,
-                                                 extension="npz",
-                                                 zero_fill_components=zero_fill_components,
-                                                 zero_fill_seed=zero_fill_seed,
-                                                 zero_fill_weights=zero_fill_weights,
-                                                 zero_fill_fuzzifier=zero_fill_fuzzifier,
-                                                 is_3d_visualisation=False)
+            file_path = compute_file_saving_path_clus(format_filename=format_filename_dest_results,
+                                                      dataset=dataset,
+                                                      clustering_algorithm=clustering_algorithm,
+                                                      components=components,
+                                                      fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                      seed=seed,
+                                                      distance=pairwise_distance,
+                                                      weights=weights,
+                                                      dir_dest=path_dir_dest,
+                                                      extension="npz",
+                                                      zero_fill_components=zero_fill_components,
+                                                      zero_fill_fuzzifier=zero_fill_fuzzifier,
+                                                      zero_fill_seed=zero_fill_seed,
+                                                      zero_fill_weights=zero_fill_weights)
+
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
                 execute("scp", file_path, url_scp + ":" + path_dir_dest)
                 os.remove(file_path)
 
         if visualise or save_visu:
-            file_path = compute_file_saving_path(dataset=dataset,
-                                                 clustering_algorithm=clustering_algorithm,
-                                                 components=components,
-                                                 seed=seed,
-                                                 distance=pairwise_distance,
-                                                 weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
-                                                 dir_dest=path_dir_dest,
-                                                 extension="png",
-                                                 zero_fill_components=zero_fill_components,
-                                                 zero_fill_seed=zero_fill_seed,
-                                                 zero_fill_weights=zero_fill_weights,
-                                                 zero_fill_fuzzifier=zero_fill_fuzzifier)
+            file_path = compute_file_saving_path_clus(format_filename=format_filename_dest_visu,
+                                                      dataset=dataset,
+                                                      clustering_algorithm=clustering_algorithm,
+                                                      components=components,
+                                                      fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                      seed=seed,
+                                                      distance=pairwise_distance,
+                                                      weights=weights,
+                                                      dir_dest=path_dir_dest,
+                                                      extension="png",
+                                                      zero_fill_components=zero_fill_components,
+                                                      zero_fill_fuzzifier=zero_fill_fuzzifier,
+                                                      zero_fill_seed=zero_fill_seed,
+                                                      zero_fill_weights=zero_fill_weights)
             visualise_clustering_2d(data=data,
                                     clusters_center=clustering_result["clusters_center"],
                                     affectations=clustering_result["affectations"],
@@ -286,20 +304,20 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
-            file_path = compute_file_saving_path(dataset=dataset,
-                                                 clustering_algorithm=clustering_algorithm,
-                                                 components=components,
-                                                 seed=seed,
-                                                 distance=pairwise_distance,
-                                                 weights=weights,
-                                                 fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
-                                                 dir_dest=path_dir_dest,
-                                                 extension="png",
-                                                 zero_fill_components=zero_fill_components,
-                                                 zero_fill_seed=zero_fill_seed,
-                                                 zero_fill_weights=zero_fill_weights,
-                                                 zero_fill_fuzzifier=zero_fill_fuzzifier,
-                                                 is_3d_visualisation=True)
+            file_path = compute_file_saving_path_clus(format_filename=format_filename_dest_visu_3d,
+                                                      dataset=dataset,
+                                                      clustering_algorithm=clustering_algorithm,
+                                                      components=components,
+                                                      fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                      seed=seed,
+                                                      distance=pairwise_distance,
+                                                      weights=weights,
+                                                      dir_dest=path_dir_dest,
+                                                      extension="png",
+                                                      zero_fill_components=zero_fill_components,
+                                                      zero_fill_fuzzifier=zero_fill_fuzzifier,
+                                                      zero_fill_seed=zero_fill_seed,
+                                                      zero_fill_weights=zero_fill_weights)
             visualise_clustering_3d(data=data,
                                     clusters_center=clustering_result["clusters_center"],
                                     affectations=clustering_result["affectations"],
@@ -561,6 +579,21 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
+@click.option("--format-filename-dest-results", show_default=True, type=str,
+              default="{dataset}_{clustering_algorithm}_{min_samples}_{eps}_{seed}_{distance}",
+              help="Format of the destination filename for the clustering results. Variables need to be enclosed in "
+                   "brackets. Possible variables are : {dataset}, {clustering_algorithm}, {min_samples}, {eps}, "
+                   "{seed}, {distance}.")
+@click.option("--format-filename-dest-visu", show_default=True, type=str,
+              default="{dataset}_{clustering_algorithm}_{min_samples}_{eps}_{seed}_{distance}",
+              help="Format of the destination filename for the clustering results. Variables need to be enclosed in "
+                   "brackets. Possible variables are : {dataset}, {clustering_algorithm}, {min_samples}, {eps}, "
+                   "{seed}, {distance}.")
+@click.option("--format-filename-dest-visu-3d", show_default=True, type=str,
+              default="{dataset}_{clustering_algorithm}_{min_samples}_{eps}_{seed}_{distance}_3d",
+              help="Format of the destination filename for the clustering results. Variables need to be enclosed in "
+                   "brackets. Possible variables are : {dataset}, {clustering_algorithm}, {min_samples}, {eps}, "
+                   "{seed}, {distance}.")
 @click.option("--zero-fill-eps", default=3, show_default=True, type=int,
               help="The desired length of the 'eps' parameter displayed on any output filename. If "
                    "this parameter as a smaller length that the one wanted, zeroes are padded to the left of the "
@@ -583,7 +616,9 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
                    "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
 def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, eps, min_samples, max_eps,
           pairwise_distance, weights, save_clus, visualise, visualise_3d, save_visu, save_visu_3d, seed, normalization,
-          quiet, path_dir_dest, zero_fill_eps, zero_fill_min_samples, zero_fill_seed, zero_fill_weights, url_scp):
+          quiet, path_dir_dest, format_filename_dest_results, format_filename_dest_visu, format_filename_dest_visu_3d,
+          zero_fill_eps, zero_fill_min_samples, zero_fill_seed, zero_fill_weights,
+          url_scp):
     """ Apply a density-based clustering algorithm to a CSV dataset. """
     parameters = locals()
 
@@ -627,37 +662,39 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
         os.makedirs(path_dir_dest, exist_ok=True)
 
         if save_clus:
-            file_path = compute_file_saving_path_dclus(dataset=dataset,
+            file_path = compute_file_saving_path_dclus(format_filename=format_filename_dest_results,
+                                                       dataset=dataset,
                                                        clustering_algorithm=clustering_algorithm,
                                                        min_samples=min_samples,
                                                        eps=max_eps if clustering_algorithm in ALIASES_OPTICS else eps,
                                                        seed=seed,
                                                        distance=pairwise_distance,
                                                        weights=weights,
-                                                       dir_dest=path_dir_dest,
                                                        extension="npz",
-                                                       zero_fill_eps=zero_fill_eps,
+                                                       dir_dest=path_dir_dest,
                                                        zero_fill_min_samples=zero_fill_min_samples,
+                                                       zero_fill_eps=zero_fill_eps,
                                                        zero_fill_seed=zero_fill_seed,
-                                                       zero_fill_weights=zero_fill_weights,
-                                                       is_3d_visualisation=False)
+                                                       zero_fill_weights=zero_fill_weights)
+
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
                 execute("scp", file_path, url_scp + ":" + path_dir_dest)
                 os.remove(file_path)
 
         if visualise or save_visu:
-            file_path = compute_file_saving_path_dclus(dataset=dataset,
+            file_path = compute_file_saving_path_dclus(format_filename=format_filename_dest_visu,
+                                                       dataset=dataset,
                                                        clustering_algorithm=clustering_algorithm,
                                                        min_samples=min_samples,
                                                        eps=max_eps if clustering_algorithm in ALIASES_OPTICS else eps,
                                                        seed=seed,
                                                        distance=pairwise_distance,
                                                        weights=weights,
-                                                       dir_dest=path_dir_dest,
                                                        extension="png",
-                                                       zero_fill_eps=zero_fill_eps,
+                                                       dir_dest=path_dir_dest,
                                                        zero_fill_min_samples=zero_fill_min_samples,
+                                                       zero_fill_eps=zero_fill_eps,
                                                        zero_fill_seed=zero_fill_seed,
                                                        zero_fill_weights=zero_fill_weights)
             visualise_clustering_2d(data=data,
@@ -675,20 +712,20 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
-            file_path = compute_file_saving_path_dclus(dataset=dataset,
+            file_path = compute_file_saving_path_dclus(format_filename=format_filename_dest_visu_3d,
+                                                       dataset=dataset,
                                                        clustering_algorithm=clustering_algorithm,
                                                        min_samples=min_samples,
                                                        eps=max_eps if clustering_algorithm in ALIASES_OPTICS else eps,
                                                        seed=seed,
                                                        distance=pairwise_distance,
                                                        weights=weights,
-                                                       dir_dest=path_dir_dest,
                                                        extension="png",
-                                                       zero_fill_eps=zero_fill_eps,
+                                                       dir_dest=path_dir_dest,
                                                        zero_fill_min_samples=zero_fill_min_samples,
+                                                       zero_fill_eps=zero_fill_eps,
                                                        zero_fill_seed=zero_fill_seed,
-                                                       zero_fill_weights=zero_fill_weights,
-                                                       is_3d_visualisation=True)
+                                                       zero_fill_weights=zero_fill_weights)
             visualise_clustering_3d(data=data,
                                     clusters_center=None,
                                     affectations=clustering_result["affectations"],
