@@ -1,16 +1,12 @@
 import ntpath
 import os
 import sys
-import glob
 
 import click
-
-import pandas as pd
 import numpy as np
-from clus.src.core.saving_path import compute_file_saving_path_dclus
+import pandas as pd
 from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single, fcluster
-from scipy.spatial.distance import pdist, squareform
-
+from scipy.spatial.distance import pdist
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
@@ -18,12 +14,13 @@ from clus.src.core.evaluation_metric import evaluate
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
     ALIASES_OPTICS
 from clus.src.core.normalization import normalization as normalize
+from clus.src.core.saving_path import compute_file_saving_path_clus
+from clus.src.core.saving_path import compute_file_saving_path_dclus
+from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
 from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
 from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
-from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
-from clus.src.core.saving_path import compute_file_saving_path_clus
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
