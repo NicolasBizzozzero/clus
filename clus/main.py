@@ -271,7 +271,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
-                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise or save_visu:
@@ -300,7 +300,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     show=visualise,
                                     save=save_visu)
             if url_scp is not None:
-                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
@@ -329,7 +329,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     show=visualise_3d,
                                     save=save_visu_3d)
             if url_scp is not None:
-                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
 
@@ -679,7 +679,7 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
 
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
-                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise or save_visu:
@@ -708,7 +708,7 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                     show=visualise,
                                     save=save_visu)
             if url_scp is not None:
-                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
@@ -737,7 +737,7 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                     show=visualise_3d,
                                     save=save_visu_3d)
             if url_scp is not None:
-                execute("scp", file_path, url_scp + ":" + path_dir_dest)
+                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
 
