@@ -21,6 +21,8 @@
   * https://github.com/agartland/utils/blob/e200d7e41039ca0053bd817c1d1857aab33bd503/kmedoids.py#L172
   * https://github.com/Brain-Mapper/BrainMapperV2/blob/63075bdca2428197fc18a1cf6c7403c2764e0664/ourLib/clustering.py#L293
 * Application du decorateur "memoryerror_fallback".
+* Au lieu de fixer un nom de fichier par défaut, mettre tous les paramètres par défaut à None (et fixer en dur leurs valeus par défaut dans la doc, ou formater selon un fichier), et ajouter les parametres NON None passés par l'utilisateur au nom de fichier selon un ordre prédéfini. L'utilisateur peut aussi très bien passer son nom de fichier prédéfini.
+
 
 
 ## References
