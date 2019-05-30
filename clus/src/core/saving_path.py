@@ -41,7 +41,7 @@ def compute_file_saving_path_dclus(format_filename, dataset, clustering_algorith
     if np.isinf(eps):
         eps = "inf"
     else:
-        eps = float(eps).zfill(zero_fill_eps)
+        eps = str(eps).zfill(zero_fill_eps)
     seed = str(seed).zfill(zero_fill_seed)
     distance = distance.replace("_", "-")
     if weights is not None:
