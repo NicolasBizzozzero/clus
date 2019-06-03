@@ -23,8 +23,8 @@ $ clus dataset.npy kmeans --pairwise-distance weighted_euclidean --weights 1 0 1
 # Clustering from a .npz file with a 3D matplotlib visualisation
 $ clus dataset.npz fcm --array-name clusters_center --visualise-3d
 
-# Clustering from a .npz file with a 3D matplotlib visualisation
-$ clus dataset.npz fcm --array-name clusters_center --visualise-3d
+# Clustering with automatic dataset filetype guessing and with a normalization beforehand 
+$ clus dataset kmeans --file-type guess --normalization rescaling --save-clus
 
 # DBSCAN clustering with a custom clustering results saving path
 $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results dbased_{clustering_algorithm}_{dataset}_{seed}
