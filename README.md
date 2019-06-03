@@ -52,6 +52,7 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 * S'inspirer de l'API d'autres clustering softwares :
 ** https://elki-project.github.io
 ** https://www.cs.waikato.ac.nz/ml/weka
+** https://www.knime.com/nodeguide/analytics/clustering
 
 
 ## References
