@@ -10,6 +10,7 @@ from clus.src.core.methods.density_based.optics import optics
 
 # Centroids-based
 ALIASES_KMEANS = ("kmeans",)
+ALIASES_MINI_BATCH_KMEANS = ("minibatch_kmeans", "mini_batch_kmeans")
 ALIASES_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
 ALIASES_POSSIBILISTIC_C_MEANS = ("possibilistic_c_means", "pcm")
 ALIASES_FUZZY_C_MEDOIDS = ("fuzzy_c_medoids", "fcmdd")

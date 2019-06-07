@@ -10,9 +10,8 @@ from scipy.spatial.distance import pdist
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
-from clus.src.core.evaluation_metric import evaluate
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
-    ALIASES_OPTICS
+from clus.src.core.evaluation_metric.evaluation_metric import evaluate
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.core.saving_path import compute_file_saving_path_clus
 from clus.src.core.saving_path import compute_file_saving_path_dclus
@@ -21,6 +20,12 @@ from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
 from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
+from clus.src.core.methods.methods import ALIASES_KMEANS, ALIASES_OPTICS, ALIASES_DBSCAN, \
+    ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, ALIASES_FUZZY_C_MEANS, ALIASES_FUZZY_C_MEDOIDS, \
+    ALIASES_HARD_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, \
+    ALIASES_MINI_BATCH_KMEANS, ALIASES_POSSIBILISTIC_C_MEANS
+from clus.src.core.evaluation_metric.evaluation_metric import ALIASES_ADJUSTED_RAND_INDEX
+
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
@@ -28,14 +33,15 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("datasets", type=str, nargs=-1, required=True)
 @click.argument("clustering_algorithm", type=click.Choice([
-    "kmeans",
-    "fuzzy_c_means", "fcm",
-    "possibilistic_c_means", "pcm",
-    "fuzzy_c_medoids", "fcmdd",
-    "hard_c_medoids", "hcmdd",
-    "linearized_fuzzy_c_medoids", "lfcmdd", "l_fc_med",
-    "linearized_fuzzy_c_medoids_select", "l_fcmed_select",
-    "datastream_linearized_fuzzy_c_medoids_select", "ds_lfcmed_select",
+    *ALIASES_KMEANS,
+    *ALIASES_MINI_BATCH_KMEANS,
+    *ALIASES_FUZZY_C_MEANS,
+    *ALIASES_POSSIBILISTIC_C_MEANS,
+    *ALIASES_FUZZY_C_MEDOIDS,
+    *ALIASES_HARD_C_MEDOIDS,
+    *ALIASES_LINEARIZED_FUZZY_C_MEDOIDS,
+    *ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT,
+    *ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT
 ]))
 # Data loading options
 @click.option("--file-type", type=str, default="guess", show_default=True,
@@ -500,8 +506,8 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("datasets", type=str, nargs=-1, required=True)
 @click.argument("clustering_algorithm", type=click.Choice([
-    "dbscan",
-    "optics"
+    *ALIASES_DBSCAN,
+    *ALIASES_OPTICS
 ]))
 # Data loading options
 @click.option("--file-type", type=str, default="guess", show_default=True,
@@ -740,7 +746,7 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("metric", type=click.Choice([
-    "ari", "adjusted_rand_index"
+    *ALIASES_ADJUSTED_RAND_INDEX
 ]))
 # Data loading options
 @click.option("--file-affectations-true", type=click.Path(exists=True), default=None,
