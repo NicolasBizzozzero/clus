@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
 from clus.src.core.analysis import ambiguity
-from clus.src.core.cluster_initialization import cluster_initialization, random_choice
+from clus.src.core.cluster_initialization import cluster_initialization, random_choice, random_choice_idx
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
 from clus.src.utils.common import is_integer
 from clus.src.utils.decorator import remove_unexpected_arguments, time_this
@@ -82,17 +82,18 @@ def minibatch_kmeans(data, components=10, eps=1e-4, max_iter=1000, batch_size=No
         memberships = None
         losses = []
         current_iter = 0
-        while (current_iter < max_iter) and \
-              ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
+        while (current_iter < max_iter):# and \
+              #((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
             # Draw `batch_size` random samples
-            minibatch = random_choice(data, batch_size)
+            minibatch_idx = random_choice_idx(data, batch_size)
+            minibatch = data[minibatch_idx, :]
 
             memberships = _optim_memberships(minibatch, centroids)
             handle_empty_clusters(minibatch, centroids, memberships, strategy=empty_clusters_method)
 
             centroids = _optim_centroids(minibatch, memberships)
 
-            loss = _compute_loss(data, memberships, centroids)
+            loss = _compute_loss(data, centroids)
             losses.append(loss)
             if loss < best_loss:
                 best_loss = loss
@@ -126,12 +127,7 @@ def _optim_memberships(data, centroids):
     # dist_data_centroids = np.linalg.norm(data - centroids[:, np.newaxis], ord=2, axis=-1).T ** 2
     dist_data_centroids = cdist(data, centroids, metric="euclidean") ** 2
 
-    # Set all binary affectations
-    mask_closest_centroid = (np.arange(data.shape[0]), dist_data_centroids.argmin(axis=1))
-    affectations = np.zeros(shape=dist_data_centroids.shape, dtype=np.int32)
-    affectations[mask_closest_centroid] = 1
-
-    return affectations
+    return _compute_hard_affectations(dist_data_centroids)
 
 
 def _optim_centroids(data, memberships):
@@ -142,12 +138,19 @@ def _optim_centroids(data, memberships):
     return np.divide(np.dot(data.T, memberships), sum_memberships_by_centroid, where=sum_memberships_by_centroid != 0).T
 
 
-def _compute_loss(data, memberships, centroids):
+def _compute_loss(data, centroids):
     """ Compute the loss of the clustering algorithm.
     This method do not have any purpose in the clustering algorithm. It is only invoked for result analysis.
     """
     dist_data_centroids = cdist(data, centroids, metric="euclidean") ** 2
-    return (memberships * dist_data_centroids).sum()
+    return _compute_hard_affectations(dist_data_centroids).sum()
+
+
+def _compute_hard_affectations(dist_data_centroids):
+    mask_closest_centroid = (np.arange(dist_data_centroids.shape[0]), dist_data_centroids.argmin(axis=1))
+    affectations = np.zeros(shape=dist_data_centroids.shape, dtype=np.int32)
+    affectations[mask_closest_centroid] = 1
+    return affectations
 
 
 if __name__ == '__main__':

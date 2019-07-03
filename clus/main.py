@@ -93,6 +93,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--weights", cls=OptionInfiniteArgs,
               help="Weights used for the \"weighted_euclidean\" pairwise distance. You need as much weights as "
                    "you have features in your data.")
+@click.option("-b", "--batch-size", type=int, default=None,
+              help="Size of a batch for minibatch compatible algorithms..")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 @click.option("--save-clus", is_flag=True,
@@ -176,7 +178,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
                    "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
 def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
-         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights,
+         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights, batch_size,
          membership_subset_size, save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
          normalization, quiet, path_dir_dest, format_filename_dest_results, format_filename_dest_visu,
          format_filename_dest_visu_3d, zero_fill_components, zero_fill_seed, zero_fill_weights, zero_fill_fuzzifier,
@@ -246,6 +248,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
             max_iter=max_iter,
             fuzzifier=fuzzifier,
             weights=weights,
+            batch_size=batch_size,
             membership_subset_size=membership_subset_size,
             initialization_method=initialization_method,
             empty_clusters_method=empty_clusters_method,
