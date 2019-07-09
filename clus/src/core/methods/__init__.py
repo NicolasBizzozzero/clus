@@ -4,6 +4,7 @@ from .hard_c_medoids import hard_c_medoids
 from .fuzzy_c_medoids import fuzzy_c_medoids
 from .linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
 from .iterative.linearized_fuzzy_c_medoids_select import linearized_fuzzy_c_medoids_select
+from .iterative.fuzzy_c_means_select import fuzzy_c_means_select
 
 
 __all__ = [
@@ -12,7 +13,8 @@ __all__ = [
     hard_c_medoids,
     fuzzy_c_medoids,
     linearized_fuzzy_c_medoids,
-    linearized_fuzzy_c_medoids_select
+    linearized_fuzzy_c_medoids_select,
+    fuzzy_c_means_select
 ]
 
 

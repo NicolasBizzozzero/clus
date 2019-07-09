@@ -20,7 +20,7 @@ _CMAP_EXAMPLES = "hsv"
 _COLOR_CLUSTERS_CENTER = "black"
 _MARKER_EXAMPLES = 'o'
 _MARKER_CLUSTERS_CENTER = 'x'
-_ALPHA_EXAMPLES = 0.01
+_ALPHA_EXAMPLES = 1.0
 _ALPHA_CLUSTERS_CENTER = 1.0
 _ELEVATION = 48
 _AZIMUTH = 134
@@ -48,14 +48,15 @@ def visualise_clustering_2d(data, clusters_center, affectations, clustering_meth
 
     # Plot the data
     ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES, marker=_MARKER_EXAMPLES, alpha=_ALPHA_EXAMPLES)
-    if not applied_tsne:
+    if (not applied_tsne) and (clusters_center is not None):
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
                    marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
 
     # Configure labels and title
     plt.xlabel(header[0])
     plt.ylabel(header[1])
-    title = _compute_title(clusters_center.shape[0], clustering_method, dataset_name, applied_tsne, n_components_tsne=2)
+    title = _compute_title(np.unique(affectations).size, clustering_method, dataset_name, applied_tsne,
+                           n_components_tsne=2)
     plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 
     if save:
@@ -193,8 +194,8 @@ def _get_rainbow_color_cycle(affectations, borned_range=2000000):
     spaced_values = np.linspace(borned_range, 16777215 - borned_range, num=unique_clusters.size, dtype=np.uint64)
     spaced_clusters_center = affectations.copy()
 
-    for id_cluster in unique_clusters:
-        spaced_clusters_center[spaced_clusters_center == id_cluster] = spaced_values[id_cluster]
+    for id_color, id_cluster in enumerate(unique_clusters):
+        spaced_clusters_center[spaced_clusters_center == id_cluster] = spaced_values[id_color]
 
     # Convert clusters' value to hex color code
     return np.array(['#{0:06X}'.format(c) for c in spaced_clusters_center])
