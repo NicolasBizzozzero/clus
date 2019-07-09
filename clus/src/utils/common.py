@@ -13,5 +13,12 @@ def is_number(s):
         return False
 
 
+def is_integer(s):
+    try:
+        return int(s) == s
+    except ValueError:
+        return False
+
+
 if __name__ == "__main__":
     pass

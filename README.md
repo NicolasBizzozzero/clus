@@ -1,14 +1,40 @@
 # clustering
-## Useful links
-* http://cs.joensuu.fi/sipu/datasets
+Clustering and fuzzy-clustering library with integrated CLI.
 
+## Installation
+```shell
+$ python3 setup.py install
+```
+Running the `setup.py` script will download all required packages and install the following commands either in your `~/.local/bin/` for local installation or in the `/usr/lib/pythonX.X` directories : 
+* clus : Main command for partition-based clustering.
+* dclus : density-based clustering.
+* hclus : Hierarchical clustering.
+* eclus : Evaluate clustering. Implementing diferents way to evaluate clustering results by comparing two partitions.
+
+
+## Usage
+```shell
+# Simple clustering with 500-components kmeans algorithm
+$ clus dataset.csv kmeans -k 500 --max-iter 100  --eps 0.001 --header --save-clus
+
+# Clustering with a weighted euclidean distance + matplotlib visualisation
+$ clus dataset.npy kmeans --pairwise-distance weighted_euclidean --weights 1 0 1 1 --visualise
+
+# Clustering from a .npz file with a 3D matplotlib visualisation
+$ clus dataset.npz fcm --array-name clusters_center --visualise-3d
+
+# Clustering with automatic dataset filetype guessing and with a normalization beforehand 
+$ clus dataset kmeans --file-type guess --normalization rescaling --save-clus
+
+# DBSCAN clustering with a custom clustering results saving path
+$ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results dbased_{clustering_algorithm}_{dataset}_{seed}
+```
 
 ## TODO
 * Pour les fcm, plusieurs copies de données sont faites plusieurs fois. Optimisable, voir : https://pythonhosted.org/scikit-fuzzy/_modules/skfuzzy/cluster/_cmeans.html#cmeans
 * Rendre les opérations de clustering inplace (ne pas dupliquer les données)
 * Méthodes de Clustering à implémenter :
   * https://github.com/scikit-learn/scikit-learn/blob/7b136e9/sklearn/cluster/k_means_.py#L1318
-  * DBSCAN
   * OPTICS
   * Mean-Shift
   * Vérifier le hard_c_medoids
@@ -22,7 +48,11 @@
   * https://github.com/Brain-Mapper/BrainMapperV2/blob/63075bdca2428197fc18a1cf6c7403c2764e0664/ourLib/clustering.py#L293
 * Application du decorateur "memoryerror_fallback".
 * Au lieu de fixer un nom de fichier par défaut, mettre tous les paramètres par défaut à None (et fixer en dur leurs valeus par défaut dans la doc, ou formater selon un fichier), et ajouter les parametres NON None passés par l'utilisateur au nom de fichier selon un ordre prédéfini. L'utilisateur peut aussi très bien passer son nom de fichier prédéfini.
-
+* Utiliser une mesure de distance chunked : sklearn.metrics.pairwise_distances_chunked (peut être dans le decorateur ?)
+* S'inspirer de l'API d'autres clustering softwares :
+** https://elki-project.github.io
+** https://www.cs.waikato.ac.nz/ml/weka
+** https://www.knime.com/nodeguide/analytics/clustering
 
 
 ## References

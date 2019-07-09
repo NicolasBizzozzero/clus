@@ -1,8 +1,6 @@
 import numpy as np
 
-from sklearn.metrics.cluster import adjusted_rand_score
-
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.core.evaluation_metric.adjusted_rand_index import adjusted_rand_index
 
 ALIASES_ADJUSTED_RAND_INDEX = ("ari", "adjusted_rand_index")
 
@@ -16,15 +14,12 @@ class UnknownEvaluationMetric(Exception):
 
 def evaluate(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred):
     metric_fct = _str_to_evaluation_metric(metric)
-    return metric_fct(file_affectations_true=file_affectations_true, file_affectations_pred=file_affectations_pred,
-                      name_affectations_true=name_affectations_true, name_affectations_pred=name_affectations_pred)
 
+    affectations_ground_truth = np.load(file_affectations_true)[name_affectations_true]
+    affectations_prediction = np.load(file_affectations_pred)[name_affectations_pred]
 
-@remove_unexpected_arguments
-def adjusted_rand_index(file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred):
-    affectations_true = np.load(file_affectations_true)[name_affectations_true]
-    affectations_pred = np.load(file_affectations_pred)[name_affectations_pred]
-    return adjusted_rand_score(affectations_true, affectations_pred)
+    return metric_fct(affectations_ground_truth=affectations_ground_truth,
+                      affectations_prediction=affectations_prediction)
 
 
 def _str_to_evaluation_metric(string):
