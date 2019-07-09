@@ -10,6 +10,8 @@ from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
+_DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
+
 
 @remove_unexpected_arguments
 def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
@@ -52,6 +54,8 @@ def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
     * The medoids matrix.
     * An array with all losses at each iteration.
     """
+    global _DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT
+
     assert len(data.shape) == 2, "The data must be a 2D array"
     assert data.shape[0] > 0, "The data must have at least one example"
     assert data.shape[1] > 0, "The data must have at least one feature"
@@ -75,9 +79,10 @@ def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
 
     # If no `membership_subset_size` is specified, [1] suggest to use a value much smaller than the average of points
     # in a cluster
-    # TODO: I suggest to take 10%  of this
+    # We thus take 10% of this default value
     if membership_subset_size is None:
         membership_subset_size = distance_matrix.shape[0] // components
+        membership_subset_size = max(1, int(_DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT * membership_subset_size))
 
     # Initialisation
     if medoids_idx is None:
@@ -99,8 +104,8 @@ def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
             )
 
             # TODO: I previously used data points as clusters_center, I updated theses values to data indexes.
-            #  So I need to updated all the code below, and probably not use the "closest_cluster"
-            #  computation but the distance matrix.
+            # So I need to update all the code below, and probably not use the "closest_cluster"
+            # computation but the distance matrix.
             # Minimal cardinal filtering
             closest_cluster = cdist(data, clusters_center, metric='euclidean').argmin(axis=-1)
             least_common = reversed(Counter(closest_cluster).most_common())
