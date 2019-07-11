@@ -105,7 +105,7 @@ def fuzzy_c_means_select(data, components=10, eps=1e-4, max_iter=1000, fuzzifier
 
     return {
         "linkage_mtx": linkage_mtx,
-        "good_data_idx": np.sort(good_data_idx),
+        "good_data_idx": good_data_idx,
         "losses": np.array(losses)
     }
 

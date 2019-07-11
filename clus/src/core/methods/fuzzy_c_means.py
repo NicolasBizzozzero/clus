@@ -13,7 +13,7 @@ _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{r
 @remove_unexpected_arguments
 def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, weights=None,
                   initialization_method="random_choice", empty_clusters_method="nothing",
-                  centroids=None):
+                  centroids=None, progress_bar=True):
     """ Performs the fuzzy c-means clustering algorithm on a dataset.
 
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
@@ -40,6 +40,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
     * "random_example", assign a random example to all empty clusters.
     * "furthest_example_from_its_centroid", assign the furthest example from its centroid to each empty cluster.
     :param centroids: Initials centroids to use instead of randomly initialize them.
+    :param progress_bar: If `False`, disable the progress bar.
     :return: A tuple containing :
     * The memberships matrix.
     * The centroids matrix.
@@ -68,7 +69,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
     if centroids is None:
         centroids = cluster_initialization(data, components, initialization_method, need_idx=False)
 
-    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR, disable=not progress_bar) as progress_bar:
         best_memberships = None
         best_centroids = None
         best_loss = np.inf
