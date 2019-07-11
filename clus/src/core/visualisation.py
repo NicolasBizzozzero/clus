@@ -14,13 +14,13 @@ from sklearn.manifold import TSNE
 
 # Plot configuration
 _TITLE_WRAP_SIZE = 60
-_SIZE_EXAMPLES = 3
+_SIZE_EXAMPLES = 1
 _SIZE_CLUSTERS_CENTER = 20
 _CMAP_EXAMPLES = "hsv"
 _COLOR_CLUSTERS_CENTER = "black"
 _MARKER_EXAMPLES = 'o'
 _MARKER_CLUSTERS_CENTER = 'x'
-_ALPHA_EXAMPLES = 1.0
+_ALPHA_EXAMPLES = 0.8
 _ALPHA_CLUSTERS_CENTER = 1.0
 _ELEVATION = 48
 _AZIMUTH = 134
@@ -89,7 +89,7 @@ def visualise_clustering_3d(data, clusters_center, affectations, clustering_meth
     ax = Axes3D(fig, rect=[0, 0, 1, 1], elev=_ELEVATION, azim=_AZIMUTH)
     ax.scatter(data[:, 0], data[:, 1], data[:, 2],
                c=c, s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES, alpha=_ALPHA_EXAMPLES)
-    if not applied_tsne:
+    if (not applied_tsne) and (clusters_center is not None):
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], clusters_center[:, 2], c=_COLOR_CLUSTERS_CENTER,
                    s=_SIZE_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER, marker=_MARKER_CLUSTERS_CENTER)
 
@@ -101,7 +101,7 @@ def visualise_clustering_3d(data, clusters_center, affectations, clustering_meth
     ax.set_ylabel(header[1])
     ax.set_zlabel(header[2])
     ax.dist = _DISTANCE_3D
-    title = _compute_title(clusters_center.shape[0], clustering_method,
+    title = _compute_title(np.unique(affectations).size, clustering_method,
                            dataset_name, applied_tsne, n_components_tsne=3)
     ax.set_title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
 

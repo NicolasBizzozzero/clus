@@ -1,3 +1,4 @@
+import sys
 from collections import Counter
 
 import numpy as np
@@ -94,13 +95,18 @@ def fuzzy_c_means_select(data, components=10, eps=1e-4, max_iter=1000, fuzzifier
 
         losses.append(clus_result["losses"][-1])
 
-    # Perform hierarchical clustering on good data
-    linkage_mtx = linkage(data[good_data_idx, :])
+    if len(good_data_idx) == 0:
+        print("No more good data after filtering. Try lowering the restrictions on the parameters `min_centroid_size` "
+              "and `max_centroid_diameter`.", file=sys.stderr)
+        linkage_mtx = None
+    else:
+        # Perform hierarchical clustering on good data
+        linkage_mtx = linkage(data[good_data_idx, :], method="single")
 
     return {
         "linkage_mtx": linkage_mtx,
         "good_data_idx": np.sort(good_data_idx),
-        "losses": np.array(losses),
+        "losses": np.array(losses)
     }
 
 
@@ -111,7 +117,6 @@ def _delete_data(batch_data_idx, i_cluster, affectations, trashcan):
 
     for idx in data_idx_to_delete:
         trashcan.append(idx)
-    # batch_data_idx = np.delete(batch_data_idx, trashcan_data, axis=0)
 
 
 def _compute_cluster_diameter(cluster):
