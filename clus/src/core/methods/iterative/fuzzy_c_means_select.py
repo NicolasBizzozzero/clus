@@ -5,8 +5,6 @@ import numpy as np
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import pdist
 
-from clus.src.core.cluster_initialization import cluster_initialization
-from clus.src.utils.array import mini_batches, mini_batches_idx
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
@@ -15,8 +13,8 @@ _DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
 
 
 @remove_unexpected_arguments
-def fuzzy_c_means_select(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, batch_size=64, weights=None,
-                         max_epochs=10, min_centroid_size=3, max_centroid_diameter=1.0,
+def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifier=2, batch_size=16_384, weights=None,
+                         max_epochs=32, min_centroid_size=10, max_centroid_diameter=1.0,
                          initialization_method="random_choice", empty_clusters_method="nothing",
                          centroids=None):
     assert len(data.shape) == 2, "The data must be a 2D array"
@@ -62,6 +60,7 @@ def fuzzy_c_means_select(data, components=10, eps=1e-4, max_iter=1000, fuzzifier
             weights=None, initialization_method=initialization_method,
             empty_clusters_method=empty_clusters_method
         )
+        losses.append(clus_result["losses"][-1])
 
         # First filter criterion, filter by cluster size
         affectations = clus_result["affectations"]
@@ -93,7 +92,8 @@ def fuzzy_c_means_select(data, components=10, eps=1e-4, max_iter=1000, fuzzifier
         for idx in trashcan:
             data_to_affect_idx = np.append(data_to_affect_idx, idx)
 
-        losses.append(clus_result["losses"][-1])
+        # Unaffected Fraud Allocation
+        # TODO: Itérer sur les données, regarder si chaque donnée non traitée est dans le RAYON (diametre /2) du centroide d'un des clusters. Si oui, alors l'ajouter.
 
     if len(good_data_idx) == 0:
         print("No more good data after filtering. Try lowering the restrictions on the parameters `min_centroid_size` "
@@ -101,7 +101,7 @@ def fuzzy_c_means_select(data, components=10, eps=1e-4, max_iter=1000, fuzzifier
         linkage_mtx = None
     else:
         # Perform hierarchical clustering on good data
-        linkage_mtx = linkage(data[good_data_idx, :], method="single")
+        linkage_mtx = linkage(data[good_data_idx], method="single")
 
     return {
         "linkage_mtx": linkage_mtx,

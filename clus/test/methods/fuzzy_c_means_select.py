@@ -16,23 +16,21 @@ from clus.src.utils.random import set_manual_seed
 from clus.src.core.normalization import normalization as normalize
 
 
-PATH_DIR_DATA = r"D:\work\projects\_data\processed"
-# PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
+PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
 
-PATH_DIR_RESULTS = r"D:\work\projects\_data\processed"
-# PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
+PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
 
 
 def test(seed):
     set_manual_seed(seed)
 
-    components = 500
+    components = 1000
     eps = 1e-4
-    max_iter = 200
+    max_iter = 100
     fuzzifier = 2.0
-    batch_size = 10000
+    batch_size = 20000
     max_epochs = 2
-    min_centroid_size = 10
+    min_centroid_size = 20
     max_centroid_diameter = 10000000.0
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
@@ -68,22 +66,6 @@ def test_fcm(seed):
 
 
 def _plot_clus_rhocut(data, affectations):
-    print("DATA")
-    print("data  :", data)
-    print("shape :", data.shape)
-    print("min   :", data.min(0))
-    print("max   :", data.max(0))
-    print("mean  :", data.mean(0))
-    print("std   :", data.std(0))
-
-    print("AFFECTATIONS")
-    print("data  :", affectations)
-    print("shape :", affectations.shape)
-    print("min   :", affectations.min(0))
-    print("max   :", affectations.max(0))
-    print("mean  :", affectations.mean(0))
-    print("std   :", affectations.std(0))
-
     data_visu = np.zeros_like(data[:, :3])
 
     # Swap columns for 3D visualisation
@@ -96,10 +78,10 @@ def _plot_clus_rhocut(data, affectations):
 
     visualise_clustering_3d(data_visu, clusters_center=None, affectations=affectations,
                             clustering_method="fcm-select",
-                            dataset_name="iris", header=None,
+                            dataset_name="iris-" + str(data.shape[0]), header=None,
                             show=True, save=False, saving_path=None)
 
 
 if __name__ == "__main__":
     test(seed=1)
-    test_fcm(seed=1)
+    # test_fcm(seed=1)
