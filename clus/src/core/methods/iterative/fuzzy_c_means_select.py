@@ -1,10 +1,12 @@
+import scipy
 import sys
 from collections import Counter
 
 import numpy as np
 from scipy.cluster.hierarchy import linkage
-from scipy.spatial.distance import pdist
+from scipy.spatial.distance import pdist, cdist
 
+from clus.src.utils.array import idx_to_r_elements
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
@@ -41,6 +43,11 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         # weighted by the square root of the weights, see [5]
         data = data * np.sqrt(weights)
 
+    # data_to_affect_idx: data not assigned to a cluster
+    # good_data_idx: data already assigned to a cluster
+    # trashcan: epoch_dependent throwed data
+    # batch_data_idx: epoch_dependent current data
+
     losses = []
     data_to_affect_idx = np.arange(0, data.shape[0])
     good_data_idx = []
@@ -64,7 +71,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
 
         # First filter criterion, filter by cluster size
         affectations = clus_result["affectations"]
-        for i_cluster, n_of_elements in reversed(Counter(affectations).most_common()):
+        for i_cluster, n_of_elements in zip(clus_result["clusters_id"], clus_result["clusters_diameter"]):
             if n_of_elements >= min_centroid_size:
                 break
             if n_of_elements < min_centroid_size:
@@ -75,9 +82,8 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         batch_data_idx = batch_data_idx[batch_data_idx != -1]
 
         # Second filter criterion, filter by cluster diameter
-        for i_cluster in np.unique(affectations):
-            cluster = data[batch_data_idx[affectations == i_cluster]]
-            if _compute_cluster_diameter(cluster) > max_centroid_diameter:
+        for i_cluster in clus_result["clusters_id"]:
+            if clus_result["clusters_diameter"][i_cluster] > max_centroid_diameter:
                 _delete_data(batch_data_idx, i_cluster, affectations, trashcan)
 
         # Update data structures
@@ -93,7 +99,36 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
             data_to_affect_idx = np.append(data_to_affect_idx, idx)
 
         # Unaffected Fraud Allocation
-        # TODO: Itérer sur les données, regarder si chaque donnée non traitée est dans le RAYON (diametre /2) du centroide d'un des clusters. Si oui, alors l'ajouter.
+        # TODO: Itérer sur les données, regarder si chaque donnée non traitée est dans le RAYON (diametre/2) du
+        #  centroide d'un des clusters. Si oui, alors l'ajouter.
+        clusters_center = clus_result["clusters_center"]
+
+        distance_data_centroids = cdist(data[data_to_affect_idx], clusters_center, metric="euclidean") ** 2
+        data_argmax = distance_data_centroids.argmax(axis=1)
+        data_max = distance_data_centroids.max(axis=1)
+
+        clusters_radius = clus_result["clusters_diameter"] / 2
+
+        todelete = []
+        for i_vector, vector in enumerate(data[data_to_affect_idx]):
+            # Retrieve centroids matching their radius condition wrt the data
+            mask_centroids = distance_data_centroids[i_vector, :] < clusters_radius
+            idx_centroids = np.where(mask_centroids)[0]
+
+            if idx_centroids.size >= 1:
+                # Find in them the closest to the data point
+                idx_closest_centroid = idx_centroids[distance_data_centroids[i_vector, idx_centroids].argmin()]
+
+                # Assign data point to this centroid
+                good_data_idx.append(i_vector)
+                data_to_affect_idx[i_vector] = -1
+                todelete.append(idx_closest_centroid)
+
+        deleted_data = ~np.ma.masked_equal(data_to_affect_idx, -1).mask
+        data_to_affect_idx = data_to_affect_idx[deleted_data]
+        print(data_to_affect_idx.shape)
+        print(Counter(todelete).most_common())
+        exit(0)
 
     if len(good_data_idx) == 0:
         print("No more good data after filtering. Try lowering the restrictions on the parameters `min_centroid_size` "
@@ -106,6 +141,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
     return {
         "linkage_mtx": linkage_mtx,
         "good_data_idx": good_data_idx,
+        "noise_data_idx": data_to_affect_idx,
         "losses": np.array(losses)
     }
 

@@ -1,4 +1,7 @@
+from collections import Counter
+
 import numpy as np
+from scipy.spatial.distance import pdist
 
 
 def ambiguity(memberships):
@@ -32,6 +35,31 @@ def partition_entropy(memberships):
 
 def entropy():
     pass
+
+
+def cluster_diameter(cluster):
+    """ Computer the diameter of a cluster, defined as the maximal pairwise distance between all its points. """
+    pairwise_distances = pdist(cluster, metric="euclidean")
+    if pairwise_distances.size == 0:
+        return 0
+    return max(pairwise_distances)
+
+
+def clusters_diameter(data, affectations, clusters_id):
+    diameters = np.empty_like(clusters_id, dtype=np.float32)
+    for i, id_cluster in enumerate(clusters_id):
+        cluster = data[affectations == id_cluster]
+        diameters[i] = cluster_diameter(cluster)
+    return diameters
+
+
+def clusters_cardinal(affectations, clusters_id):
+    counter = Counter(affectations)
+
+    cardinals = np.empty_like(clusters_id, dtype=np.int32)
+    for i, id_cluster in enumerate(clusters_id):
+        cardinals[i] = counter[id_cluster]
+    return cardinals
 
 
 if __name__ == "__main__":

@@ -181,5 +181,32 @@ def square_idx_to_condensed_idx(idx, n):
     return [(binom(2, n) - binom(2, n - 1) + (-i - 1), binom(2, n) - binom(2, n - 1) + ((n - 1) - i - 1)) for i in idx]
 
 
+def idx_to_elements(array, idx):
+    """ Returns the elements of a 2d-array located at `idx`.
+    :param array: 2d numpy array from which to extract the elements.
+    :param idx: An iterable of desired indexes.
+    """
+    return array[idx]
+
+
+def idx_to_r_elements(array, idx):
+    """ Returns the elements of a 2d-array NOT located at `idx`.
+    In short, it does the opposite of `idx_to_elements`. Thus concatenating results from `idx_to_elements` and
+    `idx_to_r_elements` applied to the same array give you the original array.
+
+    :param array: 2d numpy array from which to extract the elements.
+    :param idx: An iterable of indexes
+    """
+    # Note: Reversed indexes/mask can also be retrieved in other ways, but this method is currently the best memory and
+    # speed wise for large datasets.
+    # Other methods are :
+    # r_idx = np.setdiff1d(np.arange(array.shape[0]), idx)
+    # r_idx = ~np.in1d(np.arange(array.shape[0]), idx)
+
+    r_idx = np.ones(array.shape[0], np.bool)
+    r_idx[idx] = 0
+    return array[r_idx]
+
+
 if __name__ == "__main__":
     pass

@@ -24,13 +24,13 @@ PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 1000
+    components = 100
     eps = 1e-4
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 20000
+    batch_size = 1000
     max_epochs = 2
-    min_centroid_size = 20
+    min_centroid_size = 50
     max_centroid_diameter = 10000000.0
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
