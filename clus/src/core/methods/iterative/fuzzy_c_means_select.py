@@ -13,6 +13,9 @@ _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{r
 
 _DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
 
+_LABEL_UNASSIGNED = -2
+_LABEL_NOISE = -1
+
 
 @remove_unexpected_arguments
 def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifier=2, batch_size=16_384, weights=None,
@@ -43,39 +46,40 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         # weighted by the square root of the weights, see [5]
         data = data * np.sqrt(weights)
 
-    # data_to_affect_idx: data not assigned to a cluster
-    # good_data_idx: data already assigned to a cluster
-    # trashcan: epoch_dependent throwed data
-    # batch_data_idx: epoch_dependent current data
+    # affectations: Current affectations of the data to the clusters.
+    # .. TODO: remplir
 
     losses = []
-    data_to_affect_idx = np.arange(0, data.shape[0])
-    good_data_idx = []
+    affectations = np.ones(shape=(data.shape[0])) * _LABEL_UNASSIGNED
+    clusters_centers = []
     for epoch in range(max_epochs):
-        if data_to_affect_idx.shape[0] < batch_size:
-            # No more data to process
+        not_affected_data_idx = np.where(affectations == _LABEL_UNASSIGNED)[0]
+        if not_affected_data_idx.size < batch_size:
+            # No more data (or not enough) to process
             break
 
-        trashcan = []
+        trashcan_mask = np.zeros(shape=(batch_size,), dtype=np.bool)
 
         # Sample a random batch of new data (or previously discarded data)
-        batch_data_idx = np.random.choice(data_to_affect_idx, size=batch_size, replace=False)
-        data_to_affect_idx = data_to_affect_idx[~np.isin(data_to_affect_idx, batch_data_idx)]
+        batch_data_idx = np.random.choice(not_affected_data_idx, size=batch_size, replace=False)
 
         clus_result = fuzzy_c_means(
             data=data[batch_data_idx, :], components=components, eps=eps, max_iter=max_iter, fuzzifier=fuzzifier,
             weights=None, initialization_method=initialization_method,
-            empty_clusters_method=empty_clusters_method
+            empty_clusters_method=empty_clusters_method, progress_bar=False
         )
         losses.append(clus_result["losses"][-1])
 
+        batch_affectations = clus_result["affectations"]
+        batch_clusters_centers = clus_result["clusters_center"]
+
+        # TODO: j'en suis ici
+
         # First filter criterion, filter by cluster size
-        affectations = clus_result["affectations"]
-        for i_cluster, n_of_elements in zip(clus_result["clusters_id"], clus_result["clusters_diameter"]):
-            if n_of_elements >= min_centroid_size:
-                break
-            if n_of_elements < min_centroid_size:
-                _delete_data(batch_data_idx, i_cluster, affectations, trashcan)
+        for cluster_id, cluster_cardinal in zip(clus_result["clusters_id"], clus_result["clusters_cardinal"]):
+            if cluster_cardinal < min_centroid_size:
+                # Delete the cluster and its data
+                trashcan_mask |= batch_affectations == cluster_id
 
         # Update data structures
         affectations = affectations[batch_data_idx != -1]
@@ -96,21 +100,21 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
 
         # Put back bad discarded samples into the pool for the next epoch
         for idx in trashcan:
-            data_to_affect_idx = np.append(data_to_affect_idx, idx)
+            affectations = np.append(affectations, idx)
 
         # Unaffected Fraud Allocation
         # TODO: Itérer sur les données, regarder si chaque donnée non traitée est dans le RAYON (diametre/2) du
         #  centroide d'un des clusters. Si oui, alors l'ajouter.
         clusters_center = clus_result["clusters_center"]
 
-        distance_data_centroids = cdist(data[data_to_affect_idx], clusters_center, metric="euclidean") ** 2
+        distance_data_centroids = cdist(data[affectations], clusters_center, metric="euclidean") ** 2
         data_argmax = distance_data_centroids.argmax(axis=1)
         data_max = distance_data_centroids.max(axis=1)
 
         clusters_radius = clus_result["clusters_diameter"] / 2
 
         todelete = []
-        for i_vector, vector in enumerate(data[data_to_affect_idx]):
+        for i_vector, vector in enumerate(data[affectations]):
             # Retrieve centroids matching their radius condition wrt the data
             mask_centroids = distance_data_centroids[i_vector, :] < clusters_radius
             idx_centroids = np.where(mask_centroids)[0]
@@ -121,12 +125,12 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
 
                 # Assign data point to this centroid
                 good_data_idx.append(i_vector)
-                data_to_affect_idx[i_vector] = -1
+                affectations[i_vector] = -1
                 todelete.append(idx_closest_centroid)
 
-        deleted_data = ~np.ma.masked_equal(data_to_affect_idx, -1).mask
-        data_to_affect_idx = data_to_affect_idx[deleted_data]
-        print(data_to_affect_idx.shape)
+        deleted_data = ~np.ma.masked_equal(affectations, -1).mask
+        affectations = affectations[deleted_data]
+        print(affectations.shape)
         print(Counter(todelete).most_common())
         exit(0)
 
@@ -141,13 +145,20 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
     return {
         "linkage_mtx": linkage_mtx,
         "good_data_idx": good_data_idx,
-        "noise_data_idx": data_to_affect_idx,
+        "noise_data_idx": affectations,
         "losses": np.array(losses)
     }
 
 
-def _delete_data(batch_data_idx, i_cluster, affectations, trashcan):
-    mask_data_idx_to_delete = affectations == i_cluster
+def _delete_data(cluster_id, batch_affectations, trashcan_mask):
+    """ Mark the data to be deleted in the trashcan_mask. """
+    trashcan_mask[0] = True
+    mask_data_idx_to_delete =
+
+    print(mask_data_idx_to_delete)
+    print(trashcan_mask | mask_data_idx_to_delete)
+    exit(0)
+
     data_idx_to_delete = batch_data_idx[mask_data_idx_to_delete]
     batch_data_idx[mask_data_idx_to_delete] = -1
 
