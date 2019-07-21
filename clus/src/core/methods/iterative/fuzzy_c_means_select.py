@@ -15,6 +15,7 @@ _DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
 
 _LABEL_UNASSIGNED = -2
 _LABEL_NOISE = -1
+_CLUSTER_ID_DELETED = -1
 
 
 @remove_unexpected_arguments
@@ -72,27 +73,25 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
 
         batch_affectations = clus_result["affectations"]
         batch_clusters_centers = clus_result["clusters_center"]
+        batch_clusters_id = clus_result["clusters_id"]
 
-        # TODO: j'en suis ici
-
+        # TODO: verifier que les clusters_cardinal et clusters_diameter sont dans le meme ordre que cluster_id.
+        #  Sinon trier.
         # First filter criterion, filter by cluster size
-        for cluster_id, cluster_cardinal in zip(clus_result["clusters_id"], clus_result["clusters_cardinal"]):
+        for i, (cluster_id, cluster_cardinal) in enumerate(zip(batch_clusters_id, clus_result["clusters_cardinal"])):
             if cluster_cardinal < min_centroid_size:
                 # Delete the cluster and its data
                 trashcan_mask |= batch_affectations == cluster_id
-
-        # Update data structures
-        affectations = affectations[batch_data_idx != -1]
-        batch_data_idx = batch_data_idx[batch_data_idx != -1]
+                batch_clusters_id[i] = _CLUSTER_ID_DELETED
 
         # Second filter criterion, filter by cluster diameter
-        for i_cluster in clus_result["clusters_id"]:
-            if clus_result["clusters_diameter"][i_cluster] > max_centroid_diameter:
-                _delete_data(batch_data_idx, i_cluster, affectations, trashcan)
-
-        # Update data structures
-        affectations = affectations[batch_data_idx != -1]
-        batch_data_idx = batch_data_idx[batch_data_idx != -1]
+        for i, (cluster_id, cluster_diameter) in enumerate(zip(batch_clusters_id, clus_result["clusters_diameter"])):
+            if cluster_id == _CLUSTER_ID_DELETED:
+                continue
+            if cluster_diameter > max_centroid_diameter:
+                # Delete the cluster and its data
+                trashcan_mask |= batch_affectations == cluster_id
+                batch_clusters_id[i] = _CLUSTER_ID_DELETED
 
         # Keep good clusters for HC
         for idx in batch_data_idx:
@@ -148,22 +147,6 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         "noise_data_idx": affectations,
         "losses": np.array(losses)
     }
-
-
-def _delete_data(cluster_id, batch_affectations, trashcan_mask):
-    """ Mark the data to be deleted in the trashcan_mask. """
-    trashcan_mask[0] = True
-    mask_data_idx_to_delete =
-
-    print(mask_data_idx_to_delete)
-    print(trashcan_mask | mask_data_idx_to_delete)
-    exit(0)
-
-    data_idx_to_delete = batch_data_idx[mask_data_idx_to_delete]
-    batch_data_idx[mask_data_idx_to_delete] = -1
-
-    for idx in data_idx_to_delete:
-        trashcan.append(idx)
 
 
 def _compute_cluster_diameter(cluster):
