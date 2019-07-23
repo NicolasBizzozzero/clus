@@ -16,9 +16,10 @@ from clus.src.utils.random import set_manual_seed
 from clus.src.core.normalization import normalization as normalize
 
 
-PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
+# PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
+PATH_DIR_DATA = r"D:\work\projects\_data\processed"
 
-PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
+# PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
 
 
 def test(seed):
@@ -30,7 +31,7 @@ def test(seed):
     fuzzifier = 2.0
     batch_size = 1000
     max_epochs = 2
-    min_centroid_size = 50
+    min_centroid_size = 10
     max_centroid_diameter = 10000000.0
     normalization = "rescaling"
     weights = [1, 1, 1, 0]

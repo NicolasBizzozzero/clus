@@ -55,11 +55,10 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
     clusters_centers = []
     for epoch in range(max_epochs):
         not_affected_data_idx = np.where(affectations == _LABEL_UNASSIGNED)[0]
+
         if not_affected_data_idx.size < batch_size:
             # No more data (or not enough) to process
             break
-
-        trashcan_mask = np.zeros(shape=(batch_size,), dtype=np.bool)
 
         # Sample a random batch of new data (or previously discarded data)
         batch_data_idx = np.random.choice(not_affected_data_idx, size=batch_size, replace=False)
@@ -81,7 +80,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         for i, (cluster_id, cluster_cardinal) in enumerate(zip(batch_clusters_id, clus_result["clusters_cardinal"])):
             if cluster_cardinal < min_centroid_size:
                 # Delete the cluster and its data
-                trashcan_mask |= batch_affectations == cluster_id
+                batch_affectations[batch_affectations == cluster_id] = _LABEL_UNASSIGNED
                 batch_clusters_id[i] = _CLUSTER_ID_DELETED
 
         # Second filter criterion, filter by cluster diameter
@@ -90,8 +89,13 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 continue
             if cluster_diameter > max_centroid_diameter:
                 # Delete the cluster and its data
-                trashcan_mask |= batch_affectations == cluster_id
+                batch_affectations[batch_affectations == cluster_id] = _LABEL_UNASSIGNED
                 batch_clusters_id[i] = _CLUSTER_ID_DELETED
+
+        # print(batch_affectations)
+        # print(batch_clusters_id)
+        print(np.where(batch_clusters_id != _CLUSTER_ID_DELETED)[0])
+        exit(0)
 
         # Keep good clusters for HC
         for idx in batch_data_idx:
