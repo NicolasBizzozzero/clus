@@ -11,10 +11,7 @@ from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
-_DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
-
-_LABEL_UNASSIGNED = -2
-_LABEL_NOISE = -1
+_LABEL_UNASSIGNED = -1
 _CLUSTER_ID_DELETED = -1
 
 
@@ -51,9 +48,10 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
     # .. TODO: remplir
 
     losses = []
-    affectations = np.ones(shape=(data.shape[0])) * _LABEL_UNASSIGNED
+    affectations = np.ones(shape=(data.shape[0]), dtype=np.int64) * _LABEL_UNASSIGNED
     clusters_centers = []
     for epoch in range(max_epochs):
+        n_clusters_start_of_epoch = len(clusters_centers)
         not_affected_data_idx = np.where(affectations == _LABEL_UNASSIGNED)[0]
 
         if not_affected_data_idx.size < batch_size:
@@ -70,12 +68,12 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         )
         losses.append(clus_result["losses"][-1])
 
-        batch_affectations = clus_result["affectations"]
+        batch_affectations = clus_result["affectations"] + n_clusters_start_of_epoch
         batch_clusters_centers = clus_result["clusters_center"]
-        batch_clusters_id = clus_result["clusters_id"]
+        batch_clusters_id = clus_result["clusters_id"] + n_clusters_start_of_epoch
 
-        # TODO: verifier que les clusters_cardinal et clusters_diameter sont dans le meme ordre que cluster_id.
-        #  Sinon trier.
+        # TODO: verifier que les clusters_cardinal et clusters_diameter sont dans le meme ordre que cluster_id dans la
+        #   fonction des fcm. Sinon trier.
         # First filter criterion, filter by cluster size
         for i, (cluster_id, cluster_cardinal) in enumerate(zip(batch_clusters_id, clus_result["clusters_cardinal"])):
             if cluster_cardinal < min_centroid_size:
@@ -92,63 +90,52 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 batch_affectations[batch_affectations == cluster_id] = _LABEL_UNASSIGNED
                 batch_clusters_id[i] = _CLUSTER_ID_DELETED
 
-        # print(batch_affectations)
-        # print(batch_clusters_id)
-        print(np.where(batch_clusters_id != _CLUSTER_ID_DELETED)[0])
-        exit(0)
-
         # Keep good clusters for HC
-        for idx in batch_data_idx:
-            good_data_idx.append(idx)
+        batch_good_clusters_id = batch_clusters_id[batch_clusters_id != _CLUSTER_ID_DELETED]
+        batch_good_clusters_centers = batch_clusters_centers[batch_good_clusters_id - n_clusters_start_of_epoch]
+        for cluster_center in batch_good_clusters_centers:
+            clusters_centers.append(cluster_center)
 
         # Put back bad discarded samples into the pool for the next epoch
-        for idx in trashcan:
-            affectations = np.append(affectations, idx)
+        affectations[batch_data_idx[np.where(batch_affectations != _LABEL_UNASSIGNED)[0]]] = _LABEL_UNASSIGNED
 
         # Unaffected Fraud Allocation
-        # TODO: Itérer sur les données, regarder si chaque donnée non traitée est dans le RAYON (diametre/2) du
-        #  centroide d'un des clusters. Si oui, alors l'ajouter.
-        clusters_center = clus_result["clusters_center"]
+        unassigned_data_idx = np.where(affectations == _LABEL_UNASSIGNED)[0]
+        unassigned_data = data[unassigned_data_idx]
+        distance_data_centroids = cdist(unassigned_data, batch_good_clusters_centers, metric="euclidean")
 
-        distance_data_centroids = cdist(data[affectations], clusters_center, metric="euclidean") ** 2
-        data_argmax = distance_data_centroids.argmax(axis=1)
-        data_max = distance_data_centroids.max(axis=1)
-
-        clusters_radius = clus_result["clusters_diameter"] / 2
-
-        todelete = []
-        for i_vector, vector in enumerate(data[affectations]):
+        batch_good_clusters_radius = clus_result["clusters_diameter"][batch_good_clusters_id - n_clusters_start_of_epoch] / 2
+        for i in range(len(unassigned_data_idx)):
             # Retrieve centroids matching their radius condition wrt the data
-            mask_centroids = distance_data_centroids[i_vector, :] < clusters_radius
+            mask_centroids = distance_data_centroids[i, :] < batch_good_clusters_radius
             idx_centroids = np.where(mask_centroids)[0]
 
             if idx_centroids.size >= 1:
                 # Find in them the closest to the data point
-                idx_closest_centroid = idx_centroids[distance_data_centroids[i_vector, idx_centroids].argmin()]
+                idx_closest_centroid = idx_centroids[distance_data_centroids[i, idx_centroids].argmin()]
+                idx_closest_centroid = batch_good_clusters_id[idx_closest_centroid]
 
                 # Assign data point to this centroid
-                good_data_idx.append(i_vector)
-                affectations[i_vector] = -1
-                todelete.append(idx_closest_centroid)
+                affectations[i] = idx_closest_centroid
 
-        deleted_data = ~np.ma.masked_equal(affectations, -1).mask
-        affectations = affectations[deleted_data]
-        print(affectations.shape)
-        print(Counter(todelete).most_common())
-        exit(0)
-
-    if len(good_data_idx) == 0:
-        print("No more good data after filtering. Try lowering the restrictions on the parameters `min_centroid_size` "
-              "and `max_centroid_diameter`.", file=sys.stderr)
+    clusters_centers = np.array(clusters_centers)
+    if len(clusters_centers) == 0:
+        print("No good clusters centers found after filtering. Try lowering the restrictions on the parameters "
+              "`min_centroid_size` and `max_centroid_diameter`.", file=sys.stderr)
         linkage_mtx = None
     else:
-        # Perform hierarchical clustering on good data
-        linkage_mtx = linkage(data[good_data_idx], method="single")
+        # Perform hierarchical clustering on clusters' centers
+        linkage_mtx = linkage(clusters_centers, method="single")
+
+    print(affectations.shape)
+    print(np.unique(affectations).shape)   # = C + 1
+    print(clusters_centers.shape)          # = C
 
     return {
         "linkage_mtx": linkage_mtx,
-        "good_data_idx": good_data_idx,
-        "noise_data_idx": affectations,
+        "affectations": affectations,
+        "clusters_centers": clusters_centers,
+        "noise_data_idx": np.where(affectations == _LABEL_UNASSIGNED),
         "losses": np.array(losses)
     }
 

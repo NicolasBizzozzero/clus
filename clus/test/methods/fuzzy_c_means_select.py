@@ -25,12 +25,12 @@ PATH_DIR_DATA = r"D:\work\projects\_data\processed"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 100
+    components = 1000
     eps = 1e-4
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 1000
-    max_epochs = 2
+    batch_size = 10000
+    max_epochs = 3
     min_centroid_size = 10
     max_centroid_diameter = 10000000.0
     normalization = "rescaling"
@@ -49,9 +49,10 @@ def test(seed):
                              initialization_method="random_choice",
                              empty_clusters_method="nothing", centroids=None, progress_bar=False)
 
+    return None
     flat_clusters = fcluster(clus_results["linkage_mtx"], criterion="maxclust", t=31)
 
-    _plot_clus_rhocut(data=data[clus_results["good_data_idx"]], affectations=flat_clusters)
+    _plot_clus_rhocut(data=clus_results["clusters_centers"], affectations=flat_clusters)
 
 
 def test_fcm(seed):
@@ -79,7 +80,7 @@ def _plot_clus_rhocut(data, affectations):
 
     visualise_clustering_3d(data_visu, clusters_center=None, affectations=affectations,
                             clustering_method="fcm-select",
-                            dataset_name="iris-" + str(data.shape[0]), header=None,
+                            dataset_name="rhocut (" + str(data.shape[0]) + " cc)", header=None,
                             show=True, save=False, saving_path=None)
 
 
