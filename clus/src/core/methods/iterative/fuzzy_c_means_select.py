@@ -13,8 +13,9 @@ _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{r
 
 _DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
 
+_LABEL_ASSIGNED = -1
 _LABEL_UNASSIGNED = -2
-_LABEL_NOISE = -1
+_LABEL_NOISE = -3
 _CLUSTER_ID_DELETED = -1
 
 
@@ -75,7 +76,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         batch_clusters_id = clus_result["clusters_id"]
 
         # TODO: verifier que les clusters_cardinal et clusters_diameter sont dans le meme ordre que cluster_id.
-        #  Sinon trier.
+        #  dans la fonction des fcm. Sinon trier.
         # First filter criterion, filter by cluster size
         for i, (cluster_id, cluster_cardinal) in enumerate(zip(batch_clusters_id, clus_result["clusters_cardinal"])):
             if cluster_cardinal < min_centroid_size:
@@ -98,8 +99,8 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         exit(0)
 
         # Keep good clusters for HC
-        for idx in batch_data_idx:
-            good_data_idx.append(idx)
+        for cluster_id in batch_clusters_id:
+            clusters_centers.append(batch_clusters_centers[cluster_id])
 
         # Put back bad discarded samples into the pool for the next epoch
         for idx in trashcan:
@@ -137,18 +138,19 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         print(Counter(todelete).most_common())
         exit(0)
 
-    if len(good_data_idx) == 0:
-        print("No more good data after filtering. Try lowering the restrictions on the parameters `min_centroid_size` "
+    clusters_centers = np.array(clusters_centers)
+    if len(clusters_centers) == 0:
+        print("No good clusters center found. Try lowering the restrictions on the parameters `min_centroid_size` "
               "and `max_centroid_diameter`.", file=sys.stderr)
         linkage_mtx = None
     else:
-        # Perform hierarchical clustering on good data
-        linkage_mtx = linkage(data[good_data_idx], method="single")
+        # Perform hierarchical clustering on clusters' centers
+        linkage_mtx = linkage(clusters_centers, method="single")
 
     return {
         "linkage_mtx": linkage_mtx,
-        "good_data_idx": good_data_idx,
-        "noise_data_idx": affectations,
+        "clusters_centers": clusters_centers,
+        "noise_data_idx": None,
         "losses": np.array(losses)
     }
 
