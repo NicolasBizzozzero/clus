@@ -100,7 +100,6 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
 
     affectations = best_memberships.argmax(axis=1)
     clusters_id, clusters_cardinal = np.unique(affectations, return_counts=True)
-    clusters_id.sort()
 
     return {
         "memberships": best_memberships,

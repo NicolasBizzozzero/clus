@@ -16,9 +16,9 @@ from clus.src.utils.random import set_manual_seed
 from clus.src.core.normalization import normalization as normalize
 
 
-# PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
+PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
 # PATH_DIR_DATA = r"D:\work\projects\_data\processed"
-PATH_DIR_DATA = r"C:\Users\Nicolas\Documents\data"
+# PATH_DIR_DATA = r"C:\Users\Nicolas\Documents\data"
 
 # PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
 
@@ -26,14 +26,15 @@ PATH_DIR_DATA = r"C:\Users\Nicolas\Documents\data"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 100  # 1000
+    components = 500
     eps = 1e-4
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 1000  # 10000
-    max_epochs = 2  # 3
-    min_centroid_size = 10
-    max_centroid_diameter = 10000000.0
+    batch_size = 10000
+    max_epochs = 100
+    min_centroid_size = 20
+    max_centroid_diameter = 0.05 # np.inf
+    linkage_method = "complete"
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
 
@@ -45,40 +46,19 @@ def test(seed):
 
     clus_results = \
         fuzzy_c_means_select(data, components=components, eps=eps, max_iter=max_iter, fuzzifier=fuzzifier,
-                             batch_size=batch_size, weights=None, max_epochs=max_epochs,
+                             batch_size=batch_size, weights=None, max_epochs=max_epochs, linkage_method=linkage_method,
                              min_centroid_size=min_centroid_size, max_centroid_diameter=max_centroid_diameter,
                              initialization_method="random_choice",
-                             empty_clusters_method="nothing", centroids=None, progress_bar=False)
+                             empty_clusters_method="nothing", centroids=None, progress_bar=True)
 
     affectations = clus_results["affectations"]
-    flat_clusters = fcluster(clus_results["linkage_mtx"], criterion="maxclust", t=31)
+    affectations_hc = fcluster(clus_results["linkage_matrix"], criterion="maxclust", t=31)
+    merge_affectations(affectations, affectations_hc)
 
-    np.set_printoptions(suppress=True)
-
-    print(affectations.shape)
-    print(flat_clusters.shape)
-    print(np.unique(affectations))
-    print(np.unique(flat_clusters))
-    print(np.unique(affectations).shape)
-    print("WWWWWW")
-    print(affectations)
-    print(clus_results["linkage_mtx"])
-    print(flat_clusters)
-    print("YYYYYY")
-    print(clus_results["linkage_mtx"][:, 0].min())
-    print(clus_results["linkage_mtx"][:, 0].max())
-    print(np.unique(clus_results["linkage_mtx"][:, 0]).size)
-    print(np.unique(clus_results["linkage_mtx"][:, 0]))
-    print(clus_results["linkage_mtx"][:, 1].min())
-    print(clus_results["linkage_mtx"][:, 1].max())
-    print(np.unique(clus_results["linkage_mtx"][:, 1]).size)
-    print(np.unique(clus_results["linkage_mtx"][:, 1]))
-
-    # exit(0)
-    # TODO: Faire sur papier. Normalement il me manque le lien entre affectations et flat_custers. Je peux peut etre le
-    #  retrouver avec les colonnes 1 et 2 de linkage_mtx
-
-    _plot_clus_rhocut(data=data, affectations=affectations)
+    _plot_clus_rhocut(data=data, affectations=affectations,
+                      dataset_name="rhocut-(c={},b={},e={},l={},mcs={})".format(
+                          components, batch_size, max_epochs, linkage_method, min_centroid_size
+                      ))
 
 
 def test_fcm(seed):
@@ -93,7 +73,7 @@ def test_fcm(seed):
     _plot_clus_rhocut(data=clusters_center, affectations=flat_clusters)
 
 
-def _plot_clus_rhocut(data, affectations):
+def _plot_clus_rhocut(data, affectations, dataset_name="rhocut"):
     data_visu = np.zeros_like(data[:, :3])
 
     # Swap columns for 3D visualisation
@@ -106,10 +86,16 @@ def _plot_clus_rhocut(data, affectations):
 
     visualise_clustering_3d(data_visu, clusters_center=None, affectations=affectations,
                             clustering_method="fcm-select",
-                            dataset_name="rhocut", header=None,
+                            dataset_name=dataset_name, header=None,
                             show=True, save=False, saving_path=None)
 
 
+def merge_affectations(affectations, affectations_hc):
+    for old_cluster_id, cluster_id in enumerate(affectations_hc):
+        affectations[affectations == old_cluster_id] = cluster_id
+
+
 if __name__ == "__main__":
+    np.set_printoptions(suppress=True)
     test(seed=1)
     # test_fcm(seed=1)

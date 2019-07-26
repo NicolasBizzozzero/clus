@@ -21,6 +21,7 @@ _CMAP_EXAMPLES = "hsv"
 _COLOR_CLUSTERS_CENTER = "black"
 _COLOR_NOISE = "black"
 _MARKER_EXAMPLES = 'o'
+_MARKER_NOISE = 'o'
 _MARKER_CLUSTERS_CENTER = 'x'
 _ALPHA_EXAMPLES = 0.8
 _ALPHA_NOISE = 0.8
@@ -29,11 +30,9 @@ _ELEVATION = 48
 _AZIMUTH = 134
 _DISTANCE_3D = 12
 
-# TODO: Implement noise plotting in 2d
-
 
 def visualise_clustering_2d(data, clusters_center, affectations, clustering_method, dataset_name=None, header=None,
-                            show=True, save=False, saving_path=None):
+                            noise_id=-1, show=True, save=False, saving_path=None):
     assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
 
     # Apply a 2-components t-SNE if the data has more than 2 dimensions
@@ -51,8 +50,17 @@ def visualise_clustering_2d(data, clusters_center, affectations, clustering_meth
     # Set the most diverse colormap possible
     c = _get_rainbow_color_cycle(affectations)
 
+    # Find noise indexes
+    if noise_id is not None:
+        noise_idx, not_noise_idx = np.where(affectations == noise_id)[0], np.where(affectations != noise_id)[0]
+    else:
+        noise_idx, not_noise_idx = slice(None), slice(None)
+
     # Plot the data
-    ax.scatter(data[:, 0], data[:, 1], c=c, s=_SIZE_EXAMPLES, marker=_MARKER_EXAMPLES, alpha=_ALPHA_EXAMPLES)
+    ax.scatter(data[noise_idx, 0], data[noise_idx, 1], c=_COLOR_NOISE, s=_SIZE_NOISE,
+               marker=_MARKER_NOISE, alpha=_ALPHA_NOISE)
+    ax.scatter(data[not_noise_idx, 0], data[not_noise_idx, 1], c=c[not_noise_idx], s=_SIZE_EXAMPLES,
+               marker=_MARKER_EXAMPLES, alpha=_ALPHA_EXAMPLES)
     if (not applied_tsne) and (clusters_center is not None):
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], c=_COLOR_CLUSTERS_CENTER, s=_SIZE_CLUSTERS_CENTER,
                    marker=_MARKER_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER)
@@ -86,6 +94,7 @@ def visualise_clustering_3d(data, clusters_center, affectations, clustering_meth
 
     # Plot the visualisation
     fig = plt.figure()
+    ax = Axes3D(fig, rect=(0, 0, 1, 1), elev=_ELEVATION, azim=_AZIMUTH)
 
     # Set the most diverse colormap possible
     c = _get_rainbow_color_cycle(affectations)
@@ -97,11 +106,10 @@ def visualise_clustering_3d(data, clusters_center, affectations, clustering_meth
         noise_idx, not_noise_idx = slice(None), slice(None)
 
     # Plot the data
-    ax = Axes3D(fig, rect=[0, 0, 1, 1], elev=_ELEVATION, azim=_AZIMUTH)
+    ax.scatter(data[noise_idx, 0], data[noise_idx, 1], data[noise_idx, 2],
+               c=_COLOR_NOISE, s=_SIZE_NOISE, marker=_MARKER_NOISE, alpha=_ALPHA_NOISE)
     ax.scatter(data[not_noise_idx, 0], data[not_noise_idx, 1], data[not_noise_idx, 2],
                c=c[not_noise_idx], s=_SIZE_EXAMPLES, cmap=_CMAP_EXAMPLES, alpha=_ALPHA_EXAMPLES)
-    ax.scatter(data[noise_idx, 0], data[noise_idx, 1], data[noise_idx, 2],
-               c=_COLOR_NOISE, s=_SIZE_NOISE, alpha=_ALPHA_NOISE)
     if (not applied_tsne) and (clusters_center is not None):
         ax.scatter(clusters_center[:, 0], clusters_center[:, 1], clusters_center[:, 2], c=_COLOR_CLUSTERS_CENTER,
                    s=_SIZE_CLUSTERS_CENTER, alpha=_ALPHA_CLUSTERS_CENTER, marker=_MARKER_CLUSTERS_CENTER)
@@ -117,7 +125,6 @@ def visualise_clustering_3d(data, clusters_center, affectations, clustering_meth
     title = _compute_title(np.unique(affectations).size, clustering_method,
                            dataset_name, applied_tsne, n_components_tsne=3)
     ax.set_title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
-
     if save:
         plt.savefig(saving_path)
     if show:
