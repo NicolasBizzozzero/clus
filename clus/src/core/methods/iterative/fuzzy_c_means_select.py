@@ -51,7 +51,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
     affectations = np.ones(shape=(data.shape[0]), dtype=np.int64) * _LABEL_UNASSIGNED
     clusters_centers = []
     for epoch in range(max_epochs):
-        n_clusters_start_of_epoch = len(clusters_centers)
+        min_cluster_id = epoch * components
         not_affected_data_idx = np.where(affectations == _LABEL_UNASSIGNED)[0]
 
         if not_affected_data_idx.size < batch_size:
@@ -68,9 +68,9 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         )
         losses.append(clus_result["losses"][-1])
 
-        batch_affectations = clus_result["affectations"] + n_clusters_start_of_epoch
+        batch_affectations = clus_result["affectations"] + min_cluster_id
         batch_clusters_centers = clus_result["clusters_center"]
-        batch_clusters_id = clus_result["clusters_id"] + n_clusters_start_of_epoch
+        batch_clusters_id = clus_result["clusters_id"] + min_cluster_id
 
         # TODO: verifier que les clusters_cardinal et clusters_diameter sont dans le meme ordre que cluster_id dans la
         #   fonction des fcm. Sinon trier.
@@ -92,7 +92,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
 
         # Keep good clusters for HC
         batch_good_clusters_id = batch_clusters_id[batch_clusters_id != _CLUSTER_ID_DELETED]
-        batch_good_clusters_centers = batch_clusters_centers[batch_good_clusters_id - n_clusters_start_of_epoch]
+        batch_good_clusters_centers = batch_clusters_centers[batch_good_clusters_id - min_cluster_id]
         for cluster_center in batch_good_clusters_centers:
             clusters_centers.append(cluster_center)
 
@@ -104,7 +104,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         unassigned_data = data[unassigned_data_idx]
         distance_data_centroids = cdist(unassigned_data, batch_good_clusters_centers, metric="euclidean")
 
-        batch_good_clusters_radius = clus_result["clusters_diameter"][batch_good_clusters_id - n_clusters_start_of_epoch] / 2
+        batch_good_clusters_radius = clus_result["clusters_diameter"][batch_good_clusters_id - min_cluster_id] / 2
         for i in range(len(unassigned_data_idx)):
             # Retrieve centroids matching their radius condition wrt the data
             mask_centroids = distance_data_centroids[i, :] < batch_good_clusters_radius
@@ -125,11 +125,8 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         linkage_mtx = None
     else:
         # Perform hierarchical clustering on clusters' centers
-        linkage_mtx = linkage(clusters_centers, method="single")
-
-    print(affectations.shape)
-    print(np.unique(affectations).shape)   # = C + 1
-    print(clusters_centers.shape)          # = C
+        condensed_distance_matrix = pdist(clusters_centers, metric="euclidean")
+        linkage_mtx = linkage(condensed_distance_matrix, method="single")
 
     return {
         "linkage_mtx": linkage_mtx,

@@ -17,7 +17,8 @@ from clus.src.core.normalization import normalization as normalize
 
 
 # PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
-PATH_DIR_DATA = r"D:\work\projects\_data\processed"
+# PATH_DIR_DATA = r"D:\work\projects\_data\processed"
+PATH_DIR_DATA = r"C:\Users\Nicolas\Documents\data"
 
 # PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
 
@@ -25,12 +26,12 @@ PATH_DIR_DATA = r"D:\work\projects\_data\processed"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 1000
+    components = 100  # 1000
     eps = 1e-4
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 10000
-    max_epochs = 3
+    batch_size = 1000  # 10000
+    max_epochs = 2  # 3
     min_centroid_size = 10
     max_centroid_diameter = 10000000.0
     normalization = "rescaling"
@@ -40,7 +41,7 @@ def test(seed):
                        header=0).values
     data = data.astype(np.float64)
     normalize(data, strategy=normalization)
-    data = data * np.sqrt(weights)
+    data *= np.sqrt(weights)
 
     clus_results = \
         fuzzy_c_means_select(data, components=components, eps=eps, max_iter=max_iter, fuzzifier=fuzzifier,
@@ -49,10 +50,35 @@ def test(seed):
                              initialization_method="random_choice",
                              empty_clusters_method="nothing", centroids=None, progress_bar=False)
 
-    return None
+    affectations = clus_results["affectations"]
     flat_clusters = fcluster(clus_results["linkage_mtx"], criterion="maxclust", t=31)
 
-    _plot_clus_rhocut(data=clus_results["clusters_centers"], affectations=flat_clusters)
+    np.set_printoptions(suppress=True)
+
+    print(affectations.shape)
+    print(flat_clusters.shape)
+    print(np.unique(affectations))
+    print(np.unique(flat_clusters))
+    print(np.unique(affectations).shape)
+    print("WWWWWW")
+    print(affectations)
+    print(clus_results["linkage_mtx"])
+    print(flat_clusters)
+    print("YYYYYY")
+    print(clus_results["linkage_mtx"][:, 0].min())
+    print(clus_results["linkage_mtx"][:, 0].max())
+    print(np.unique(clus_results["linkage_mtx"][:, 0]).size)
+    print(np.unique(clus_results["linkage_mtx"][:, 0]))
+    print(clus_results["linkage_mtx"][:, 1].min())
+    print(clus_results["linkage_mtx"][:, 1].max())
+    print(np.unique(clus_results["linkage_mtx"][:, 1]).size)
+    print(np.unique(clus_results["linkage_mtx"][:, 1]))
+
+    # exit(0)
+    # TODO: Faire sur papier. Normalement il me manque le lien entre affectations et flat_custers. Je peux peut etre le
+    #  retrouver avec les colonnes 1 et 2 de linkage_mtx
+
+    _plot_clus_rhocut(data=data, affectations=affectations)
 
 
 def test_fcm(seed):
@@ -80,7 +106,7 @@ def _plot_clus_rhocut(data, affectations):
 
     visualise_clustering_3d(data_visu, clusters_center=None, affectations=affectations,
                             clustering_method="fcm-select",
-                            dataset_name="rhocut (" + str(data.shape[0]) + " cc)", header=None,
+                            dataset_name="rhocut", header=None,
                             show=True, save=False, saving_path=None)
 
 
