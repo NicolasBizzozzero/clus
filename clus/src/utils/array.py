@@ -210,3 +210,34 @@ def idx_to_r_elements(array, idx):
 
 if __name__ == "__main__":
     pass
+
+
+def flatten_id(affectations, noise_cluster_id=-1):
+    """ Change clusters_id of a current affectation to the smallest value possible (removing holes between two clusters
+    id).
+
+    Exemple:
+    >>> affectations = np.array([0, 1, 7, 1, -1, 4])
+    >>> new_affectations = flatten_id(affectations, noise_cluster_id=-1)
+    >>> new_affectations
+    array([ 0,  1,  3,  1, -1,  2])
+    >>> assert affectations.shape[0] == new_affectations.shape[0]
+    >>> for cluster_id in np.unique(affectations):
+    ...    new_cluster_id = new_affectations[np.where(affectations == cluster_id)[0]][0]
+    ...    assert np.all(new_affectations[affectations == cluster_id] == new_cluster_id)
+    """
+    new_affectations = np.zeros_like(affectations)
+
+    if noise_cluster_id is not None:
+        id_current = 0
+        for id_original in np.unique(affectations):
+            if id_original == noise_cluster_id:
+                continue
+            new_affectations[affectations == id_original] = id_current
+            id_current += 1
+        new_affectations[affectations == noise_cluster_id] = noise_cluster_id
+    else:
+        for id_current, id_original in enumerate(np.unique(affectations)):
+            new_affectations[affectations == id_original] = id_current
+
+    return new_affectations

@@ -5,6 +5,7 @@ from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import pdist, cdist
 from tqdm import tqdm
 
+from clus.src.utils.array import flatten_id
 from clus.src.utils.decorator import remove_unexpected_arguments
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_epochs, elapsed:{elapsed}, ETA:{remaining}{postfix}"
@@ -124,10 +125,10 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
             not_deleted_batch_data_mask = batch_affectations != _LABEL_UNASSIGNED
             affectations[batch_data_idx[not_deleted_batch_data_mask]] = batch_affectations[not_deleted_batch_data_mask]
 
-            unaffected_data_allocation(data=data, affectations=affectations,
-                                       batch_good_clusters_centers=batch_good_clusters_centers,
-                                       batch_good_clusters_id=batch_good_clusters_id, min_cluster_id=min_cluster_id,
-                                       clus_result=clus_result)
+            _unaffected_data_allocation(data=data, affectations=affectations,
+                                        batch_good_clusters_centers=batch_good_clusters_centers,
+                                        batch_good_clusters_id=batch_good_clusters_id, min_cluster_id=min_cluster_id,
+                                        clus_result=clus_result)
 
             # Update clustering info per epoch
             stats_epoch["clusters_found_per_epoch"].append(np.array(clusters_centers).shape[0])
@@ -163,39 +164,8 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
     }
 
 
-def flatten_id(affectations, noise_cluster_id=-1):
-    """ Change clusters_id of a current affectation to the smallest value possible (removing holes between two clusters
-    id).
-
-    Exemple:
-    >>> affectations = np.array([0, 1, 7, 1, -1, 4])
-    >>> new_affectations = flatten_id(affectations, noise_cluster_id=-1)
-    >>> new_affectations
-    array([ 0,  1,  3,  1, -1,  2])
-    >>> assert affectations.shape[0] == new_affectations.shape[0]
-    >>> for cluster_id in np.unique(affectations):
-    ...    new_cluster_id = new_affectations[np.where(affectations == cluster_id)[0]][0]
-    ...    assert np.all(new_affectations[affectations == cluster_id] == new_cluster_id)
-    """
-    new_affectations = np.zeros_like(affectations)
-
-    if noise_cluster_id is not None:
-        id_current = 0
-        for id_original in np.unique(affectations):
-            if id_original == noise_cluster_id:
-                continue
-            new_affectations[affectations == id_original] = id_current
-            id_current += 1
-        new_affectations[affectations == noise_cluster_id] = noise_cluster_id
-    else:
-        for id_current, id_original in enumerate(np.unique(affectations)):
-            new_affectations[affectations == id_original] = id_current
-
-    return new_affectations
-
-
-def unaffected_data_allocation(data, affectations, batch_good_clusters_centers, batch_good_clusters_id, min_cluster_id,
-                               clus_result):
+def _unaffected_data_allocation(data, affectations, batch_good_clusters_centers, batch_good_clusters_id, min_cluster_id,
+                                clus_result):
     """ Assign unaffected data to an existing cluster center if it does not increase its diameter. """
     global _LABEL_UNASSIGNED
 
