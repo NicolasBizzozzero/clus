@@ -86,11 +86,6 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 empty_clusters_method=empty_clusters_method, progress_bar=False
             )
 
-            # print("\n")
-            # print(clus_result["clusters_diameter"])
-            # print(clus_result["clusters_diameter"].mean())
-            # print(clus_result["clusters_diameter"].std())
-            # print(clus_result["clusters_diameter"].max())
             batch_affectations = clus_result["affectations"] + min_cluster_id
             batch_clusters_centers = clus_result["clusters_center"]
             batch_clusters_id = clus_result["clusters_id"] + min_cluster_id
