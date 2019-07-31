@@ -33,8 +33,8 @@ def test(seed):
     batch_size = 10000
     max_epochs = 100
     min_centroid_size = 20
-    max_centroid_diameter = 0.05 # np.inf
-    linkage_method = "complete"
+    max_centroid_diameter = 0.05  # np.inf
+    linkage_method = "single"
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
 

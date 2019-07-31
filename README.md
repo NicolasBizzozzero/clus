@@ -23,6 +23,7 @@
 * Application du decorateur "memoryerror_fallback".
 * Au lieu de fixer un nom de fichier par défaut, mettre tous les paramètres par défaut à None (et fixer en dur leurs valeus par défaut dans la doc, ou formater selon un fichier), et ajouter les parametres NON None passés par l'utilisateur au nom de fichier selon un ordre prédéfini. L'utilisateur peut aussi très bien passer son nom de fichier prédéfini.
 * Implémenter un algo d'appariemment (de comparaison) d'affectations. Peut être utiliser https://fr.wikipedia.org/wiki/Algorithme_hongrois
+* Revoir les séparations en sous-commandes. Peut être faire : "clus evaluate" ou "clus visualise".
 
 
 ## References
