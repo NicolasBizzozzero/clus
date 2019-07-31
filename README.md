@@ -8,7 +8,6 @@
 * Rendre les opérations de clustering inplace (ne pas dupliquer les données)
 * Méthodes de Clustering à implémenter :
   * https://github.com/scikit-learn/scikit-learn/blob/7b136e9/sklearn/cluster/k_means_.py#L1318
-  * DBSCAN
   * OPTICS
   * Mean-Shift
   * Vérifier le hard_c_medoids
