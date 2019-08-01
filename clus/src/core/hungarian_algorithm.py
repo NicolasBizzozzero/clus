@@ -204,6 +204,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+# TODO: Compare with : https://github.com/scipy/scipy/blob/v0.18.1/scipy/optimize/_hungarian.py#L13-L107
+
 import numpy as np
 
 __all__ = ['Munkres']

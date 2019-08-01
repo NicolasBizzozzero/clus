@@ -10,7 +10,9 @@ from scipy.spatial.distance import pdist
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
-from clus.src.core.evaluation_metric import evaluate
+from clus.src.core.evaluation_metric import evaluate, ALIASES_ADJUSTED_RAND_INDEX, ALIASES_ADJUSTED_MUTUAL_INFO, \
+    ALIASES_COMPLETENESS, ALIASES_CONTINGENCY_MATRIX, ALIASES_FOWLKES_MALLOWS_INDEX, ALIASES_HOMOGENEITY, \
+    ALIASES_MUTUAL_INFO, ALIASES_NORMALIZED_MUTUAL_INFO, ALIASES_V_MEASURE
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
     ALIASES_OPTICS
 from clus.src.core.normalization import normalization as normalize
@@ -740,7 +742,15 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("metric", type=click.Choice([
-    "ari", "adjusted_rand_index"
+    ALIASES_ADJUSTED_RAND_INDEX +
+    ALIASES_ADJUSTED_MUTUAL_INFO +
+    ALIASES_COMPLETENESS +
+    ALIASES_CONTINGENCY_MATRIX +
+    ALIASES_FOWLKES_MALLOWS_INDEX +
+    ALIASES_HOMOGENEITY +
+    ALIASES_MUTUAL_INFO +
+    ALIASES_NORMALIZED_MUTUAL_INFO +
+    ALIASES_V_MEASURE
 ]))
 # Data loading options
 @click.option("--file-affectations-true", type=click.Path(exists=True), default=None,
@@ -751,14 +761,33 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
               help="Array name of the true affectations in the npz file.")
 @click.option("--name-affectations-pred", type=str, default=None,
               help="Array name of the predicted affectations in the npz file.")
+# Evaluation options
+@click.option("--average-method", type=str, default="arithmetic", show_default=True,
+              help="How to compute the normalizer in the denominator.  The following methods are available :\n"
+                   "- 'min'\n"
+                   "- 'geometric'\n"
+                   "- 'arithmetic'\n"
+                   "- 'max'\n")
+@click.option("--eps", type=float, default=None,
+              help="If a float, that value is added to all values in the contingency matrix. This helps to stop NaN "
+                   "propagation. If None, nothing is adjusted.")
+@click.option("--sparse", type=bool, default=False, show_default=True,
+              help="If True, return a sparse CSR matrix. If eps is not None, and sparse is True, will throw"
+                   "ValueError.")
+@click.option("--beta", type=float, default=1.0, show_default=True,
+              help="Ratio of weight attributed to homogeneity vs completeness. If beta is greater than 1, completeness "
+                   "is weighted more strongly in the calculation. If beta is less than 1, homogeneity is weighted more "
+                   "strongly.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
               help="Random seed to set.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
-def eclus(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred, seed,
-          quiet):
-    """ Evaluate a clustering performance. """
+def eclus(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred,
+          average_method, eps, sparse, beta, seed, quiet):
+    """ Evaluate a supervised clustering performance between a ground truth clustering and a prediction (or compare two
+    clustering).
+    """
     parameters = locals()
 
     if quiet:
@@ -769,7 +798,12 @@ def eclus(metric, file_affectations_true, file_affectations_pred, name_affectati
 
     print("Starting clustering evaluation with the following parameters :", parameters)
 
-    evaluate(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred)
+    # Load affectations
+    affectations_true = np.load(file_affectations_true)[name_affectations_true]
+    affectations_pred = np.load(file_affectations_pred)[name_affectations_pred]
+
+    evaluate(metric=metric, affectations_true=affectations_true, affectations_pred=affectations_pred,
+             average_method=average_method, eps=eps, sparse=sparse, beta=beta)
 
 
 if __name__ == '__main__':

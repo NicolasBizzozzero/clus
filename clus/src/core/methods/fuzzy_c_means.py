@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import cdist
+from sklearn.metrics import silhouette_samples, silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from tqdm import tqdm
 
 from clus.src.core.analysis import ambiguity, partition_coefficient, partition_entropy, clusters_diameter
@@ -102,16 +103,27 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
     clusters_id, clusters_cardinal = np.unique(affectations, return_counts=True)
 
     return {
+        # Clustering results
         "memberships": best_memberships,
+        "affectations": affectations,
         "clusters_center": best_centroids,
         "clusters_id": clusters_id,
         "losses": np.array(losses),
-        "affectations": affectations,
+
+        # Evaluation : Memberships matrix
         "ambiguity": ambiguity(best_memberships),
         "partition_coefficient": partition_coefficient(best_memberships),
         "partition_entropy": partition_entropy(best_memberships),
+
+        # Evaluation : Clusters center
         "clusters_diameter": clusters_diameter(data, affectations, clusters_id),
-        "clusters_cardinal": clusters_cardinal
+        "clusters_cardinal": clusters_cardinal,
+
+        # Evaluation : Affectations
+        "silhouette_samples": silhouette_samples(data, affectations),
+        "silhouette": silhouette_score(data, affectations),
+        "variance_ratio": calinski_harabasz_score(data, affectations),
+        "davies_bouldin": davies_bouldin_score(data, affectations)
     }
 
 
