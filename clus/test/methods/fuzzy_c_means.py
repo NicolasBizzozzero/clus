@@ -3,9 +3,8 @@ from scipy.spatial.distance import cdist
 
 from sklearn.datasets import load_iris
 
-from clus.src.core.methods.fuzzy_c_means import fuzzy_c_means, _compute_centroids, _compute_loss, _compute_memberships, __compute_centroids, __compute_loss, __compute_memberships
+from clus.src.core.methods.partition_based.fuzzy_c_means import _compute_centroids, _compute_loss, _compute_memberships, __compute_centroids, __compute_loss, __compute_memberships
 from clus.src.core.cluster_initialization import random_choice
-from clus.src.utils.random import set_manual_seed
 
 
 def test_compute_memberships():

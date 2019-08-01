@@ -5,12 +5,11 @@ import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
-from clus.src.core.methods.fuzzy_c_medoids import _compute_medoids_square, _compute_loss_square, \
+from clus.src.core.methods.partition_based.fuzzy_c_medoids import _compute_medoids_square, _compute_loss_square, \
     _compute_memberships_square, __compute_medoids_square, __compute_loss_square, __compute_memberships_square, \
     _compute_memberships_condensed, _compute_medoids_condensed, _compute_loss_condensed
 from clus.src.core.cluster_initialization import random_choice_idx
 from clus.src.utils.random import set_manual_seed
-from clus.src.utils.array import square_idx_to_condensed_idx
 
 
 def test_compute_memberships_square(data, distance_matrix, components, fuzzifier):

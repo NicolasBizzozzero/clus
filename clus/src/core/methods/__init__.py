@@ -1,8 +1,8 @@
-from .kmeans import kmeans
-from .fuzzy_c_means import fuzzy_c_means
-from .hard_c_medoids import hard_c_medoids
-from .fuzzy_c_medoids import fuzzy_c_medoids
-from .linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
+from clus.src.core.methods.partition_based.kmeans import kmeans
+from clus.src.core.methods.partition_based.fuzzy_c_means import fuzzy_c_means
+from clus.src.core.methods.partition_based.hard_c_medoids import hard_c_medoids
+from clus.src.core.methods.partition_based.fuzzy_c_medoids import fuzzy_c_medoids
+from clus.src.core.methods.partition_based.linearized_fuzzy_c_medoids import linearized_fuzzy_c_medoids
 from .iterative.linearized_fuzzy_c_medoids_select import linearized_fuzzy_c_medoids_select
 from .iterative.fuzzy_c_means_select import fuzzy_c_means_select
 
