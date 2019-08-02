@@ -174,13 +174,6 @@ def mini_batches_dist(inputs, distance_matrix, batch_size=1,
             yield inputs[excerpt], distance_matrix[excerpt][:, excerpt]
 
 
-def square_idx_to_condensed_idx(idx, n):
-    """ With `idx` being an iterable of indexes from a square matrix and `n` one shape of this square matrix,
-    return the same iterable of indexes matching indexes from the corresponding condensed matrix.
-    """
-    return [(binom(2, n) - binom(2, n - 1) + (-i - 1), binom(2, n) - binom(2, n - 1) + ((n - 1) - i - 1)) for i in idx]
-
-
 def idx_to_elements(array, idx):
     """ Returns the elements of a 2d-array located at `idx`.
     :param array: 2d numpy array from which to extract the elements.
@@ -239,5 +232,8 @@ def flatten_id(affectations, noise_cluster_id=-1):
     else:
         for id_current, id_original in enumerate(np.unique(affectations)):
             new_affectations[affectations == id_original] = id_current
-
     return new_affectations
+
+
+if __name__ == "__main__":
+    pass
