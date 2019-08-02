@@ -197,7 +197,8 @@ def _compute_memberships_condensed(distance_matrix, medoids_idx, fuzzifier, n):
 
 
 def _compute_medoids_condensed(distance_matrix, memberships, fuzzifier, n):
-    # TODO: do we really need to convert the distance matrix to a square distance matrix ?
+    # TODO: do we really need to convert the distance matrix to a square distance matrix ? It defeats the whole purpose
+    #  of condensed dm
     distance_matrix = scipy.spatial.distance.squareform(distance_matrix)
 
     fuzzified_memberships = memberships ** fuzzifier
