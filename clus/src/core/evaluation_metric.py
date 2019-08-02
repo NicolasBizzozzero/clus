@@ -1,3 +1,5 @@
+import numpy as np
+
 from sklearn.metrics import adjusted_mutual_info_score, fowlkes_mallows_score, homogeneity_completeness_v_measure, \
     homogeneity_score, mutual_info_score, normalized_mutual_info_score, v_measure_score
 from sklearn.metrics.cluster import adjusted_rand_score, completeness_score as sklearn_completeness_score,\
@@ -14,6 +16,10 @@ ALIASES_HOMOGENEITY = ("homogeneity",)
 ALIASES_MUTUAL_INFO = ("mi", "mutual_info")
 ALIASES_NORMALIZED_MUTUAL_INFO = ("nmi", "normalized_mutual_info")
 ALIASES_V_MEASURE = ("v", "v_measure")
+ALIASES_N11 = ("n11", "a")
+ALIASES_N10 = ("n10", "b")
+ALIASES_N01 = ("n01", "c")
+ALIASES_N00 = ("n00", "d")
 
 
 class UnknownEvaluationMetric(Exception):
@@ -74,6 +80,73 @@ def v_measure(affectations_true, affectations_pred, beta=1.0):
     return v_measure_score(affectations_true, affectations_pred, beta=beta)
 
 
+@remove_unexpected_arguments
+def v_measure(affectations_true, affectations_pred, beta=1.0):
+    return v_measure_score(affectations_true, affectations_pred, beta=beta)
+
+
+@remove_unexpected_arguments
+def n11(a, b):
+    """
+
+    Source:
+    * https://stackoverflow.com/a/39746217
+    """
+    # Label "11" clusters (a[i]==a[j] & b[i]==b[j])
+    ab = a * b.max() + b
+
+    # Calculate the counts for each type of pairing
+    return sizes2count(np.bincount(ab), len(a))
+
+
+@remove_unexpected_arguments
+def n10(a, b):
+    """
+
+    Source:
+    * https://stackoverflow.com/a/39746217
+    """
+    # Label "11" clusters (a[i]==a[j] & b[i]==b[j])
+    ab = a * b.max() + b
+
+    n11 = sizes2count(np.bincount(ab), len(a))
+    return sizes2count(np.bincount(a), len(a)) - n11
+
+
+@remove_unexpected_arguments
+def n01(a, b):
+    """
+
+    Source:
+    * https://stackoverflow.com/a/39746217
+    """
+    # Label "11" clusters (a[i]==a[j] & b[i]==b[j])
+    ab = a * b.max() + b
+
+    n11 = sizes2count(np.bincount(ab), len(a))
+    return sizes2count(np.bincount(b), len(a)) - n11
+
+
+@remove_unexpected_arguments
+def n00(a, b):
+    """
+
+    Source:
+    * https://stackoverflow.com/a/39746217
+    """
+    # Label "11" clusters (a[i]==a[j] & b[i]==b[j])
+    ab = a * b.max() + b
+
+    n11 = sizes2count(np.bincount(ab), len(a))
+    n10 = sizes2count(np.bincount(a), len(a)) - n11
+    n01 = sizes2count(np.bincount(b), len(a)) - n11
+    return (len(a) ** 2) - len(a) - n11 - n10 - n01
+
+
+def sizes2count(a, n):
+    return (np.inner(a, a) - n) // 2
+
+
 def _str_to_evaluation_metric(string):
     global ALIASES_ADJUSTED_RAND_INDEX
 
@@ -96,6 +169,14 @@ def _str_to_evaluation_metric(string):
         return normalized_mutual_information
     if string in ALIASES_V_MEASURE:
         return v_measure
+    if string in ALIASES_N11:
+        return n11
+    if string in ALIASES_N10:
+        return n10
+    if string in ALIASES_N01:
+        return n01
+    if string in ALIASES_N00:
+        return n00
     raise UnknownEvaluationMetric(string)
 
 

@@ -12,7 +12,8 @@ from sklearn.neighbors.dist_metrics import DistanceMetric
 from clus.src.core.data_loading import load_data
 from clus.src.core.evaluation_metric import evaluate, ALIASES_ADJUSTED_RAND_INDEX, ALIASES_ADJUSTED_MUTUAL_INFO, \
     ALIASES_COMPLETENESS, ALIASES_CONTINGENCY_MATRIX, ALIASES_FOWLKES_MALLOWS_INDEX, ALIASES_HOMOGENEITY, \
-    ALIASES_MUTUAL_INFO, ALIASES_NORMALIZED_MUTUAL_INFO, ALIASES_V_MEASURE
+    ALIASES_MUTUAL_INFO, ALIASES_NORMALIZED_MUTUAL_INFO, ALIASES_V_MEASURE, ALIASES_N10, ALIASES_N01, ALIASES_N00, \
+    ALIASES_N11
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
     ALIASES_OPTICS
 from clus.src.core.normalization import normalization as normalize
@@ -750,7 +751,11 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
     ALIASES_HOMOGENEITY +
     ALIASES_MUTUAL_INFO +
     ALIASES_NORMALIZED_MUTUAL_INFO +
-    ALIASES_V_MEASURE
+    ALIASES_V_MEASURE +
+    ALIASES_N11 +
+    ALIASES_N10 +
+    ALIASES_N01 +
+    ALIASES_N00
 ]))
 # Data loading options
 @click.option("--file-affectations-true", type=click.Path(exists=True), default=None,
