@@ -55,6 +55,8 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ** https://elki-project.github.io
 ** https://www.cs.waikato.ac.nz/ml/weka
 ** https://www.knime.com/nodeguide/analytics/clustering
+* Implémenter la lecture de fichiers :
+** memmap : https://docs.scipy.org/doc/numpy/reference/generated/numpy.memmap.html
 
 
 ## References
