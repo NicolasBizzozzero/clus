@@ -57,7 +57,14 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ** https://www.knime.com/nodeguide/analytics/clustering
 * Implémenter la lecture de fichiers :
 ** memmap : https://docs.scipy.org/doc/numpy/reference/generated/numpy.memmap.html
-
+* S'inspirer des codes suivants :
+** https://github.com/overshiki/kmeans_pytorch/blob/master/kmeans.py
+* Etudier mesures :
+** https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_mutual_info_score.html 
+** https://docs.scipy.org/doc/numpy/reference/generated/numpy.random.multivariate_normal.html
+** https://davetang.org/muse/2017/09/21/adjusted-rand-index/
+* Trouver meilleure coupe HC :
+** https://www.sciencedirect.com/science/article/pii/S0031320310001974
 
 ## References
 * [1] R. Krishnapuram ; A. Joshi ; O. Nasraoui ; L. Yi, Low-complexity fuzzy relational clustering algorithms for Web mining,  IEEE Transactions on Fuzzy Systems (Volume: 9, Issue: 4, Aug 2001), p595-607, DOI: 10.1109/91.940971

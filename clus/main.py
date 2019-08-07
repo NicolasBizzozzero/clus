@@ -10,12 +10,15 @@ from scipy.spatial.distance import pdist
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
-from clus.src.core.evaluation_metric import evaluate, ALIASES_ADJUSTED_RAND_INDEX, ALIASES_ADJUSTED_MUTUAL_INFO, \
-    ALIASES_COMPLETENESS, ALIASES_CONTINGENCY_MATRIX, ALIASES_FOWLKES_MALLOWS_INDEX, ALIASES_HOMOGENEITY, \
-    ALIASES_MUTUAL_INFO, ALIASES_NORMALIZED_MUTUAL_INFO, ALIASES_V_MEASURE, ALIASES_N10, ALIASES_N01, ALIASES_N00, \
-    ALIASES_N11
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
-    ALIASES_OPTICS
+from clus.src.core.evaluation_metric.evaluation_metric import evaluate, ALIASES_ADJUSTED_RAND_INDEX, \
+    ALIASES_ADJUSTED_MUTUAL_INFO, ALIASES_COMPLETENESS, ALIASES_CONTINGENCY_MATRIX, ALIASES_FOWLKES_MALLOWS_INDEX, \
+    ALIASES_HOMOGENEITY, ALIASES_MUTUAL_INFO, ALIASES_NORMALIZED_MUTUAL_INFO, ALIASES_V_MEASURE, ALIASES_N10, \
+    ALIASES_N01, ALIASES_N00, ALIASES_N11
+from clus.src.core.methods.methods import ALIASES_KMEANS, ALIASES_OPTICS, ALIASES_DBSCAN, \
+    ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, ALIASES_FUZZY_C_MEANS, ALIASES_FUZZY_C_MEDOIDS, \
+    ALIASES_HARD_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, \
+    ALIASES_MINI_BATCH_KMEANS, ALIASES_POSSIBILISTIC_C_MEANS
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.core.saving_path import compute_file_saving_path_clus
 from clus.src.core.saving_path import compute_file_saving_path_dclus
@@ -24,12 +27,6 @@ from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
 from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
-from clus.src.core.methods.methods import ALIASES_KMEANS, ALIASES_OPTICS, ALIASES_DBSCAN, \
-    ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, ALIASES_FUZZY_C_MEANS, ALIASES_FUZZY_C_MEDOIDS, \
-    ALIASES_HARD_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, \
-    ALIASES_MINI_BATCH_KMEANS, ALIASES_POSSIBILISTIC_C_MEANS
-from clus.src.core.evaluation_metric.evaluation_metric import ALIASES_ADJUSTED_RAND_INDEX
-
 
 _MAX_TEXT_OUTPUT_WIDTH = 120
 
@@ -772,18 +769,18 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("metric", type=click.Choice([
-    *ALIASES_ADJUSTED_RAND_INDEX +
-    *ALIASES_ADJUSTED_MUTUAL_INFO +
-    *ALIASES_COMPLETENESS +
-    *ALIASES_CONTINGENCY_MATRIX +
-    *ALIASES_FOWLKES_MALLOWS_INDEX +
-    *ALIASES_HOMOGENEITY +
-    *ALIASES_MUTUAL_INFO +
-    *ALIASES_NORMALIZED_MUTUAL_INFO +
-    *ALIASES_V_MEASURE +
-    *ALIASES_N11 +
-    *ALIASES_N10 +
-    *ALIASES_N01 +
+    *ALIASES_ADJUSTED_RAND_INDEX,
+    *ALIASES_ADJUSTED_MUTUAL_INFO,
+    *ALIASES_COMPLETENESS,
+    *ALIASES_CONTINGENCY_MATRIX,
+    *ALIASES_FOWLKES_MALLOWS_INDEX,
+    *ALIASES_HOMOGENEITY,
+    *ALIASES_MUTUAL_INFO,
+    *ALIASES_NORMALIZED_MUTUAL_INFO,
+    *ALIASES_V_MEASURE,
+    *ALIASES_N11,
+    *ALIASES_N10,
+    *ALIASES_N01,
     *ALIASES_N00
 ]))
 # Data loading options
