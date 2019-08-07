@@ -201,10 +201,6 @@ def idx_to_r_elements(array, idx):
     return array[r_idx]
 
 
-if __name__ == "__main__":
-    pass
-
-
 def flatten_id(affectations, noise_cluster_id=-1):
     """ Change clusters_id of a current affectation to the smallest value possible (removing holes between two clusters
     id).
@@ -233,6 +229,60 @@ def flatten_id(affectations, noise_cluster_id=-1):
         for id_current, id_original in enumerate(np.unique(affectations)):
             new_affectations[affectations == id_original] = id_current
     return new_affectations
+
+
+def contingency_matrix(labels_true, labels_pred, eps=None, sparse=False):
+    """ Build a contingency matrix describing the relationship between labels.
+    Parameters
+    ----------
+    labels_true : int array, shape = [n_samples]
+        Ground truth class labels to be used as a reference
+    labels_pred : array, shape = [n_samples]
+        Cluster labels to evaluate
+    eps : None or float, optional.
+        If a float, that value is added to all values in the contingency
+        matrix. This helps to stop NaN propagation.
+        If ``None``, nothing is adjusted.
+    sparse : boolean, optional.
+        If True, return a sparse CSR continency matrix. If ``eps is not None``,
+        and ``sparse is True``, will throw ValueError.
+        .. versionadded:: 0.18
+    Returns
+    -------
+    contingency : {array-like, sparse}, shape=[n_classes_true, n_classes_pred]
+        Matrix :math:`C` such that :math:`C_{i, j}` is the number of samples in
+        true class :math:`i` and in predicted class :math:`j`. If
+        ``eps is None``, the dtype of this array will be integer. If ``eps`` is
+        given, the dtype will be float.
+        Will be a ``scipy.sparse.csr_matrix`` if ``sparse=True``.
+    Source
+    ------
+    https://github.com/scikit-learn/scikit-learn/blob/7813f7efb/sklearn/metrics/cluster/supervised.py#L78
+    """
+
+    if eps is not None and sparse:
+        raise ValueError("Cannot set 'eps' when sparse=True")
+
+    classes, class_idx = np.unique(labels_true, return_inverse=True)
+    clusters, cluster_idx = np.unique(labels_pred, return_inverse=True)
+    n_classes = classes.shape[0]
+    n_clusters = clusters.shape[0]
+    # Using coo_matrix to accelerate simple histogram calculation,
+    # i.e. bins are consecutive integers
+    # Currently, coo_matrix is faster than histogram2d for simple cases
+    contingency = sp.coo_matrix((np.ones(class_idx.shape[0]),
+                                 (class_idx, cluster_idx)),
+                                shape=(n_classes, n_clusters),
+                                dtype=np.int)
+    if sparse:
+        contingency = contingency.tocsr()
+        contingency.sum_duplicates()
+    else:
+        contingency = contingency.toarray()
+        if eps is not None:
+            # don't use += as contingency is integer
+            contingency = contingency + eps
+    return contingency
 
 
 if __name__ == "__main__":

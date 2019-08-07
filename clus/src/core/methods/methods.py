@@ -1,15 +1,12 @@
-from clus.src.core.methods import fuzzy_c_means
-from clus.src.core.methods import fuzzy_c_medoids
-from clus.src.core.methods import hard_c_medoids
-from clus.src.core.methods import kmeans
-from clus.src.core.methods import linearized_fuzzy_c_medoids
-from clus.src.core.methods import linearized_fuzzy_c_medoids_select
+from clus.src.core.methods import fuzzy_c_means, fuzzy_c_medoids, hard_c_medoids, kmeans, minibatch_kmeans, \
+    linearized_fuzzy_c_medoids, linearized_fuzzy_c_medoids_select
 from clus.src.core.methods.density_based.dbscan import dbscan
 from clus.src.core.methods.density_based.optics import optics
 
 
 # Centroids-based
 ALIASES_KMEANS = ("kmeans",)
+ALIASES_MINI_BATCH_KMEANS = ("minibatch_kmeans", "mini_batch_kmeans")
 ALIASES_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
 ALIASES_POSSIBILISTIC_C_MEANS = ("possibilistic_c_means", "pcm")
 ALIASES_FUZZY_C_MEDOIDS = ("fuzzy_c_medoids", "fcmdd")
@@ -54,6 +51,7 @@ def use_medoids(clustering_method):
 def is_hard_clustering(clustering_method):
     return clustering_method in list(
         ALIASES_KMEANS +
+        ALIASES_MINI_BATCH_KMEANS +
         ALIASES_HARD_C_MEDOIDS +
         ALIASES_DBSCAN +
         ALIASES_OPTICS
@@ -64,6 +62,8 @@ def get_clustering_function(string):
     string = string.lower()
     if string in ALIASES_KMEANS:
         return kmeans
+    if string in ALIASES_MINI_BATCH_KMEANS:
+        return minibatch_kmeans
     elif string in ALIASES_FUZZY_C_MEANS:
         return fuzzy_c_means
     elif string in ALIASES_POSSIBILISTIC_C_MEANS:

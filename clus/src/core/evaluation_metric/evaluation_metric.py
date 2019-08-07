@@ -35,7 +35,6 @@ def evaluate(*, metric, affectations_true, affectations_pred, average_method, ep
                       average_method=average_method, eps=eps, sparse=sparse, beta=beta)
 
 
-@remove_unexpected_arguments
 def adjusted_rand_index(affectations_true, affectations_pred):
     return adjusted_rand_score(affectations_true, affectations_pred)
 
@@ -73,11 +72,6 @@ def mutual_information(affectations_true, affectations_pred):
 @remove_unexpected_arguments
 def normalized_mutual_information(affectations_true, affectations_pred, average_method="arithmetic"):
     return normalized_mutual_info_score(affectations_true, affectations_pred, average_method=average_method)
-
-
-@remove_unexpected_arguments
-def v_measure(affectations_true, affectations_pred, beta=1.0):
-    return v_measure_score(affectations_true, affectations_pred, beta=beta)
 
 
 @remove_unexpected_arguments
