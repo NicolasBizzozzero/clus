@@ -105,7 +105,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Criterion used to remove clusters with a too small cardinal after each epoch.")
 @click.option("--max-centroid-diameter", type=float, default=np.inf, show_default=True,
               help="Criterion used to remove clusters with a too big diameter after each epoch.")
-@click.option("--linkage-method", type=str, default="simple", show_default=True,
+@click.option("--linkage-method", type=str, default="single", show_default=True,
               help="The linkage algorithm to use for hierarchical clustering. Available methods are listed here : "
                    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html")
 @click.option("--save-clus", is_flag=True,
@@ -276,7 +276,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
             empty_clusters_method=empty_clusters_method,
             progress_bar=not disable_progress_bar
         )
-        if not keep_memberships:
+        if (not keep_memberships) and ("memberships" in clustering_result):
             del clustering_result["memberships"]
 
         # Create destination directory if it does not already exists
