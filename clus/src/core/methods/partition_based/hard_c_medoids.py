@@ -14,7 +14,7 @@ _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{r
 def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
                    max_iter=1000, initialization_method="random_choice",
                    empty_clusters_method="nothing",
-                   medoids_idx=None):
+                   medoids_idx=None, progress_bar=True):
     """ Performs the hard c-medoids clustering algorithm on a dataset.
 
     :param data: The dataset into which the clustering will be performed. The dataset must be 2D np.array with rows as
@@ -40,6 +40,7 @@ def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
     * "random_example", assign a random example to all empty clusters.
     * "furthest_example_from_its_centroid", assign the furthest example from its centroid to each empty cluster.
     :param medoids_idx: Initials medoids indexes to use instead of randomly initialize them.
+    :param progress_bar: If `False`, disable the progress bar.
     :return: A tuple containing :
     * The memberships matrix.
     * The medoids matrix.
@@ -63,7 +64,7 @@ def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
     if medoids_idx is None:
         medoids_idx = cluster_initialization(distance_matrix, components, initialization_method, need_idx=True)
 
-    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR) as progress_bar:
+    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR, disable=not progress_bar) as progress_bar:
         best_memberships = None
         best_medoids_idx = None
         best_loss = np.inf
@@ -73,8 +74,8 @@ def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         losses = []
         current_iter = 0
         while (current_iter < max_iter) and \
-                ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
-                ((current_iter < 2) or not (abs(losses[-1] - losses[-2]) <= eps)):
+              ((current_iter < 1) or (not all(medoids_idx == medoids_idx_old))) and \
+              ((current_iter < 2) or (abs(losses[-2] - losses[-1]) > eps)):
             medoids_idx_old = medoids_idx
             memberships = _compute_memberships(distance_matrix, medoids_idx)
             handle_empty_clusters(distance_matrix, medoids_idx, memberships, strategy=empty_clusters_method)

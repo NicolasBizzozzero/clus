@@ -10,8 +10,12 @@ from scipy.spatial.distance import pdist
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
-from clus.src.core.evaluation_metric.evaluation_metric import evaluate
-from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
+from clus.src.core.evaluation_metric import evaluate, ALIASES_ADJUSTED_RAND_INDEX, ALIASES_ADJUSTED_MUTUAL_INFO, \
+    ALIASES_COMPLETENESS, ALIASES_CONTINGENCY_MATRIX, ALIASES_FOWLKES_MALLOWS_INDEX, ALIASES_HOMOGENEITY, \
+    ALIASES_MUTUAL_INFO, ALIASES_NORMALIZED_MUTUAL_INFO, ALIASES_V_MEASURE, ALIASES_N10, ALIASES_N01, ALIASES_N00, \
+    ALIASES_N11
+from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering, \
+    ALIASES_OPTICS
 from clus.src.core.normalization import normalization as normalize
 from clus.src.core.saving_path import compute_file_saving_path_clus
 from clus.src.core.saving_path import compute_file_saving_path_dclus
@@ -212,7 +216,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
         clustering_function = get_clustering_function(clustering_algorithm)
 
         # Load data
-        data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+        data = load_data(dataset, file_type=file_type,
+                         delimiter=delimiter, header=header, array_name=array_name)
 
         if normalization is not None:
             data = data.astype(np.float64)
@@ -222,7 +227,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
             # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
             # consideration
             if " " in weights[0]:
-                weights = tuple(map(lambda s: str_to_number(s), weights[0].split(" ")))
+                weights = tuple(
+                    map(lambda s: str_to_number(s), weights[0].split(" ")))
             else:
                 weights = tuple(map(lambda s: str_to_number(s), weights))
 
@@ -235,9 +241,11 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                         "").format(data.shape)
                 distance_matrix = data
             elif pairwise_distance == "weighted_euclidean":
-                distance_matrix = DistanceMetric.get_metric("euclidean").pairwise(data * np.sqrt(weights))
+                distance_matrix = DistanceMetric.get_metric(
+                    "euclidean").pairwise(data * np.sqrt(weights))
             else:
-                distance_matrix = DistanceMetric.get_metric(pairwise_distance).pairwise(data)
+                distance_matrix = DistanceMetric.get_metric(
+                    pairwise_distance).pairwise(data)
 
         # Perform the clustering method
         clustering_result = clustering_function(
@@ -264,7 +272,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                       dataset=dataset,
                                                       clustering_algorithm=clustering_algorithm,
                                                       components=components,
-                                                      fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                      fuzzifier=None if is_hard_clustering(
+                                                          clustering_algorithm) else fuzzifier,
                                                       seed=seed,
                                                       distance=pairwise_distance,
                                                       weights=weights,
@@ -277,7 +286,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
+                execute("scp", file_path, url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise or save_visu:
@@ -285,7 +295,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                       dataset=dataset,
                                                       clustering_algorithm=clustering_algorithm,
                                                       components=components,
-                                                      fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                      fuzzifier=None if is_hard_clustering(
+                                                          clustering_algorithm) else fuzzifier,
                                                       seed=seed,
                                                       distance=pairwise_distance,
                                                       weights=weights,
@@ -306,7 +317,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     show=visualise,
                                     save=save_visu)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
+                execute("scp", file_path, url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
@@ -314,7 +326,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                                       dataset=dataset,
                                                       clustering_algorithm=clustering_algorithm,
                                                       components=components,
-                                                      fuzzifier=None if is_hard_clustering(clustering_algorithm) else fuzzifier,
+                                                      fuzzifier=None if is_hard_clustering(
+                                                          clustering_algorithm) else fuzzifier,
                                                       seed=seed,
                                                       distance=pairwise_distance,
                                                       weights=weights,
@@ -335,7 +348,8 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     show=visualise_3d,
                                     save=save_visu_3d)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
+                execute("scp", file_path, url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
 
@@ -433,14 +447,16 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 
     for dataset in datasets:
         parameters["dataset"] = dataset
-        print("Starting hierarchical clustering with the following parameters :", parameters)
+        print(
+            "Starting hierarchical clustering with the following parameters :", parameters)
 
         if seed is not None:
             set_manual_seed(seed)
 
         # Load data
         dataset_name = os.path.splitext(ntpath.basename(dataset))[0]
-        data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+        data = load_data(dataset, file_type=file_type,
+                         delimiter=delimiter, header=header, array_name=array_name)
 
         if is_linkage_mtx:
             linkage_mtx = data
@@ -463,7 +479,8 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
                 if isinstance(weights, tuple):
                     weights = tuple(map(lambda s: str_to_number(s), weights))
                 else:
-                    weights = tuple(map(lambda s: str_to_number(s), weights.split(" ")))
+                    weights = tuple(
+                        map(lambda s: str_to_number(s), weights.split(" ")))
 
                 # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into
                 # data weighted by the square root of the weights, see [5]
@@ -494,7 +511,8 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
             np.save(dir_file_linkage_mtx, linkage_mtx)
 
         if save_flat_clusters:
-            flat_clusters = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
+            flat_clusters = fcluster(
+                linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
             file_name = format_filename_dest_f.format(
                 dataset_name=dataset_name
             )
@@ -641,7 +659,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
         clustering_function = get_clustering_function(clustering_algorithm)
 
         # Load data
-        data = load_data(dataset, file_type=file_type, delimiter=delimiter, header=header, array_name=array_name)
+        data = load_data(dataset, file_type=file_type,
+                         delimiter=delimiter, header=header, array_name=array_name)
 
         if normalization is not None:
             data = data.astype(np.float64)
@@ -651,7 +670,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
             # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
             # consideration
             if " " in weights[0]:
-                weights = tuple(map(lambda s: str_to_number(s), weights[0].split(" ")))
+                weights = tuple(
+                    map(lambda s: str_to_number(s), weights[0].split(" ")))
             else:
                 weights = tuple(map(lambda s: str_to_number(s), weights))
 
@@ -685,7 +705,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
 
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
+                execute("scp", file_path, url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise or save_visu:
@@ -714,7 +735,8 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                     show=visualise,
                                     save=save_visu)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
+                execute("scp", file_path, url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
@@ -743,13 +765,26 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                     show=visualise_3d,
                                     save=save_visu_3d)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (url_scp + ":" + path_dir_dest))
+                execute("scp", file_path, url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
                 os.remove(file_path)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
 @click.argument("metric", type=click.Choice([
-    *ALIASES_ADJUSTED_RAND_INDEX
+    *ALIASES_ADJUSTED_RAND_INDEX +
+    *ALIASES_ADJUSTED_MUTUAL_INFO +
+    *ALIASES_COMPLETENESS +
+    *ALIASES_CONTINGENCY_MATRIX +
+    *ALIASES_FOWLKES_MALLOWS_INDEX +
+    *ALIASES_HOMOGENEITY +
+    *ALIASES_MUTUAL_INFO +
+    *ALIASES_NORMALIZED_MUTUAL_INFO +
+    *ALIASES_V_MEASURE +
+    *ALIASES_N11 +
+    *ALIASES_N10 +
+    *ALIASES_N01 +
+    *ALIASES_N00
 ]))
 # Data loading options
 @click.option("--file-affectations-true", type=click.Path(exists=True), default=None,
@@ -760,14 +795,33 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
               help="Array name of the true affectations in the npz file.")
 @click.option("--name-affectations-pred", type=str, default=None,
               help="Array name of the predicted affectations in the npz file.")
+# Evaluation options
+@click.option("--average-method", type=str, default="arithmetic", show_default=True,
+              help="How to compute the normalizer in the denominator.  The following methods are available :\n"
+                   "- 'min'\n"
+                   "- 'geometric'\n"
+                   "- 'arithmetic'\n"
+                   "- 'max'\n")
+@click.option("--eps", type=float, default=None,
+              help="If a float, that value is added to all values in the contingency matrix. This helps to stop NaN "
+                   "propagation. If None, nothing is adjusted.")
+@click.option("--sparse", type=bool, default=False, show_default=True,
+              help="If True, return a sparse CSR matrix. If eps is not None, and sparse is True, will throw"
+                   "ValueError.")
+@click.option("--beta", type=float, default=1.0, show_default=True,
+              help="Ratio of weight attributed to homogeneity vs completeness. If beta is greater than 1, completeness "
+                   "is weighted more strongly in the calculation. If beta is less than 1, homogeneity is weighted more "
+                   "strongly.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
               help="Random seed to set.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
-def eclus(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred, seed,
-          quiet):
-    """ Evaluate a clustering performance. """
+def eclus(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred,
+          average_method, eps, sparse, beta, seed, quiet):
+    """ Evaluate a supervised clustering performance between a ground truth clustering and a prediction (or compare two
+    clustering).
+    """
     parameters = locals()
 
     if quiet:
@@ -778,7 +832,12 @@ def eclus(metric, file_affectations_true, file_affectations_pred, name_affectati
 
     print("Starting clustering evaluation with the following parameters :", parameters)
 
-    evaluate(metric, file_affectations_true, file_affectations_pred, name_affectations_true, name_affectations_pred)
+    # Load affectations
+    affectations_true = np.load(file_affectations_true)[name_affectations_true]
+    affectations_pred = np.load(file_affectations_pred)[name_affectations_pred]
+
+    evaluate(metric=metric, affectations_true=affectations_true, affectations_pred=affectations_pred,
+             average_method=average_method, eps=eps, sparse=sparse, beta=beta)
 
 
 if __name__ == '__main__':
