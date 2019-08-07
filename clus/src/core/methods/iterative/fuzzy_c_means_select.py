@@ -30,7 +30,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         "The number of weights given must be the same as the number of features. Expected size : %s, given size : %s" %\
         (data.shape[1], len(weights))
     assert 1 <= max_epochs, "The maximal number of epochs must be of at least 1"
-    assert 0 <= min_centroid_size, "`min_centroid_size` must be positive"
+    assert (min_centroid_size is None) or (0 <= min_centroid_size), "`min_centroid_size` must be positive"
     assert 0 < max_centroid_diameter, "`max_centroid_diameter` must be strictly positive"
     assert (centroids is None) or (centroids.shape == (components, data.shape[1])), \
         "The given centroids do not have a correct shape. Expected shape : {}, given shape : {}".format(
@@ -44,6 +44,9 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into data
         # weighted by the square root of the weights, see [5]
         data = data * np.sqrt(weights)
+
+    if min_centroid_size is None:
+        min_centroid_size = int(np.floor(batch_size / components))
 
     # affectations (N,) : Current affectations of the data to the clusters. An affectation of `-1` means the data have
     #   not yet been affected to a cluster. If a data point is still affected to the `-1` cluster after all epochs, it
