@@ -17,7 +17,7 @@ from clus.src.core.evaluation_metric.evaluation_metric import evaluate, ALIASES_
 from clus.src.core.methods.methods import ALIASES_KMEANS, ALIASES_OPTICS, ALIASES_DBSCAN, \
     ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, ALIASES_FUZZY_C_MEANS, ALIASES_FUZZY_C_MEDOIDS, \
     ALIASES_HARD_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS, ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT, \
-    ALIASES_MINI_BATCH_KMEANS, ALIASES_POSSIBILISTIC_C_MEANS
+    ALIASES_MINI_BATCH_KMEANS, ALIASES_POSSIBILISTIC_C_MEANS, ALIASES_FUZZY_C_MEANS_SELECT
 from clus.src.core.methods.methods import get_clustering_function, use_distance_matrix, is_hard_clustering
 from clus.src.core.normalization import normalization as normalize
 from clus.src.core.saving_path import compute_file_saving_path_clus
@@ -40,6 +40,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
     *ALIASES_POSSIBILISTIC_C_MEANS,
     *ALIASES_FUZZY_C_MEDOIDS,
     *ALIASES_HARD_C_MEDOIDS,
+    *ALIASES_FUZZY_C_MEANS_SELECT,
     *ALIASES_LINEARIZED_FUZZY_C_MEDOIDS,
     *ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT,
     *ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT
@@ -96,21 +97,21 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "you have features in your data.")
 @click.option("--max-epochs", type=int, default=128, show_default=True,
               help="Number of time to repeat a clustering algorithm.")
-@click.option("-b", "--batch-size", type=int, default=None,
+@click.option("-b", "--batch-size", type=int, default=1000,
               help="Size of a batch for minibatch compatible algorithms.")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
 @click.option("--min-centroid-size", type=int, default=None, show_default=True,
               help="Criterion used to remove clusters with a too small cardinal after each epoch.")
-@click.option("--max-centroid-diameter", type=float, default=None, show_default=True,
+@click.option("--max-centroid-diameter", type=float, default=np.inf, show_default=True,
               help="Criterion used to remove clusters with a too big diameter after each epoch.")
 @click.option("--linkage-method", type=str, default="simple", show_default=True,
               help="The linkage algorithm to use for hierarchical clustering. Available methods are listed here : "
                    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html")
 @click.option("--save-clus", is_flag=True,
               help="Set this flag if you want to save the clustering result. A .npz file will be created, containing "
-                   "the memberships matrix 'memberships', the clusters' center matrix 'clusters_center' and the losses "
-                   "across all iterations 'losses'.")
+                   "the memberships matrix 'memberships', the clusters' center matrix 'clusters_center' and the "
+                   "losses across all iterations 'losses'.")
 @click.option("--keep-memberships", is_flag=True,
               help="Set this flag if you want to keep the memberships matrix in your results. It has been removed by "
                    "default because it is usually not used, take a large amount of disk space and can be resumed by "

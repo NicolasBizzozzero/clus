@@ -139,6 +139,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 "affected_data": "{}/{}".format(stats_epoch["affected_data_per_epoch"][-1], affectations.shape[0])
             })
 
+
     affectations = flatten_id(affectations)
 
     clusters_centers = np.array(clusters_centers)

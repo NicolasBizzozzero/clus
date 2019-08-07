@@ -127,13 +127,22 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
 
 
 def _compute_memberships(data, centroids, fuzzifier):
+    #np.seterr(all='raise')
     dist_data_centroids = cdist(data, centroids, metric="euclidean")
     tmp = np.power(dist_data_centroids, -2 / (fuzzifier - 1), where=dist_data_centroids != 0)
     big_sum = tmp.sum(axis=1, keepdims=True)
-    res = np.divide(tmp, big_sum, where=big_sum != 0)
-
-    # If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership to 1,
-    # and the memberships of others to 0. See [3]
+    res = np.divide(tmp, big_sum, where=~np.isclose(big_sum, 0))
+    # res = np.divide(tmp, big_sum, where=big_sum != 0)
+    # print(tmp)
+    # print(big_sum)
+    # print(res)
+    # print(big_sum != 0)
+    # print(tmp.shape)
+    # print(big_sum.shape)
+    # print(res.shape)
+    # print((big_sum != 0).shape)
+    # If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership to
+    # 1, and the memberships of others to 0. See [3]
     # This is done by computing a mask of zeros elements' index of the `dist_data_centroids` matrix, then by performing
     # the operation cited above afterward.
     # These operations do nothing if `idx_rows_with_zero` is empty.
