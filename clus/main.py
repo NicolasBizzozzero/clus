@@ -94,10 +94,19 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--weights", cls=OptionInfiniteArgs,
               help="Weights used for the \"weighted_euclidean\" pairwise distance. You need as much weights as "
                    "you have features in your data.")
+@click.option("--max-epochs", type=int, default=128, show_default=True,
+              help="Number of time to repeat a clustering algorithm.")
 @click.option("-b", "--batch-size", type=int, default=None,
-              help="Size of a batch for minibatch compatible algorithms..")
+              help="Size of a batch for minibatch compatible algorithms.")
 @click.option("-p", "--membership-subset-size", type=int, default=None, show_default=True,
               help="Size of the highest membership subset examined during the medoids computation for LFCMdd.")
+@click.option("--min-centroid-size", type=int, default=None, show_default=True,
+              help="Criterion used to remove clusters with a too small cardinal after each epoch.")
+@click.option("--max-centroid-diameter", type=float, default=None, show_default=True,
+              help="Criterion used to remove clusters with a too big diameter after each epoch.")
+@click.option("--linkage-method", type=str, default="simple", show_default=True,
+              help="The linkage algorithm to use for hierarchical clustering. Available methods are listed here : "
+                   "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html")
 @click.option("--save-clus", is_flag=True,
               help="Set this flag if you want to save the clustering result. A .npz file will be created, containing "
                    "the memberships matrix 'memberships', the clusters' center matrix 'clusters_center' and the losses "
@@ -140,6 +149,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "cross-covariance and cross-correlation matrices.")
 @click.option("--quiet", is_flag=True,
               help="Set this flag if you want to completely silence all outputs to stdout.")
+@click.option("--disable-progress-bar", is_flag=True,
+              help="Set this flag if you want to completely disable the progress bar.")
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
@@ -179,11 +190,12 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
                    "destination will then be 'url_scp:path_dir_dest'. For it to works, you also need to set your "
                    "public key to the destination computer. You can easily do it with the `ssh-keygen` software.")
 def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
-         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights, batch_size,
-         membership_subset_size, save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
-         normalization, quiet, path_dir_dest, format_filename_dest_results, format_filename_dest_visu,
-         format_filename_dest_visu_3d, zero_fill_components, zero_fill_seed, zero_fill_weights, zero_fill_fuzzifier,
-         url_scp):
+         empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights, max_epochs, batch_size,
+         membership_subset_size, min_centroid_size, max_centroid_diameter, linkage_method,
+         save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
+         normalization, quiet, disable_progress_bar, path_dir_dest, format_filename_dest_results,
+         format_filename_dest_visu, format_filename_dest_visu_3d, zero_fill_components, zero_fill_seed,
+         zero_fill_weights, zero_fill_fuzzifier, url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
@@ -254,9 +266,14 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
             fuzzifier=fuzzifier,
             weights=weights,
             batch_size=batch_size,
+            max_epochs=max_epochs,
+            min_centroid_size=min_centroid_size,
+            max_centroid_diameter=max_centroid_diameter,
+            linkage_method=linkage_method,
             membership_subset_size=membership_subset_size,
             initialization_method=initialization_method,
             empty_clusters_method=empty_clusters_method,
+            progress_bar=not disable_progress_bar
         )
         if not keep_memberships:
             del clustering_result["memberships"]

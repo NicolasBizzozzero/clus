@@ -16,7 +16,7 @@ _CLUSTER_ID_DELETED = -1
 
 @remove_unexpected_arguments
 def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifier=2, batch_size=16_384, weights=None,
-                         max_epochs=32, min_centroid_size=10, max_centroid_diameter=1.0, linkage_method="simple",
+                         max_epochs=32, min_centroid_size=10, max_centroid_diameter=np.inf, linkage_method="simple",
                          initialization_method="random_choice", empty_clusters_method="nothing",
                          centroids=None, progress_bar=True):
     assert len(data.shape) == 2, "The data must be a 2D array"

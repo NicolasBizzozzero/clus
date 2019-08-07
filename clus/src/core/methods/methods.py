@@ -1,5 +1,5 @@
 from clus.src.core.methods import fuzzy_c_means, fuzzy_c_medoids, hard_c_medoids, kmeans, minibatch_kmeans, \
-    linearized_fuzzy_c_medoids, linearized_fuzzy_c_medoids_select
+    linearized_fuzzy_c_medoids, linearized_fuzzy_c_medoids_select, fuzzy_c_means_select
 from clus.src.core.methods.density_based.dbscan import dbscan
 from clus.src.core.methods.density_based.optics import optics
 
@@ -11,6 +11,7 @@ ALIASES_FUZZY_C_MEANS = ("fuzzy_c_means", "fcm")
 ALIASES_POSSIBILISTIC_C_MEANS = ("possibilistic_c_means", "pcm")
 ALIASES_FUZZY_C_MEDOIDS = ("fuzzy_c_medoids", "fcmdd")
 ALIASES_HARD_C_MEDOIDS = ("hard_c_medoids", "hcmdd")
+ALIASES_FUZZY_C_MEANS_SELECT = ("fcms", "fuzzy_c_means_select",)
 ALIASES_LINEARIZED_FUZZY_C_MEDOIDS = ("linearized_fuzzy_c_medoids", "lfcmdd", "l_fc_med")
 ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = ("linearized_fuzzy_c_medoids_select", "l_fcmed_select")
 ALIASES_DATASTREAM_LINEARIZED_FUZZY_C_MEDOIDS_SELECT = ("datastream_linearized_fuzzy_c_medoids_select",
@@ -72,6 +73,8 @@ def get_clustering_function(string):
         return fuzzy_c_medoids
     elif string in ALIASES_HARD_C_MEDOIDS:
         return hard_c_medoids
+    elif string in ALIASES_FUZZY_C_MEANS_SELECT:
+        return fuzzy_c_means_select
     elif string in ALIASES_LINEARIZED_FUZZY_C_MEDOIDS:
         return linearized_fuzzy_c_medoids
     elif string in ALIASES_LINEARIZED_FUZZY_C_MEDOIDS_SELECT:
