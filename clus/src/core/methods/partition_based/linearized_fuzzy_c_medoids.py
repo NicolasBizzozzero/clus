@@ -121,6 +121,7 @@ def linearized_fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         "ambiguity": ambiguity(best_memberships),
         "partition_coefficient": partition_coefficient(best_memberships),
         "partition_entropy": partition_entropy(best_memberships),
+        "extended_time": progress_bar.last_print_t - progress_bar.start_t,
     }
 
 

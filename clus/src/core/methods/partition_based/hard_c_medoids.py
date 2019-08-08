@@ -103,6 +103,7 @@ def hard_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         "clusters_center": data[best_medoids_idx, :],
         "losses": np.array(losses),
         "affectations": best_memberships.argmax(axis=1),
+        "extended_time": progress_bar.last_print_t - progress_bar.start_t,
     }
 
 

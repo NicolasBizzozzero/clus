@@ -127,6 +127,7 @@ def fuzzy_c_medoids(data, distance_matrix, components=10, eps=1e-4,
         "clusters_center": data[best_medoids_idx, :],
         "clusters_id": clusters_id,
         "losses": np.array(losses),
+        "extended_time": progress_bar.last_print_t - progress_bar.start_t,
 
         # Evaluation : Memberships matrix
         "ambiguity": ambiguity(best_memberships),

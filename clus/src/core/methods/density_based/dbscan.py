@@ -48,7 +48,8 @@ def dbscan(data, eps=1e-6, min_samples=3, weights=None):
 
     return {
         "affectations": affectations,
-        "number_of_clusters": np.unique(affectations).size
+        "number_of_clusters": np.unique(affectations).size,
+        "extended_time": progress_bar.last_print_t - progress_bar.start_t
     }
 
 

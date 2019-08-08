@@ -108,6 +108,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
         "clusters_center": best_centroids,
         "clusters_id": clusters_id,
         "losses": np.array(losses),
+        "extended_time": progress_bar.last_print_t - progress_bar.start_t,
 
         # Evaluation : Memberships matrix
         "ambiguity": ambiguity(best_memberships),
