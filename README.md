@@ -62,6 +62,11 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ** https://davetang.org/muse/2017/09/21/adjusted-rand-index/
 * Trouver meilleure coupe HC :
 ** https://www.sciencedirect.com/science/article/pii/S0031320310001974
+* Etudier d'autres méthodes de normalisation, leurs effets et leurs buts
+** https://en.wikipedia.org/wiki/Normalization_(statistics)
+** https://en.wikipedia.org/wiki/Feature_scaling
+** https://sebastianraschka.com/Articles/2014_about_feature_scaling.html
+
 
 ## References
 * [1] R. Krishnapuram ; A. Joshi ; O. Nasraoui ; L. Yi, Low-complexity fuzzy relational clustering algorithms for Web mining,  IEEE Transactions on Fuzzy Systems (Volume: 9, Issue: 4, Aug 2001), p595-607, DOI: 10.1109/91.940971

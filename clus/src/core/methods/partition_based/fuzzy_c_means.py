@@ -1,3 +1,6 @@
+import os
+import sys
+
 import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn.metrics import silhouette_samples, silhouette_score, calinski_harabasz_score, davies_bouldin_score
@@ -70,7 +73,8 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
     if centroids is None:
         centroids = cluster_initialization(data, components, initialization_method, need_idx=False)
 
-    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR, disable=not progress_bar) as progress_bar:
+    with tqdm(total=max_iter, bar_format=_FORMAT_PROGRESS_BAR,
+              file=sys.stderr if progress_bar else open(os.devnull, 'w')) as progress_bar:
         best_memberships = None
         best_centroids = None
         best_loss = np.inf
@@ -98,6 +102,7 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
                 "loss": "{0:.6f}".format(loss),
                 "best_loss": "{0:.6f}".format(best_loss)
             })
+    progress_bar.fp.close()
 
     affectations = best_memberships.argmax(axis=1)
     clusters_id, clusters_cardinal = np.unique(affectations, return_counts=True)

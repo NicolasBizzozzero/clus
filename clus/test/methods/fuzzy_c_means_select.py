@@ -16,8 +16,8 @@ from clus.src.utils.random import set_manual_seed
 from clus.src.core.normalization import normalization as normalize
 
 
-PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
-# PATH_DIR_DATA = r"D:\work\projects\_data\processed"
+# PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
+PATH_DIR_DATA = r"D:\work\projects\_data\processed"
 # PATH_DIR_DATA = r"C:\Users\Nicolas\Documents\data"
 
 # PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
@@ -26,13 +26,13 @@ PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 500
+    components = 100
     eps = 1e-4
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 10000
+    batch_size = 1000
     max_epochs = 100
-    min_centroid_size = 20
+    min_centroid_size = 5
     max_centroid_diameter = 0.05  # np.inf
     linkage_method = "single"
     normalization = "rescaling"
