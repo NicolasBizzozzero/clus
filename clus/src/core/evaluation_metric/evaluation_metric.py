@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn import metrics
 
 from sklearn.metrics import adjusted_mutual_info_score, fowlkes_mallows_score, homogeneity_completeness_v_measure, \
     homogeneity_score, mutual_info_score, normalized_mutual_info_score, v_measure_score
@@ -15,6 +16,8 @@ ALIASES_FOWLKES_MALLOWS_INDEX = ("fmi", "fowlkes_mallows_index")
 ALIASES_HOMOGENEITY = ("homogeneity",)
 ALIASES_MUTUAL_INFO = ("mi", "mutual_info")
 ALIASES_NORMALIZED_MUTUAL_INFO = ("nmi", "normalized_mutual_info")
+ALIASES_PURITY = ("purity",)
+ALIASES_INVERSE_PURITY = ("inverse_purity",)
 ALIASES_V_MEASURE = ("v", "v_measure")
 ALIASES_N11 = ("n11", "a")
 ALIASES_N10 = ("n10", "b")
@@ -72,6 +75,18 @@ def mutual_information(affectations_true, affectations_pred):
 @remove_unexpected_arguments
 def normalized_mutual_information(affectations_true, affectations_pred, average_method="arithmetic"):
     return normalized_mutual_info_score(affectations_true, affectations_pred, average_method=average_method)
+
+
+@remove_unexpected_arguments
+def purity(affectations_true, affectations_pred):
+    confusion_matrix = sklearn_contingency_matrix(affectations_true, affectations_pred)
+    return np.sum(np.amax(contingency_matrix, axis=0)) / np.sum(confusion_matrix)
+
+
+@remove_unexpected_arguments
+def inverse_purity(affectations_true, affectations_pred):
+    confusion_matrix = sklearn_contingency_matrix(affectations_true, affectations_pred)
+    return np.sum(np.amax(contingency_matrix, axis=1)) / np.sum(confusion_matrix)
 
 
 @remove_unexpected_arguments
@@ -161,6 +176,10 @@ def _str_to_evaluation_metric(string):
         return mutual_information
     if string in ALIASES_NORMALIZED_MUTUAL_INFO:
         return normalized_mutual_information
+    if string in ALIASES_PURITY:
+        return purity
+    if string in ALIASES_INVERSE_PURITY:
+        return inverse_purity
     if string in ALIASES_V_MEASURE:
         return v_measure
     if string in ALIASES_N11:
