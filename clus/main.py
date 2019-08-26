@@ -448,12 +448,12 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 @click.option("--path-dir-dest", default="results", show_default=True, type=str,
               help="Path to the directory containing all saved results (logs, plots, ...). Will be created if it does "
                    "not already exists.")
-@click.option("--format-filename-dest-z", default="z_{dataset_name}", show_default=True, type=str,
+@click.option("--format-filename-dest-z", default="z_{dataset_name}_{linkage_method}", show_default=True, type=str,
               help="Format of the destination filename for the z matrix. Variables need to be enclosed in brackets. "
-                   "Possible variables are : {dataset_name}.")
-@click.option("--format-filename-dest-f", default="f_{dataset_name}", show_default=True, type=str,
+                   "Possible variables are : {dataset_name}, {linkage_method}.")
+@click.option("--format-filename-dest-f", default="f_{dataset_name}_{linkage_method}", show_default=True, type=str,
               help="Format of the destination filename for the flat clustering vector. Variables need to be enclosed "
-                   "in brackets. Possible variables are : {dataset_name}.")
+                   "in brackets. Possible variables are : {dataset_name}, {linkage_method}.")
 def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, distance_metric, weights, linkage_method,
           save_z, save_flat_clusters, flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram,
           depth_cut, seed, normalization, quiet, path_dir_dest, format_filename_dest_z, format_filename_dest_f):
@@ -523,23 +523,24 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 
         if save_z:
             file_name = format_filename_dest_z.format(
-                dataset_name=dataset_name
+                dataset_name=dataset_name,
+                linkage_method=linkage_method
             )
             dir_file_linkage_mtx = os.path.join(path_dir_dest, file_name)
             np.save(dir_file_linkage_mtx, linkage_mtx)
 
         if save_flat_clusters:
-            flat_clusters = fcluster(
-                linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
+            flat_clusters = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
             file_name = format_filename_dest_f.format(
-                dataset_name=dataset_name
+                dataset_name=dataset_name,
+                linkage_method=linkage_method
             )
             dir_file_linkage_mtx = os.path.join(path_dir_dest, file_name)
             np.save(dir_file_linkage_mtx, flat_clusters)
 
         if visualise or save_dendrogram:
             plot_dendrogram(linkage_mtx=linkage_mtx, depth_cut=depth_cut, dataset_name=dataset_name,
-                            show=visualise, save=save_dendrogram)
+                            linkage_method=linkage_method, show=visualise, save=save_dendrogram)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
