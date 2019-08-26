@@ -396,6 +396,9 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 @click.option("--weights", cls=OptionInfiniteArgs,
               help="Weights used for the \"weighted_euclidean\" distance. You need as much weights as you have "
                    "features in your data.")
+@click.option("--linkage-method", type=str, default="single", show_default=True,
+              help="The linkage algorithm to use for hierarchical clustering. Available methods are listed here : "
+                   "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html")
 @click.option("--save-z", is_flag=True,
               help="Set this flag if you want to save the Z matrix containing the hierarchical clustering result. A "
                    "(n - 1) by 4 matrix Z is then saved. At the i-th iteration, clusters with indices Z[i, 0] and "
@@ -451,9 +454,9 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 @click.option("--format-filename-dest-f", default="f_{dataset_name}", show_default=True, type=str,
               help="Format of the destination filename for the flat clustering vector. Variables need to be enclosed "
                    "in brackets. Possible variables are : {dataset_name}.")
-def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, distance_metric, weights, save_z,
-          save_flat_clusters, flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram, depth_cut, seed,
-          normalization, quiet, path_dir_dest, format_filename_dest_z, format_filename_dest_f):
+def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, distance_metric, weights, linkage_method,
+          save_z, save_flat_clusters, flat_clusters_criterion, flat_clusters_value, visualise, save_dendrogram,
+          depth_cut, seed, normalization, quiet, path_dir_dest, format_filename_dest_z, format_filename_dest_f):
     parameters = locals()
     del parameters["datasets"]
 
@@ -511,9 +514,9 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
 
             # Compute linkage
             if distance_mtx is not None:
-                linkage_mtx = linkage_pairwise_single(distance_mtx)
+                linkage_mtx = linkage(distance_mtx, method=linkage_method)
             else:
-                linkage_mtx = linkage(data)
+                linkage_mtx = linkage(data, method=linkage_method)
 
         # Create destination directory if it does not already exists
         os.makedirs(path_dir_dest, exist_ok=True)
