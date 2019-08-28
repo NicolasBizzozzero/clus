@@ -6,7 +6,7 @@ from scipy.spatial.distance import pdist, cdist
 from tqdm import tqdm
 
 from clus.src.utils.array import flatten_id
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.utils.decorator import remove_unexpected_arguments, wrap_max_memory_consumption
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_epochs, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
@@ -14,45 +14,10 @@ _LABEL_UNASSIGNED = -1
 _CLUSTER_ID_DELETED = -1
 
 
-# TODO: Reparer ça :
-# """
-# PS D:\work\projects\clus> clus ..\_data\processed\rhocut-filtered-1e02.csv fcms --seed 4 --header --visualise-3d --no
-# rmalization rescaling
-# Starting clustering with the following parameters : {'datasets': ('..\\_data\\processed\\rhocut-filtered-1e02.csv',), 'clustering_algorithm': 'fcms', 'file_type': 'guess', 'delimiter': ',', 'header': True, 'array_name': None, 'initialization_method': 'random_choice', 'empty_clusters_method': 'nothing', 'components': 5, 'eps': 1e-06, 'max_iter': 1000, 'fuzzifier': 2.0, 'pairwise_distance': 'euclidean', 'weights': None, 'max_epochs': 128, 'batch_size': 1000, 'membership_subset_size': None, 'min_centroid_size': None, 'max_centroid_diameter': inf, 'linkage_method': 'single', 'save_clus': False, 'keep_memberships': False, 'visualise': False, 'visualise_3d': True, 'save_visu': False, 'save_visu_3d': False, 'seed': 4, 'normalization': 'rescaling', 'quiet': False, 'disable_progress_bar': False, 'path_dir_dest': 'results', 'format_filename_dest_results': '{dataset}_{clustering_algorithm}_{components}_{fuzzifier}_{seed}_{distance}', 'format_filename_dest_visu': '{dataset}_{clustering_algorithm}_{components}_{fuzzifier}_{seed}_{distance}', 'format_filename_dest_visu_3d': '{dataset}_{clustering_algorithm}_{components}_{fuzzifier}_{seed}_{distance}_3d', 'zero_fill_components': 3, 'zero_fill_seed': 3, 'zero_fill_weights': 3, 'zero_fill_fuzzifier': 3, 'url_scp': None}
-# 8/128 max_epochs, elapsed:00:03, ETA:00:47, clusters_found=19, affected_data=60278/60814
-# Traceback (most recent call last):
-#   File "c:\program files\python37\lib\runpy.py", line 193, in _run_module_as_main
-#     "__main__", mod_spec)
-#   File "c:\program files\python37\lib\runpy.py", line 85, in _run_code
-#     exec(code, run_globals)
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\Scripts\clus.exe\__main__.py", line 9, in <module>
-#   File "c:\program files\python37\lib\site-packages\click\core.py", line 764, in __call__
-#     return self.main(*args, **kwargs)
-#   File "c:\program files\python37\lib\site-packages\click\core.py", line 717, in main
-#     rv = self.invoke(ctx)
-#   File "c:\program files\python37\lib\site-packages\click\core.py", line 956, in invoke
-#     return ctx.invoke(self.callback, **ctx.params)
-#   File "c:\program files\python37\lib\site-packages\click\core.py", line 555, in invoke
-#     return callback(*args, **kwargs)
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\site-packages\clus\main.py", line 277, in clus
-#     progress_bar=not disable_progress_bar
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\site-packages\clus\src\utils\decorator.py", line 21, in wrapper
-#     return func(*args, **new_kwargs)
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\site-packages\clus\src\core\methods\iterative\fuzzy_c_means_select.py", line 89, in fuzzy_c_means_select
-#     empty_clusters_method=empty_clusters_method, progress_bar=False
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\site-packages\clus\src\utils\decorator.py", line 21, in wrapper
-#     return func(*args, **new_kwargs)
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\site-packages\clus\src\core\methods\partition_based\fuzzy_c_means.py", line 83, in fuzzy_c_means
-#     memberships = _compute_memberships(data, centroids, fuzzifier)
-#   File "C:\Users\Nicolas\AppData\Roaming\Python\Python37\site-packages\clus\src\core\methods\partition_based\fuzzy_c_means.py", line 137, in _compute_memberships
-#     res = np.divide(tmp, big_sum, where=~np.isclose(big_sum, 0))
-# RuntimeWarning: underflow encountered in true_divide
-# """
-
-
+@wrap_max_memory_consumption
 @remove_unexpected_arguments
 def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifier=2, batch_size=16_384, weights=None,
-                         max_epochs=32, min_centroid_size=10, max_centroid_diameter=np.inf, linkage_method="simple",
+                         max_epochs=32, min_centroid_size=10, max_centroid_diameter=np.inf, linkage_method="single",
                          initialization_method="random_choice", empty_clusters_method="nothing",
                          centroids=None, progress_bar=True):
     assert len(data.shape) == 2, "The data must be a 2D array"

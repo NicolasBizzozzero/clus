@@ -11,7 +11,10 @@ from sklearn.neighbors import NearestNeighbors
 from scipy.stats import chisquare as sci_chisquare
 from scipy.stats import poisson
 
+from clus.src.utils.decorator import wrap_max_memory_consumption
 
+
+@wrap_max_memory_consumption
 def dbclasd(data):
     """ Implementation of the DBCLASD clustering algorithm.
     :param data: input points as 2D-array where the first axis is the number of points and the second, the dimensions

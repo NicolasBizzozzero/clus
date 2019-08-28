@@ -10,11 +10,12 @@ from tqdm import tqdm
 from clus.src.core.analysis import ambiguity, partition_coefficient, partition_entropy, clusters_diameter
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.core.handle_empty_clusters import handle_empty_clusters
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.utils.decorator import remove_unexpected_arguments, wrap_max_memory_consumption
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 
+@wrap_max_memory_consumption
 @remove_unexpected_arguments
 def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, weights=None,
                   initialization_method="random_choice", empty_clusters_method="nothing",

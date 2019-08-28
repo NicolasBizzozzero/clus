@@ -2,9 +2,10 @@ import numpy as np
 
 from sklearn.cluster import OPTICS
 
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.utils.decorator import remove_unexpected_arguments, wrap_max_memory_consumption
 
 
+@wrap_max_memory_consumption
 @remove_unexpected_arguments
 def optics(data, min_samples=3, max_eps=np.inf, weights=None):
     assert len(data.shape) == 2, "The data must be a 2D array"

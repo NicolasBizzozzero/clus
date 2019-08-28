@@ -6,13 +6,14 @@ from scipy.spatial.distance import cdist
 
 from clus.src.core.cluster_initialization import cluster_initialization
 from clus.src.utils.array import mini_batches_dist
-from clus.src.utils.decorator import remove_unexpected_arguments
+from clus.src.utils.decorator import remove_unexpected_arguments, wrap_max_memory_consumption
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} max_iter, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
 _DEFAULT_MEMBERSHIP_SUBSET_SIZE_PERCENT = 0.1
 
 
+@wrap_max_memory_consumption
 @remove_unexpected_arguments
 def linearized_fuzzy_c_medoids_select(data, distance_matrix, components=1000,
                                       eps=1e-4, max_iter=100, fuzzifier=2,

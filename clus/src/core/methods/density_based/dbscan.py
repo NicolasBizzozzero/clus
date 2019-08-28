@@ -5,8 +5,7 @@ import numpy as np
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 
-from clus.src.utils.decorator import remove_unexpected_arguments
-
+from clus.src.utils.decorator import remove_unexpected_arguments, wrap_max_memory_consumption
 
 _FORMAT_PROGRESS_BAR = r"{n_fmt}/{total_fmt} examples, elapsed:{elapsed}, ETA:{remaining}{postfix}"
 
@@ -16,6 +15,7 @@ _LABEL_NOISE = -1
 
 # TODO: Implement shuffle
 
+@wrap_max_memory_consumption
 @remove_unexpected_arguments
 def dbscan(data, eps=1e-6, min_samples=3, shuffle=False, weights=None):
     global _LABEL_UNASSIGNED, _LABEL_NOISE
