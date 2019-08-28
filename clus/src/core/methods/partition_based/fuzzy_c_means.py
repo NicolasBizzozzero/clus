@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -136,7 +137,11 @@ def _compute_memberships(data, centroids, fuzzifier):
     dist_data_centroids = cdist(data, centroids, metric="euclidean")
     tmp = np.power(dist_data_centroids, -2 / (fuzzifier - 1), where=~np.isclose(dist_data_centroids, 0))
     big_sum = tmp.sum(axis=1, keepdims=True)
-    res = np.divide(tmp, big_sum, where=~np.isclose(big_sum, 0))
+
+    # TODO: Sometimes, Underflow warning occurs randomly. Find why.
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', "underflow encountered in true_divide")
+        res = np.divide(tmp, big_sum, where=~np.isclose(big_sum, 0))
 
     # If an example is at the exact same coordinates than a centroid (euclidean distance == 0), set its membership to
     # 1, and the memberships of others to 0. See [3]

@@ -5,6 +5,7 @@ from sklearn.datasets import load_iris
 
 from clus.src.core.methods.partition_based.fuzzy_c_means import _compute_centroids, _compute_loss, _compute_memberships, __compute_centroids, __compute_loss, __compute_memberships
 from clus.src.core.cluster_initialization import random_choice
+from clus.src.utils.random import set_manual_seed
 
 
 def test_compute_memberships():
@@ -52,13 +53,6 @@ def test_compute_loss():
 
     true_loss = __compute_loss(data, true_memberships, true_centroids, fuzzifier)
     loss = _compute_loss(data, true_memberships, true_centroids, fuzzifier)
-    loss_skfuzzy = compute_loss_skfuzzy(data.T, true_memberships.T, components, fuzzifier)
-
-    print("loss true    :", true_loss)
-    print("loss clus    :", compute_loss_clus(data, true_memberships, true_centroids, fuzzifier))
-    print("loss skfuzzy :", loss_skfuzzy)
-
-    assert loss_skfuzzy == 104.12778851148951
 
     assert np.isclose(true_loss, loss)
 
@@ -84,5 +78,15 @@ def compute_loss_skfuzzy(data, memberships, components, fuzzifier):
     return (um * d ** 2).sum()
 
 
+# TODO: delete
+def test_hyperclustering():
+    pass
+
 if __name__ == "__main__":
-    test_compute_loss()
+    from tqdm import tqdm
+
+    for seed in tqdm(range(1000)):
+        set_manual_seed(seed)
+        test_compute_memberships()
+        test_compute_centroids()
+        test_compute_loss()

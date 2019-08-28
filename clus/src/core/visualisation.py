@@ -139,7 +139,7 @@ def visualise_clustering_loss(losses, show=True):
         plt.show()
 
 
-def plot_dendrogram(linkage_mtx, depth_cut, dataset_name=None, title=None,
+def plot_dendrogram(linkage_mtx, depth_cut, dataset_name=None, title=None, linkage_method=None,
                     dpi=1000, show=True, save=True):
     # Plot the dendrogram
     fig, ax = plt.subplots()
@@ -151,13 +151,15 @@ def plot_dendrogram(linkage_mtx, depth_cut, dataset_name=None, title=None,
 
     if title is None:
         if dataset_name is None:
-            title = "Dendrogram of the hierarchical clustering with parameters : p={p}".format(
-                p=depth_cut
+            title = "Dendrogram of the hierarchical clustering with parameters : p={p}, linkage_method={linkage_method}".format(
+                p=depth_cut,
+                linkage_method=linkage_method
             )
         else:
-            title = "Dendrogram of the hierarchical clustering computed from {dataset} with parameters : p={p}".format(
+            title = "Dendrogram of the hierarchical clustering computed from {dataset} with parameters : p={p}, linkage_method={linkage_method}".format(
                 dataset=dataset_name,
-                p=depth_cut
+                p=depth_cut,
+                linkage_method=linkage_method
             )
     plt.title("\n".join(wrap(title, _TITLE_WRAP_SIZE)))
     plt.xlabel("fusion_cost")

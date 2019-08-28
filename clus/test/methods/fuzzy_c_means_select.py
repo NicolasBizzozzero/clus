@@ -17,8 +17,10 @@ from clus.src.core.normalization import normalization as normalize
 
 
 # PATH_DIR_DATA = r"/local/bizzozzero/data/hyperstars/processed/n02_pw05_vs07"
-PATH_DIR_DATA = r"D:\work\projects\_data\processed"
 # PATH_DIR_DATA = r"C:\Users\Nicolas\Documents\data"
+# PATH_DIR_DATA = r"D:\work\projects\_data\processed"
+
+PATH_DIR_DATA = r"D:\work\projects\_data\hyperclustering"
 
 # PATH_DIR_RESULTS = r"/local/bizzozzero/results/clustering"
 
@@ -32,17 +34,17 @@ def test(seed):
     fuzzifier = 2.0
     batch_size = 1000
     max_epochs = 100
-    min_centroid_size = 5
+    min_centroid_size = 15
     max_centroid_diameter = 0.05  # np.inf
     linkage_method = "single"
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
 
-    data = pd.read_csv(os.path.join(PATH_DIR_DATA, "rhocut-filtered-1e02.csv"),
-                       header=0).values
+    # data = pd.read_csv(os.path.join(PATH_DIR_DATA, "rhocut-filtered-1e02.csv"), header=0).values
+    data = np.load(os.path.join(PATH_DIR_DATA, "gauss_3_100000_densityequals.npz"))["data"]
     data = data.astype(np.float64)
     normalize(data, strategy=normalization)
-    data *= np.sqrt(weights)
+    # data *= np.sqrt(weights)
 
     clus_results = \
         fuzzy_c_means_select(data, components=components, eps=eps, max_iter=max_iter, fuzzifier=fuzzifier,
@@ -51,14 +53,20 @@ def test(seed):
                              initialization_method="random_choice",
                              empty_clusters_method="nothing", centroids=None, progress_bar=True)
 
+    print("finito")
+
     affectations = clus_results["affectations"]
-    affectations_hc = fcluster(clus_results["linkage_matrix"], criterion="maxclust", t=31)
+    affectations_hc = fcluster(clus_results["linkage_matrix"], criterion="maxclust", t=3)
     merge_affectations(affectations, affectations_hc)
 
-    _plot_clus_rhocut(data=data, affectations=affectations,
-                      dataset_name="rhocut-(c={},b={},e={},l={},mcs={})".format(
-                          components, batch_size, max_epochs, linkage_method, min_centroid_size
-                      ))
+    visualise_clustering_2d(data, clusters_center=None, affectations=affectations,
+                            clustering_method="fcm-select",
+                            dataset_name="aaaa", header=None,
+                            show=True, save=False, saving_path=None)
+    # _plot_clus_rhocut(data=data, affectations=affectations,
+    #                   dataset_name="rhocut-(c={},b={},e={},l={},mcs={})".format(
+    #                       components, batch_size, max_epochs, linkage_method, min_centroid_size
+    #                   ))
 
 
 def test_fcm(seed):

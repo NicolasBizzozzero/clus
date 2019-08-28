@@ -14,8 +14,10 @@ _LABEL_UNASSIGNED = -2
 _LABEL_NOISE = -1
 
 
+# TODO: Implement shuffle
+
 @remove_unexpected_arguments
-def dbscan(data, eps=1e-6, min_samples=3, weights=None):
+def dbscan(data, eps=1e-6, min_samples=3, shuffle=False, weights=None):
     global _LABEL_UNASSIGNED, _LABEL_NOISE
 
     assert len(data.shape) == 2, "The data must be a 2D array"
