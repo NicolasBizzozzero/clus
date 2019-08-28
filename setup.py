@@ -71,6 +71,7 @@ setup(
     install_requires=[
         "click >= 7.0",
         "matplotlib >= 3.0.3",
+        "memory-profiler >= 0.55.0"
         "numpy >= 1.16.1",
         "pandas >= 0.24.1",
         "scikit-learn >= 0.20.2",
