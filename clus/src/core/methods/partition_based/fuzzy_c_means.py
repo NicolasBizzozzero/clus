@@ -118,16 +118,16 @@ def fuzzy_c_means(data, components=10, eps=1e-4, max_iter=1000, fuzzifier=2, wei
         "extended_time": progress_bar.last_print_t - progress_bar.start_t,
 
         # Evaluation : Memberships matrix
-        "ambiguity": ambiguity(best_memberships),
-        "partition_coefficient": partition_coefficient(best_memberships),
-        "partition_entropy": partition_entropy(best_memberships),
+        # TODO: remove "ambiguity": ambiguity(best_memberships),
+        # TODO: remove "partition_coefficient": partition_coefficient(best_memberships),
+        # TODO: remove "partition_entropy": partition_entropy(best_memberships),
 
         # Evaluation : Clusters center
         "clusters_diameter": clusters_diameter(data, affectations, clusters_id),
         "clusters_cardinal": clusters_cardinal,
 
         # Evaluation : Affectations
-        "silhouette_samples": silhouette_samples(data, affectations),
+        # TODO: remove "silhouette_samples": silhouette_samples(data, affectations),
         "silhouette": silhouette_score(data, affectations),
         "variance_ratio": calinski_harabasz_score(data, affectations),
         "davies_bouldin": davies_bouldin_score(data, affectations)

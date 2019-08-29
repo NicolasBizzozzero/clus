@@ -28,14 +28,14 @@ PATH_DIR_DATA = r"D:\work\projects\_data\hyperclustering"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 500
-    eps = 1e-4
+    components = 50
+    eps = 1e-5
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 5000
+    batch_size = 1000
     max_epochs = 100
-    min_centroid_size = 60
-    max_centroid_diameter = np.inf
+    min_centroid_size = 5
+    max_centroid_diameter = 0.1
     linkage_method = "complete"
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
@@ -56,6 +56,12 @@ def test(seed):
     print("finito")
 
     affectations = clus_results["affectations"]
+
+    visualise_clustering_2d(data, clusters_center=None, affectations=affectations,
+                            clustering_method="fcm-select",
+                            dataset_name="aaaa", header=None,
+                            show=True, save=False, saving_path=None)
+
     affectations_hc = fcluster(clus_results["linkage_matrix"], criterion="maxclust", t=3)
     merge_affectations(affectations, affectations_hc)
 
