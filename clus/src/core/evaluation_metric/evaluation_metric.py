@@ -25,6 +25,10 @@ ALIASES_N01 = ("n01", "c")
 ALIASES_N00 = ("n00", "d")
 
 
+# TODO: Implement all of theses : https://en.wikipedia.org/wiki/Confusion_matrix, maybe make a master functions
+#  computing confusion matrix then computing all scores at once.
+# TODO: Rename n11, n10, ... as TP, TN, ... Precises their common nicknames (TP, n11, a), ....
+
 class UnknownEvaluationMetric(Exception):
     def __init__(self, metric_name):
         Exception.__init__(self, "The evaluation metric \"{metric_name}\" doesn't exists".format(

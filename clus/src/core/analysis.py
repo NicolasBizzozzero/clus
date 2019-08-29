@@ -33,10 +33,6 @@ def partition_entropy(memberships):
     return -(memberships * np.log(memberships, where=memberships != 0) / memberships.shape[0]).sum()
 
 
-def entropy():
-    pass
-
-
 def cluster_diameter(cluster):
     """ Computer the diameter of a cluster, defined as the maximal pairwise distance between all its points. """
     pairwise_distances = pdist(cluster, metric="euclidean")

@@ -66,6 +66,16 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ** https://en.wikipedia.org/wiki/Normalization_(statistics)
 ** https://en.wikipedia.org/wiki/Feature_scaling
 ** https://sebastianraschka.com/Articles/2014_about_feature_scaling.html
+* Refactoring de l'architecture du code:
+** clus.methods, qui offre toutes les méthodes depuis ce module.
+** clus.preprocessing, qui offre les méthodes de normalisation, et de pondération
+** clus.visualisation
+** clus.evaluation
+** clus.loading, toutes les méthodes de chargement des données
+* Changer la façon dont les paramètres du clustering sont stockés et dont les résultats sont sauvegardés.
+** Virer tous les params liés au nom de fichier. Ne garder que "file-name-prefix", et ajouter un UUID comme nom de fichier.
+** Stocker tous les paramètres de clustering dans le dictionnaire résultats. clef "params".
+** Maintenant que j'écris ça, je me rends compte que sacred serait peut etre plus approprié pour la gestion des résultats.
 
 
 ## References

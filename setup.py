@@ -70,13 +70,13 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "click >= 7.0",
-        "matplotlib >= 3.0.3",
-        "memory-profiler >= 0.55.0"
-        "numpy >= 1.16.1",
-        "pandas >= 0.24.1",
-        "scikit-learn >= 0.20.2",
-        "scipy >= 1.2.1",
-        "tqdm >= 4.31.1"
+        "matplotlib >= 3.1.1",
+        "memory-profiler >= 0.55.0",
+        "numpy >= 1.17.0",
+        "pandas >= 0.25.0",
+        "scikit-learn >= 0.21.3",
+        "scipy >= 1.3.0",
+        "tqdm >= 4.32.2"
     ],
 
     # List additional groups of dependencies here (e.g. development
