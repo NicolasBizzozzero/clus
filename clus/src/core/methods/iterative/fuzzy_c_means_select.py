@@ -80,7 +80,8 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 break
             if not_affected_data_idx.size < batch_size:
                 # No more data to process for a batch
-                batch_size = not_affected_data_idx.size
+                # batch_size = not_affected_data_idx.size
+                break
 
             # Sample a random batch of new data (or previously discarded data)
             batch_data_idx = np.random.choice(not_affected_data_idx, size=batch_size, replace=False)
@@ -141,7 +142,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 "affected_data": "{}/{}".format(stats_epoch["affected_data_per_epoch"][-1], affectations.shape[0])
             })
 
-    affectations = flatten_id(affectations)
+    # affectations = flatten_id(affectations)
     clusters_centers = np.array(clusters_centers)
     if len(clusters_centers) == 0:
         print("No good clusters centers found after filtering. Try lowering the restrictions on the parameters "
@@ -178,7 +179,7 @@ def _unaffected_data_allocation(data, affectations, batch_good_clusters_centers,
     distance_data_centroids = cdist(unassigned_data, batch_good_clusters_centers, metric="euclidean")
 
     batch_good_clusters_radius = clus_result["clusters_diameter"][batch_good_clusters_id - min_cluster_id] / 2
-    for i in range(len(unassigned_data_idx)):
+    for i, idx in enumerate(unassigned_data_idx):
         # Retrieve centroids matching their radius condition wrt the data
         mask_centroids = distance_data_centroids[i, :] < batch_good_clusters_radius
         idx_centroids = np.where(mask_centroids)[0]
@@ -189,7 +190,7 @@ def _unaffected_data_allocation(data, affectations, batch_good_clusters_centers,
             idx_closest_centroid = batch_good_clusters_id[idx_closest_centroid]
 
             # Assign data point to this centroid
-            affectations[i] = idx_closest_centroid
+            affectations[idx] = idx_closest_centroid
 
 
 if __name__ == '__main__':

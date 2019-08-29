@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import sklearn
 from scipy.cluster.hierarchy import fcluster
 from scipy.spatial.distance import cdist
 from scipy.cluster.hierarchy import linkage
@@ -28,14 +29,14 @@ PATH_DIR_DATA = r"D:\work\projects\_data\hyperclustering"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 50
+    components = 200
     eps = 1e-5
-    max_iter = 100
+    max_iter = 15
     fuzzifier = 2.0
     batch_size = 1000
-    max_epochs = 100
-    min_centroid_size = 5
-    max_centroid_diameter = 0.1
+    max_epochs = 20
+    min_centroid_size = 10
+    max_centroid_diameter = 0.3
     linkage_method = "complete"
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
@@ -53,8 +54,6 @@ def test(seed):
                              initialization_method="random_choice",
                              empty_clusters_method="nothing", centroids=None, progress_bar=True)
 
-    print("finito")
-
     affectations = clus_results["affectations"]
 
     visualise_clustering_2d(data, clusters_center=None, affectations=affectations,
@@ -69,6 +68,7 @@ def test(seed):
                             clustering_method="fcm-select",
                             dataset_name="aaaa", header=None,
                             show=True, save=False, saving_path=None)
+
     # _plot_clus_rhocut(data=data, affectations=affectations,
     #                   dataset_name="rhocut-(c={},b={},e={},l={},mcs={})".format(
     #                       components, batch_size, max_epochs, linkage_method, min_centroid_size
