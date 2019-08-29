@@ -28,15 +28,15 @@ PATH_DIR_DATA = r"D:\work\projects\_data\hyperclustering"
 def test(seed):
     set_manual_seed(seed)
 
-    components = 100
+    components = 500
     eps = 1e-4
     max_iter = 100
     fuzzifier = 2.0
-    batch_size = 1000
+    batch_size = 5000
     max_epochs = 100
-    min_centroid_size = 15
-    max_centroid_diameter = 0.05  # np.inf
-    linkage_method = "single"
+    min_centroid_size = 60
+    max_centroid_diameter = np.inf
+    linkage_method = "complete"
     normalization = "rescaling"
     weights = [1, 1, 1, 0]
 

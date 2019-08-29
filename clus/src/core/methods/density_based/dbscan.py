@@ -3,6 +3,7 @@ import queue
 import numpy as np
 
 from scipy.spatial.distance import cdist
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from tqdm import tqdm
 
 from clus.src.utils.decorator import remove_unexpected_arguments, wrap_max_memory_consumption
@@ -51,7 +52,11 @@ def dbscan(data, eps=1e-6, min_samples=3, shuffle=False, weights=None):
     return {
         "affectations": affectations,
         "number_of_clusters": np.unique(affectations).size,
-        "extended_time": progress_bar.last_print_t - progress_bar.start_t
+        "extended_time": progress_bar.last_print_t - progress_bar.start_t,
+
+        "silhouette": silhouette_score(data, affectations),
+        "variance_ratio": calinski_harabasz_score(data, affectations),
+        "davies_bouldin": davies_bouldin_score(data, affectations)
     }
 
 

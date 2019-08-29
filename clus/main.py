@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import linkage, single as linkage_pairwise_single, fcluster
 from scipy.spatial.distance import pdist
+from sklearn.metrics import calinski_harabasz_score, silhouette_score, davies_bouldin_score
 from sklearn.neighbors.dist_metrics import DistanceMetric
 
 from clus.src.core.data_loading import load_data
@@ -25,6 +26,7 @@ from clus.src.core.saving_path import compute_file_saving_path_dclus
 from clus.src.core.visualisation import visualise_clustering_2d, visualise_clustering_3d, plot_dendrogram
 from clus.src.utils.click import OptionInfiniteArgs
 from clus.src.utils.common import str_to_number
+from clus.src.utils.decorator import wrap_max_memory_consumption
 from clus.src.utils.process import execute
 from clus.src.utils.random import set_manual_seed
 
@@ -482,41 +484,35 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
             if normalization is not None:
                 data = data.astype(np.float64)
                 normalize(data, strategy=normalization)
+            url_scp = "bizzozzero@gate.lip6.fr"
+            flat_clusters_criterion = "maxclus"
+            clus_results = hierarchical_clustering(data, distance_metric, weights, linkage_method,
+                                                   flat_clusters_criterion, flat_clusters_value, dataset, url_scp,
+                                                   path_dir_dest)
 
-            # Load distance
-            distance_mtx = None
-            distance_metric = distance_metric.lower()
-            if distance_metric == "euclidean":
-                pass
-            elif distance_metric == "weighted_euclidean":
-                assert weights is not None, \
-                    "You need to precise the --weights parameter for the 'weighted_euclidean' distance."
+            file_path = ntpath.basename(dataset) + "_" + "hc_" + linkage_method
+            visualise_clustering_2d(data=data,
+                                    clusters_center=None,
+                                    affectations=clus_results["affectations"],
+                                    clustering_method="hc_" + linkage_method,
+                                    dataset_name=ntpath.basename(dataset),
+                                    header=None,
+                                    saving_path=file_path + ".png",
+                                    show=False,
+                                    save=True)
+            if url_scp is not None:
+                execute("scp", file_path + ".png", url_scp if ":" in url_scp else (
+                        url_scp + ":" + path_dir_dest))
+                os.remove(file_path + ".png")
 
-                # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
-                # consideration
-                if isinstance(weights, tuple):
-                    weights = tuple(map(lambda s: str_to_number(s), weights))
-                else:
-                    weights = tuple(
-                        map(lambda s: str_to_number(s), weights.split(" ")))
+            np.savez_compressed(file_path + ".npz", **clus_results)
+            if url_scp is not None:
+                execute("scp", file_path + ".npz", url_scp if ":" in url_scp else (
+                    url_scp + ":" + path_dir_dest))
+                os.remove(file_path + ".npz")
 
-                # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into
-                # data weighted by the square root of the weights, see [5]
-                assert len(weights) == data.shape[1], \
-                    "You need as much weights as you have features in your data. Expected %d, got %d" % \
-                    (data.shape[1], len(weights))
-                data = data * np.sqrt(weights)
-            else:
-                # Apply a scipy pairwise distance (list of available methods here :
-                # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
-                # Returns a condensed distance matrix.
-                distance_mtx = pdist(data, distance_metric, w=weights)
-
-            # Compute linkage
-            if distance_mtx is not None:
-                linkage_mtx = linkage(distance_mtx, method=linkage_method)
-            else:
-                linkage_mtx = linkage(data, method=linkage_method)
+        # TODO: remove this, temporarely
+        exit(0)
 
         # Create destination directory if it does not already exists
         os.makedirs(path_dir_dest, exist_ok=True)
@@ -860,6 +856,61 @@ def eclus(metric, file_affectations_true, file_affectations_pred, name_affectati
     evaluate(metric=metric, affectations_true=affectations_true, affectations_pred=affectations_pred,
              average_method=average_method, eps=eps, sparse=sparse, beta=beta)
 
+
+@wrap_max_memory_consumption
+def hierarchical_clustering(data, distance_metric, weights, linkage_method, flat_clusters_criterion,
+                            flat_clusters_value, dataset, url_scp, path_dir_dest):
+    import time
+
+    t0 = time.time()
+    # Load distance
+    distance_mtx = None
+    distance_metric = distance_metric.lower()
+    if distance_metric == "euclidean":
+        pass
+    elif distance_metric == "weighted_euclidean":
+        assert weights is not None, \
+            "You need to precise the --weights parameter for the 'weighted_euclidean' distance."
+
+        # Sometimes weights are parse as a tuple, or as a string with space in them. Take both cases in
+        # consideration
+        if isinstance(weights, tuple):
+            weights = tuple(map(lambda s: str_to_number(s), weights))
+        else:
+            weights = tuple(
+                map(lambda s: str_to_number(s), weights.split(" ")))
+
+        # Applying weighted euclidean distance is equivalent to applying traditional euclidean distance into
+        # data weighted by the square root of the weights, see [5]
+        assert len(weights) == data.shape[1], \
+            "You need as much weights as you have features in your data. Expected %d, got %d" % \
+            (data.shape[1], len(weights))
+        data = data * np.sqrt(weights)
+    else:
+        # Apply a scipy pairwise distance (list of available methods here :
+        # https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.spatial.distance.pdist.html
+        # Returns a condensed distance matrix.
+        distance_mtx = pdist(data, distance_metric, w=weights)
+
+    # Compute linkage
+    if distance_mtx is not None:
+        linkage_mtx = linkage(distance_mtx, method=linkage_method)
+    else:
+        linkage_mtx = linkage(data, method=linkage_method)
+
+    affectations = fcluster(linkage_mtx, criterion=flat_clusters_criterion, t=flat_clusters_value)
+    t1 = time.time()
+    clustering_result = {
+        # Clustering results
+        "affectations": affectations,
+        "extended_time": t1 - t0,
+
+        # Evaluation : Affectations
+        "silhouette": silhouette_score(data, affectations),
+        "variance_ratio": calinski_harabasz_score(data, affectations),
+        "davies_bouldin": davies_bouldin_score(data, affectations)
+    }
+    return clustering_result
 
 if __name__ == '__main__':
     pass

@@ -3,6 +3,7 @@ import sys
 import numpy as np
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import pdist, cdist
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from tqdm import tqdm
 
 from clus.src.utils.array import flatten_id
@@ -159,7 +160,11 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         "clusters_found": clusters_centers.shape[0],
         "affected_data": (affectations != _LABEL_UNASSIGNED).sum(),
         "extended_time": progress_bar.last_print_t - progress_bar.start_t,
-        **stats_epoch
+        **stats_epoch,
+
+        "silhouette": silhouette_score(data, affectations),
+        "variance_ratio": calinski_harabasz_score(data, affectations),
+        "davies_bouldin": davies_bouldin_score(data, affectations)
     }
 
 
