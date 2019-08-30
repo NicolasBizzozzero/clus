@@ -55,6 +55,8 @@ def test(seed):
                              empty_clusters_method="nothing", centroids=None, progress_bar=True)
 
     affectations = clus_results["affectations"]
+    print(affectations)
+    print(affectations.shape)
 
     visualise_clustering_2d(data, clusters_center=None, affectations=affectations,
                             clustering_method="fcm-select",
@@ -62,9 +64,13 @@ def test(seed):
                             show=True, save=False, saving_path=None)
 
     affectations_hc = fcluster(clus_results["linkage_matrix"], criterion="maxclust", t=3)
-    merge_affectations(affectations, affectations_hc)
+    print(affectations_hc)
+    print(affectations_hc.shape)
+    new_affectations = merge_affectations(affectations, affectations_hc)
+    print(new_affectations)
+    print(new_affectations.shape)
 
-    visualise_clustering_2d(data, clusters_center=None, affectations=affectations,
+    visualise_clustering_2d(data, clusters_center=None, affectations=new_affectations,
                             clustering_method="fcm-select",
                             dataset_name="aaaa", header=None,
                             show=True, save=False, saving_path=None)
@@ -105,8 +111,10 @@ def _plot_clus_rhocut(data, affectations, dataset_name="rhocut"):
 
 
 def merge_affectations(affectations, affectations_hc):
-    for old_cluster_id, cluster_id in enumerate(affectations_hc):
-        affectations[affectations == old_cluster_id] = cluster_id
+    merged_affectations = np.full(fill_value=-1, shape=affectations.shape, dtype=np.int64)
+    for i in range(len(affectations_hc)):
+        merged_affectations[affectations == i] = affectations_hc[i]
+    return merged_affectations
 
 
 if __name__ == "__main__":

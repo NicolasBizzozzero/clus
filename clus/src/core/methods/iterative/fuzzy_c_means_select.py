@@ -1,7 +1,7 @@
 import sys
 
 import numpy as np
-from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import pdist, cdist
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from tqdm import tqdm
@@ -20,6 +20,7 @@ _CLUSTER_ID_DELETED = -1
 def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifier=2, batch_size=16_384, weights=None,
                          max_epochs=32, min_centroid_size=10, max_centroid_diameter=np.inf, linkage_method="single",
                          initialization_method="random_choice", empty_clusters_method="nothing",
+                         flat_clusters_criterion="maxclust", flat_clusters_value=None,
                          centroids=None, progress_bar=True):
     assert len(data.shape) == 2, "The data must be a 2D array"
     assert data.shape[0] > 0, "The data must have at least one example"
@@ -142,7 +143,7 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
                 "affected_data": "{}/{}".format(stats_epoch["affected_data_per_epoch"][-1], affectations.shape[0])
             })
 
-    # affectations = flatten_id(affectations)
+    affectations = flatten_id(affectations)
     clusters_centers = np.array(clusters_centers)
     if len(clusters_centers) == 0:
         print("No good clusters centers found after filtering. Try lowering the restrictions on the parameters "
@@ -153,9 +154,18 @@ def fuzzy_c_means_select(data, components=1000, eps=1e-4, max_iter=100, fuzzifie
         distance_matrix = pdist(clusters_centers, metric="euclidean")
         linkage_matrix = linkage(distance_matrix, method=linkage_method)
 
+    if (flat_clusters_criterion is not None) and (flat_clusters_value is not None):
+        affectations_hc = fcluster(linkage_matrix, criterion=flat_clusters_criterion, t=flat_clusters_value)
+        affectations_final = merge_affectations(affectations, affectations_hc)
+    else:
+        affectations_hc = None
+        affectations_final = affectations
+
     return {
         "linkage_matrix": linkage_matrix,
-        "affectations": affectations,
+        "affectations_fcms": affectations,
+        "affectations_hc": affectations_hc,
+        "affectations": affectations_final,
         "clusters_center": clusters_centers,
         "noise_data_idx": np.where(affectations == _LABEL_UNASSIGNED),
         "clusters_found": clusters_centers.shape[0],
@@ -191,6 +201,13 @@ def _unaffected_data_allocation(data, affectations, batch_good_clusters_centers,
 
             # Assign data point to this centroid
             affectations[idx] = idx_closest_centroid
+
+
+def merge_affectations(affectations, affectations_hc):
+    merged_affectations = np.full(fill_value=-1, shape=affectations.shape, dtype=np.int64)
+    for i in range(len(affectations_hc)):
+        merged_affectations[affectations == i] = affectations_hc[i]
+    return merged_affectations
 
 
 if __name__ == '__main__':

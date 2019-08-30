@@ -118,6 +118,13 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Set this flag if you want to keep the memberships matrix in your results. It has been removed by "
                    "default because it is usually not used, take a large amount of disk space and can be resumed by "
                    "the 'ambiguity' and 'entropy' scalars.")
+@click.option("--flat-clusters-criterion", default="distance", show_default=True, type=str,
+              help="The criterion to use in forming flat clusters. Possible values can be found at :\n"
+                   "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.fcluster.html")
+@click.option("--flat-clusters-value", default=0.0, show_default=True, type=float,
+              help="For criteria 'inconsistent', 'distance' or 'monocrit', this is the threshold to apply when forming "
+                   "flat clusters. For 'maxclust' or 'maxclust_monocrit' criteria, this would be max number of "
+                   "clusters requested.")
 # Visualisation options
 @click.option("--visualise", is_flag=True,
               help="Set this flag if you want to visualise the clustering result. If your data's dimension is more "
@@ -195,8 +202,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_name, initialization_method,
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights, max_epochs, batch_size,
          membership_subset_size, min_centroid_size, max_centroid_diameter, linkage_method,
-         save_clus, keep_memberships, visualise, visualise_3d, save_visu, save_visu_3d, seed,
-         normalization, quiet, disable_progress_bar, path_dir_dest, format_filename_dest_results,
+         save_clus, keep_memberships, flat_clusters_criterion, flat_clusters_value, visualise, visualise_3d, save_visu,
+         save_visu_3d, seed, normalization, quiet, disable_progress_bar, path_dir_dest, format_filename_dest_results,
          format_filename_dest_visu, format_filename_dest_visu_3d, zero_fill_components, zero_fill_seed,
          zero_fill_weights, zero_fill_fuzzifier, url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
@@ -276,7 +283,9 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
             membership_subset_size=membership_subset_size,
             initialization_method=initialization_method,
             empty_clusters_method=empty_clusters_method,
-            progress_bar=not disable_progress_bar
+            progress_bar=not disable_progress_bar,
+            flat_clusters_criterion=flat_clusters_criterion,
+            flat_clusters_value=flat_clusters_value
         )
         if (not keep_memberships) and ("memberships" in clustering_result):
             del clustering_result["memberships"]
