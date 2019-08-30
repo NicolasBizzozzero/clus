@@ -312,9 +312,10 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
 
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path)
+                retcode = execute("scp", file_path, url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path)
 
         if visualise or save_visu:
             file_path = compute_file_saving_path_clus(format_filename=format_filename_dest_visu,
@@ -343,9 +344,10 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     show=visualise,
                                     save=save_visu)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path)
+                retcode = execute("scp", file_path, url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
             file_path = compute_file_saving_path_clus(format_filename=format_filename_dest_visu_3d,
@@ -374,9 +376,10 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     show=visualise_3d,
                                     save=save_visu_3d)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path)
+                retcode = execute("scp", file_path, url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
@@ -510,15 +513,17 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
                                     show=False,
                                     save=True)
             if url_scp is not None:
-                execute("scp", file_path + ".png", url_scp if ":" in url_scp else (
-                        url_scp + ":" + path_dir_dest))
-                os.remove(file_path + ".png")
+                retcode = execute("scp", file_path + ".png", url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path + ".png")
 
             np.savez_compressed(file_path + ".npz", **clus_results)
             if url_scp is not None:
-                execute("scp", file_path + ".npz", url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path + ".npz")
+                retcode = execute("scp", file_path + ".npz", url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path + ".npz")
 
         # TODO: remove this, temporarely
         exit(0)
@@ -729,9 +734,10 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
 
             np.savez_compressed(file_path, **clustering_result)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path)
+                retcode = execute("scp", file_path, url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path)
 
         if visualise or save_visu:
             file_path = compute_file_saving_path_dclus(format_filename=format_filename_dest_visu,
@@ -759,9 +765,10 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                     show=visualise,
                                     save=save_visu)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path)
+                retcode = execute("scp", file_path, url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path)
 
         if visualise_3d or save_visu_3d:
             file_path = compute_file_saving_path_dclus(format_filename=format_filename_dest_visu_3d,
@@ -789,9 +796,10 @@ def dclus(datasets, clustering_algorithm, file_type, delimiter, header, array_na
                                     show=visualise_3d,
                                     save=save_visu_3d)
             if url_scp is not None:
-                execute("scp", file_path, url_scp if ":" in url_scp else (
-                    url_scp + ":" + path_dir_dest))
-                os.remove(file_path)
+                retcode = execute("scp", file_path, url_scp if ":" in url_scp else (
+                                  url_scp + ":" + path_dir_dest))
+                if retcode == 0:
+                    os.remove(file_path)
 
 
 @click.command(context_settings=dict(max_content_width=_MAX_TEXT_OUTPUT_WIDTH))
