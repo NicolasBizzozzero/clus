@@ -497,7 +497,7 @@ def hclus(datasets, file_type, delimiter, header, array_name, is_linkage_mtx, di
                 data = data.astype(np.float64)
                 normalize(data, strategy=normalization)
             url_scp = "bizzozzero@gate.lip6.fr"
-            flat_clusters_criterion = "maxclus"
+            flat_clusters_criterion = "maxclust"
             clus_results = hierarchical_clustering(data, distance_metric, weights, linkage_method,
                                                    flat_clusters_criterion, flat_clusters_value, dataset, url_scp,
                                                    path_dir_dest)
