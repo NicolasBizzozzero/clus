@@ -118,7 +118,7 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
               help="Set this flag if you want to keep the memberships matrix in your results. It has been removed by "
                    "default because it is usually not used, take a large amount of disk space and can be resumed by "
                    "the 'ambiguity' and 'entropy' scalars.")
-@click.option("--flat-clusters-criterion", default="distance", show_default=True, type=str,
+@click.option("--flat-clusters-criterion", default="maxclust", show_default=True, type=str,
               help="The criterion to use in forming flat clusters. Possible values can be found at :\n"
                    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.fcluster.html")
 @click.option("--flat-clusters-value", default=0.0, show_default=True, type=float,
