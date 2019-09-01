@@ -77,6 +77,7 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ** Stocker tous les paramètres de clustering dans le dictionnaire résultats. clef "params".
 ** Maintenant que j'écris ça, je me rends compte que sacred serait peut etre plus approprié pour la gestion des résultats.
 * Virer silhouette, ne garder que silhouette-samples, puis retourner la moyenne (qui correspond à silhouette-score), on lapelle silhouette_mean, et l'écart type silhouette_std.
+* Etudier l'utilisation de : https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise_distances_chunked.html
 
 
 ## References
