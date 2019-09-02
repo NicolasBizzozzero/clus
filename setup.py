@@ -31,8 +31,8 @@ setup(
     author_email="nicolasbizzozzero@gmail.com",
 
     description="A complete fuzzy clus framework",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    # long_description=long_description,
+    # long_description_content_type="text/markdown",
 
     license="gpl-v3",
     url="https://github.com/NicolasBizzozzero/clus",
