@@ -138,6 +138,8 @@ _MAX_TEXT_OUTPUT_WIDTH = 120
 @click.option("--save-visu-3d", is_flag=True,
               help="Set this flag if you want to save the visualisation of the clustering result in 3D. If your data's "
                    "dimension is more than 3, a 3-components t-SNE is applied to the data before visualising.")
+@click.option("--index-visu", cls=OptionInfiniteArgs,
+              help="Restrains the indexes to use for the visualisation.")
 # Miscellaneous options
 @click.option("--seed", type=int, default=None, show_default=True,
               help="Random seed to set.")
@@ -203,9 +205,9 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
          empty_clusters_method, components, eps, max_iter, fuzzifier, pairwise_distance, weights, max_epochs, batch_size,
          membership_subset_size, min_centroid_size, max_centroid_diameter, linkage_method,
          save_clus, keep_memberships, flat_clusters_criterion, flat_clusters_value, visualise, visualise_3d, save_visu,
-         save_visu_3d, seed, normalization, quiet, disable_progress_bar, path_dir_dest, format_filename_dest_results,
-         format_filename_dest_visu, format_filename_dest_visu_3d, zero_fill_components, zero_fill_seed,
-         zero_fill_weights, zero_fill_fuzzifier, url_scp):
+         save_visu_3d, index_visu, seed, normalization, quiet, disable_progress_bar, path_dir_dest,
+         format_filename_dest_results, format_filename_dest_visu, format_filename_dest_visu_3d, zero_fill_components,
+         zero_fill_seed, zero_fill_weights, zero_fill_fuzzifier, url_scp):
     """ Apply a clustering algorithm to a CSV dataset.
 
     Some algorithms need a pairwise distance matrix as a dataset. If the dataset you provide is not a pairwise distance
@@ -340,6 +342,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     dataset_name=ntpath.basename(dataset),
                                     header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                                header=0).columns.tolist(),
+                                    index_visualisation=index_visu,
                                     saving_path=file_path,
                                     show=visualise,
                                     save=save_visu)
@@ -372,6 +375,7 @@ def clus(datasets, clustering_algorithm, file_type, delimiter, header, array_nam
                                     dataset_name=ntpath.basename(dataset),
                                     header=None if not header else pd.read_csv(dataset, delimiter=delimiter,
                                                                                header=0).columns.tolist(),
+                                    index_visualisation=index_visu,
                                     saving_path=file_path,
                                     show=visualise_3d,
                                     save=save_visu_3d)

@@ -30,10 +30,19 @@ _ELEVATION = 48
 _AZIMUTH = 134
 _DISTANCE_3D = 12
 
+# TODO: Make clusters_center default value to None. Set all arguments needed to set the title name to another function "make_plot_title" outside of the scope of the visualisation, and add the "title" parameter.
+# TODO: Add informations about "make_rainbow_color_cycle" and its difficulty.
+
 
 def visualise_clustering_2d(data, clusters_center, affectations, clustering_method, dataset_name=None, header=None,
-                            noise_id=-1, show=True, save=False, saving_path=None):
-    assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
+                            index_visualisation=None, noise_id=-1, show=True, save=False, saving_path=None):
+    if index_visualisation is not None:
+        assert len(index_visualisation) >= 2, "Data must have at least 2 dimensions after reindexing for a 2D-visualisation"
+        data = data[:, index_visualisation]
+        if clusters_center is not None:
+            clusters_center = clusters_center[:, index_visualisation]
+    else:
+        assert data.shape[-1] >= 2, "Data must have at least 2 dimensions for a 2D-visualisation"
 
     # Apply a 2-components t-SNE if the data has more than 2 dimensions
     data, applied_tsne = _apply_tsne_if_too_many_dimensions(data, n_components=2)
@@ -80,8 +89,14 @@ def visualise_clustering_2d(data, clusters_center, affectations, clustering_meth
 
 
 def visualise_clustering_3d(data, clusters_center, affectations, clustering_method, dataset_name, header=None,
-                            noise_id=-1, show=True, save=False, saving_path=None):
-    assert data.shape[-1] >= 3, "Data must have at least 3 dimensions for a 3D-visualisation"
+                            index_visualisation=None, noise_id=-1, show=True, save=False, saving_path=None):
+    if index_visualisation is not None:
+        assert len(index_visualisation) >= 3, "Data must have at least 3 dimensions after reindexing for a 3D-visualisation"
+        data = data[:, index_visualisation]
+        if clusters_center is not None:
+            clusters_center = clusters_center[:, index_visualisation]
+    else:
+        assert data.shape[-1] >= 3, "Data must have at least 3 dimensions for a 3D-visualisation"
 
     # Apply a 3-components t-SNE if the data has more than 3 dimensions
     data, applied_tsne = _apply_tsne_if_too_many_dimensions(data, n_components=3)
