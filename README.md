@@ -78,6 +78,7 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ** Maintenant que j'écris ça, je me rends compte que sacred serait peut etre plus approprié pour la gestion des résultats.
 * Virer silhouette, ne garder que silhouette-samples, puis retourner la moyenne (qui correspond à silhouette-score), on lapelle silhouette_mean, et l'écart type silhouette_std.
 * Etudier l'utilisation de : https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise_distances_chunked.html
+* Remettre les références dans la doc de chaque module. Les retirer des références ci-dessous.
 
 
 ## References
