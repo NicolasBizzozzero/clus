@@ -79,6 +79,9 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 * Virer silhouette, ne garder que silhouette-samples, puis retourner la moyenne (qui correspond à silhouette-score), on lapelle silhouette_mean, et l'écart type silhouette_std.
 * Etudier l'utilisation de : https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise_distances_chunked.html
 * Remettre les références dans la doc de chaque module. Les retirer des références ci-dessous.
+* Essayer de proposer une implémentation de k-means utilisant CUDA : http://alexminnaar.com/2019/03/05/cuda-kmeans.html
+* Ajouter param UUID : ajouter un param possible, {uuid4}, {uuid6}, etc dans le futur nom de fichier peut etre ? Regarder si on peut l'initialiser avec le temps, sinon faudra faire gaffe à l'initialisation avec graine aléatoire, sinon c'est possiblkz que je retourne les mêmes uuid à chaque fois.
+* Ajouter des mesures d'evaluation : Papier pour mesures d'eval clustering : https://amstat.tandfonline.com/doi/abs/10.1080/01621459.1971.10482356#.XXZYe6WxXRY
 
 
 ## References
