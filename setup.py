@@ -69,6 +69,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
+        "wheel >= 0.33.6",
         "click >= 7.0",
         "matplotlib >= 3.1.1",
         "memory-profiler >= 0.55.0",
