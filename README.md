@@ -82,6 +82,7 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 * Essayer de proposer une implémentation de k-means utilisant CUDA : http://alexminnaar.com/2019/03/05/cuda-kmeans.html
 * Ajouter param UUID : ajouter un param possible, {uuid4}, {uuid6}, etc dans le futur nom de fichier peut etre ? Regarder si on peut l'initialiser avec le temps, sinon faudra faire gaffe à l'initialisation avec graine aléatoire, sinon c'est possiblkz que je retourne les mêmes uuid à chaque fois.
 * Ajouter des mesures d'evaluation : Papier pour mesures d'eval clustering : https://amstat.tandfonline.com/doi/abs/10.1080/01621459.1971.10482356#.XXZYe6WxXRY
+* Etudier d'autres normalisations et leurs effets : https://scikit-learn.org/stable/auto_examples/preprocessing/plot_all_scaling.html#results
 
 
 ## References
