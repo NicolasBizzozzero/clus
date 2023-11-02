@@ -31,6 +31,11 @@ $ dclus dataset.csv dbscan --save-clus --seed 1 --format-filename-dest-results d
 ```
 
 ## TODO
+* Complete paradigm rewrite :
+    * Move away from CLI support into a more clean Python class interface
+    * Design easy-to-use and abstract base clustering classes
+    * Take inspiration from river
+* "New" algorithm family : Streaming/One-Pass algorithms.
 * Pour les fcm, plusieurs copies de données sont faites plusieurs fois. Optimisable, voir : https://pythonhosted.org/scikit-fuzzy/_modules/skfuzzy/cluster/_cmeans.html#cmeans
 * Rendre les opérations de clustering inplace (ne pas dupliquer les données)
 * Méthodes de Clustering à implémenter :
